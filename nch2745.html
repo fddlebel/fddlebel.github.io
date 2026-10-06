@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aislación NCh2745 | fddlebel</title>
+<style>
+:root{
+  --paper:#ffffff;
+  --panel:#ffffff;
+  --ink:#000000;
+  --ink-soft:#000000;
+  --line:#9a9a9a;
+  --line-strong:#7a7a7a;
+  --accent:#000000;
+  --accent-soft:#e9e9e9;
+  --input-bg:#ffffff;
+  --input-border:#7a7a7a;
+  --suction:#2f6690;
+  --pressure:#c1542c;
+  --focus:#4a4d24;
+  --grid:#d4d4d4;
+  --mono:'Arial Narrow',Arial,Helvetica,sans-serif;
+  --sans:'Arial Narrow',Arial,Helvetica,sans-serif;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--sans);padding:20px 16px 48px;
+  padding-inline:max(16px,calc((100vw - 1180px)/2));
+}
+h1,h2,h3{text-wrap:balance;font-family:var(--sans);margin:0;color:var(--ink);}
+.app-header{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px;}
+.app-header h1{font-size:22px;font-weight:700;letter-spacing:.2px;}
+.app-header .clause{font-family:var(--mono);font-size:12px;color:var(--ink);}
+.grid{display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start;}
+@media (max-width:860px){.grid{grid-template-columns:1fr;}}
+.panel{
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  padding:16px;
+}
+.panel + .panel{margin-top:14px;}
+.section-title{
+  font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--ink);margin:0 0 12px;
+}
+.seg{display:flex;border:1px solid var(--line-strong);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+.seg button{
+  flex:1;padding:9px 6px;border:none;background:var(--panel);color:var(--ink);
+  font-family:var(--sans);font-weight:600;font-size:13px;cursor:pointer;
+}
+.seg button.active{background:var(--accent);color:#fff;}
+.field{margin-bottom:11px;}
+.field label{display:block;font-size:12px;color:var(--ink);margin-bottom:4px;}
+.field label .unit{font-family:var(--mono);color:var(--ink);opacity:.75;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+input[type=number],input[type=text],select{
+  width:100%;font-family:var(--mono);font-size:13.5px;color:var(--ink);
+  background:var(--input-bg);border:1px solid var(--input-border);border-radius:4px;
+  padding:7px 8px;font-variant-numeric:tabular-nums;
+}
+input[type=number]:focus,select:focus,button:focus-visible{
+  outline:2px solid var(--focus);outline-offset:1px;
+}
+details summary{cursor:pointer;font-size:13px;color:var(--ink);font-weight:700;margin-top:4px;user-select:none;}
+details[open] summary{margin-bottom:10px;}
+.stat-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px;}
+@media (max-width:640px){.stat-row{grid-template-columns:repeat(2,1fr);}}
+.stat{
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  padding:10px 12px;
+}
+.stat .k{font-size:11px;color:var(--ink);text-transform:uppercase;letter-spacing:.04em;}
+.stat .v{font-family:var(--mono);font-size:17px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums;color:var(--ink);}
+.tabs{display:flex;gap:6px;margin-bottom:14px;}
+.tabs button{
+  font-family:var(--sans);font-weight:600;font-size:13px;color:var(--ink);
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  padding:7px 14px;cursor:pointer;
+}
+.tabs button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.diagram-wrap{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:14px;margin-bottom:14px;}
+.legend{display:flex;gap:18px;align-items:center;font-size:12px;color:var(--ink);margin-top:8px;flex-wrap:wrap;}
+.legend .sw{width:12px;height:12px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:-2px;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th,td{text-align:left;padding:6px 8px;border:1px solid var(--line);font-variant-numeric:tabular-nums;color:var(--ink);}
+th{font-size:11px;text-transform:none;letter-spacing:.03em;color:var(--ink);font-weight:700;background:var(--accent-soft);}
+td.num,th.num{font-family:var(--mono);text-align:right;}
+td.zone{font-family:var(--mono);font-weight:700;}
+.tablewrap{overflow-x:auto;}
+.warn{
+  background:var(--accent-soft);border:1px solid var(--line-strong);color:var(--ink);
+  border-radius:4px;padding:8px 10px;font-size:12px;margin-bottom:12px;
+}
+.note{font-size:11.5px;color:var(--ink);margin-top:10px;line-height:1.5;}
+svg text{font-family:var(--mono);fill:var(--ink);}
+
+#printReport{display:none;}
+.rpt-header{margin-bottom:14px;}
+.rpt-header h1{font-size:20px;font-weight:700;}
+.rpt-header .rpt-sub{font-family:var(--mono);font-size:11.5px;margin-top:2px;}
+.rpt-params{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:11.5px;}
+.rpt-params td{border:1px solid var(--line);padding:5px 8px;}
+.rpt-params td.k{font-weight:700;width:32%;background:var(--accent-soft);}
+.rpt-section{margin-bottom:16px;page-break-inside:avoid;break-inside:avoid;}
+.rpt-section h2{page-break-after:avoid;break-after:avoid;}
+.rpt-section h2{font-size:14px;font-weight:700;margin-bottom:8px;border-bottom:1px solid var(--line);padding-bottom:4px;}
+.rpt-section table{margin-top:8px;}
+.rpt-foot{font-size:10px;margin-top:18px;border-top:1px solid var(--line);padding-top:6px;}
+
+@media print{
+  body *{visibility:hidden;}
+  #printReport, #printReport *{visibility:visible;}
+  #printReport{display:block;position:absolute;left:0;top:0;width:100%;}
+  @page{margin:14mm;}
+}
+.btn{font-family:var(--sans);font-weight:700;font-size:13px;color:#fff;background:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:8px 16px;cursor:pointer;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.intable{margin-bottom:10px;}
+.intable td{padding:4px 6px;font-size:12px;}
+.intable td:first-child{white-space:nowrap;}
+.intable input.in{padding:5px 6px;font-size:13px;text-align:right;}
+.diagram-wrap .section-title{margin-bottom:6px;}
+#warnBox .warn{margin-bottom:10px;}
+.rpt-small{font-size:10.5px;}
+.rpt-small td,.rpt-small th{padding:2px 6px;}
+.rpt-section.allow-break{page-break-inside:auto;break-inside:auto;}
+.chk{display:flex;align-items:center;gap:6px;font-size:12px;}
+.chk input{width:auto;margin:0;}
+.sysblk{border-top:1px solid var(--line);padding-top:8px;margin-top:4px;}
+tr.grp td{font-weight:700;background:var(--accent-soft);}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1><a href="index.html" style="color:inherit;text-decoration:none;font-weight:400;">fddlebel</a> / Aislación sísmica</h1>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <div class="clause">NCh2745:2013, 7.3, 7.4, 8.4, 8.6.3, Tablas 2 a 6</div>
+    <select id="txtSel" style="width:auto;">
+      <option value="sdi">TXT: SDI</option>
+      <option value="smp">TXT: SMP</option>
+      <option value="sdiC">TXT: SDI reducido por BD</option>
+      <option value="smpC">TXT: SMP reducido por BM</option>
+      <option value="ver">TXT: vertical, 2/3 SDI</option>
+    </select>
+    <button class="btn" id="txtBtn">Exportar TXT</button>
+    <button class="btn" id="pdfBtn">Exportar PDF</button>
+  </div>
+</div>
+
+<div id="printReport"></div>
+
+<div class="grid">
+  <div>
+    <div class="panel">
+      <div class="field"><label>Proyecto</label><input type="text" id="proj" value=""></div>
+      <div class="section-title" style="margin-top:12px">Sitio</div>
+      <div class="row2">
+        <div class="field"><label>Zona sísmica (Tabla 5)</label>
+          <select id="zona">
+            <option value="1">1 (Z = 3/4)</option>
+            <option value="2">2 (Z = 1)</option>
+            <option value="3" selected>3 (Z = 5/4)</option>
+          </select>
+        </div>
+        <div class="field"><label>Suelo NCh433 (Tabla 6)</label>
+          <select id="suelo">
+            <option value="A">A (tipo I)</option>
+            <option value="B">B (tipo II)</option>
+            <option value="C" selected>C (tipo III)</option>
+            <option value="D">D (tipo III)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:14px">Sistema de aislación</div>
+      <div class="row2">
+        <div class="field"><label>W, peso sísmico <span class="unit">[kN]</span></label><input type="number" id="W" value="50000" step="100"></div>
+        <div class="field"><label>Tipo de aislador</label>
+          <select id="tipo">
+            <option value="elast">Elastomérico</option>
+            <option value="fps">Péndulo friccional</option>
+          </select>
+        </div>
+      </div>
+      <table class="intable">
+        <thead><tr><th></th><th class="num">SDI (D)</th><th class="num">SMP (M)</th></tr></thead>
+        <tbody>
+          <tr><td>T efectivo [s]</td><td><input type="number" id="TD" value="2.5" step="0.05" class="in"></td><td><input type="number" id="TM" value="2.7" step="0.05" class="in"></td></tr>
+          <tr><td>β efectivo [%]</td><td><input type="number" id="bD" value="15" step="1" class="in"></td><td><input type="number" id="bM" value="12" step="1" class="in"></td></tr>
+          <tr><td>k máx. [kN/m]</td><td><input type="number" id="kDx" value="" step="10" class="in" placeholder="opcional"></td><td><input type="number" id="kMx" value="" step="10" class="in" placeholder="opcional"></td></tr>
+        </tbody>
+      </table>
+      <div class="field"><label>Factor B (Tabla 2 o Ec. C.18)</label>
+        <select id="bmode">
+          <option value="t2">Tabla 2, interpolación lineal</option>
+          <option value="c18">Ec. C.18, depende de T</option>
+        </select>
+      </div>
+
+      <div class="section-title" style="margin-top:14px">Superestructura</div>
+      <div class="field"><label>Sistema (Tabla 4)</label><select id="sys"></select></div>
+      <div class="row3">
+        <div class="field"><label>R<sub>s</sub></label><input type="number" id="Rs" step="0.1"></div>
+        <div class="field"><label>R<sub>b</sub> fundación</label><input type="number" id="Rb" value="1.5" step="0.1"></div>
+        <div class="field"><label>T base fija <span class="unit">[s]</span></label><input type="number" id="Tf" value="0.5" step="0.05"></div>
+      </div>
+
+      <details>
+        <summary>Parámetros avanzados</summary>
+        <div class="section-title" style="margin-top:8px">Torsión (7.3.5)</div>
+        <div class="row2">
+          <div class="field"><label>b, planta <span class="unit">[m]</span></label><input type="number" id="pb" value="30" step="0.5"></div>
+          <div class="field"><label>d, planta <span class="unit">[m]</span></label><input type="number" id="pd" value="20" step="0.5"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>y, al aislador <span class="unit">[m]</span></label><input type="number" id="py" value="15" step="0.5"></div>
+          <div class="field"><label>e, excentricidad <span class="unit">[m]</span></label><input type="number" id="pe" value="1.5" step="0.1"></div>
+        </div>
+        <div class="section-title" style="margin-top:8px">Límites de V<sub>s</sub> (7.4.3.2)</div>
+        <div class="row2">
+          <div class="field"><label>R NCh433 base fija</label><input type="number" id="R433" value="7" step="0.5"></div>
+          <div class="field"><label>Corte de viento <span class="unit">[kN]</span></label><input type="number" id="Vw" value="" step="10" placeholder="opcional"></div>
+        </div>
+        <div class="field"><label>Fuerza de activación o fluencia del sistema <span class="unit">[kN]</span></label><input type="number" id="Vy" value="" step="10" placeholder="opcional"></div>
+        <div class="section-title" style="margin-top:8px">Espectro</div>
+        <div class="row3">
+          <div class="field"><label>Corte BD <span class="unit">[×T]</span></label><input type="number" id="cut" value="0.8" step="0.05"></div>
+          <div class="field"><label>T máx. <span class="unit">[s]</span></label><input type="number" id="tmax" value="5" step="0.5"></div>
+          <div class="field"><label>ΔT <span class="unit">[s]</span></label><input type="number" id="dt" value="0.01" step="0.005"></div>
+        </div>
+      </details>
+    </div>
+    <div class="panel">
+      <div class="section-title">Notas</div>
+      <div class="note" id="notes"></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="stat-row" id="statRow"></div>
+    <div id="warnBox"></div>
+
+    <div class="diagram-wrap">
+      <div class="section-title">Espectros de pseudo-aceleración</div>
+      <svg id="chA" viewBox="0 0 720 380" width="100%" style="display:block;height:auto"></svg>
+    </div>
+    <div class="diagram-wrap">
+      <div class="section-title">Espectros de desplazamiento</div>
+      <svg id="chD" viewBox="0 0 720 340" width="100%" style="display:block;height:auto"></svg>
+    </div>
+    <div class="diagram-wrap">
+      <div class="section-title">Factor de reducción por amortiguamiento</div>
+      <svg id="chB" viewBox="0 0 720 280" width="100%" style="display:block;height:auto"></svg>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">Resultados</div>
+      <div class="tablewrap"><table id="resTable"></table></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ZF={1:0.75,2:1.0,3:1.25};
+const A0Z={1:0.2,2:0.3,3:0.4};
+const SDI={
+  I:  {Ta:0.03,Tb:0.11, Tc:0.29, Td:2.51,Te:10,Tf:33,aA:1085,aV:50, aD:20,A:0.40*981,CD:200},
+  II: {Ta:0.03,Tb:0.20, Tc:0.54, Td:2.00,Te:10,Tf:33,aA:1100,aV:94, aD:30,A:0.41*981,CD:300},
+  III:{Ta:0.03,Tb:0.375,Tc:0.68, Td:1.58,Te:10,Tf:33,aA:1212,aV:131,aD:33,A:0.45*981,CD:330},
+};
+const SOILMAP={A:'I',B:'II',C:'III',D:'III'};
+const N433={A:{Tp:0.20,n:1.00},B:{Tp:0.35,n:1.33},C:{Tp:0.45,n:1.40},D:{Tp:0.85,n:1.80}};
+const T2B=[[2,0.65],[5,1.00],[10,1.37],[15,1.67],[20,1.94],[25,2.17],[30,2.38],[50,3.02]];
+const TC1=[[0.05,400,300,200],[0.10,396.9,293.1,224.5],[0.15,180.7,124.6,98.0],[0.20,117.9,76.1,57.1],[0.25,94.0,54.3,39.6],[0.30,68.5,42.0,30.4],[0.50,36.9,22.2,16.1]];
+const SYS=[
+  ['Pórticos, acero estructural',2.0,35],
+  ['Pórticos, hormigón armado',2.0,35],
+  ['Muros de corte, acero estructural',2.0,50],
+  ['Muros de corte, hormigón armado',2.0,50],
+  ['Muros de corte, albañilería confinada',2.0,15],
+  ['Muros de corte, albañilería armada',1.6,12],
+  ['Arriostrados concéntricos',1.6,35],
+  ['Arriostrados excéntricos',2.0,50],
+  ['Estructuras en voladizo',1.4,10],
+];
+const v=id=>document.getElementById(id);
+const sel=v('sys');
+SYS.forEach((s,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=s[0]; sel.appendChild(o); });
+sel.value=3;
+function applySys(){ v('Rs').value=SYS[sel.value][1]; }
+applySys();
+
+function interp1(xs,ys,x){ const n=xs.length; if(x<=xs[0]) return ys[0]; if(x>=xs[n-1]) return ys[n-1]; let i=0; while(i<n-2&&xs[i+1]<x) i++; return ys[i]+(x-xs[i])/(xs[i+1]-xs[i])*(ys[i+1]-ys[i]); }
+function num(id,def){ const x=parseFloat(v(id).value); return isFinite(x)?x:def; }
+
+function baseSa(T,s){
+  if(T<=s.Ta) return s.A;
+  if(T<=s.Tb) return s.A*Math.pow(s.aA/s.A,Math.log(T/s.Ta)/Math.log(s.Tb/s.Ta));
+  if(T<=s.Tc) return s.aA;
+  if(T<=s.Td) return 2*Math.PI/T*s.aV;
+  return 4*Math.PI*Math.PI/(T*T)*s.aD;
+}
+function Btab(b){ return interp1(T2B.map(q=>q[0]),T2B.map(q=>q[1]),b); }
+function Bc18(b,T,soil){
+  const beta=b/100;
+  if(beta<=0.05) return Btab(b);
+  const col={I:1,II:2,III:3}[soil];
+  const a=interp1(TC1.map(q=>q[0]),TC1.map(q=>q[col]),beta);
+  const B0=2*(1+beta)/(1+14.68*Math.pow(beta,0.865));
+  return 1/(B0-(B0-1)*Math.exp(-a*Math.abs(beta-0.05)*T));
+}
+function Bfac(p,b,T){ return p.bmode==='c18'?Bc18(b,T,p.soil):Btab(b); }
+
+function readP(){
+  const sc=v('suelo').value, soil=SOILMAP[sc], z=+v('zona').value;
+  return {
+    proj:v('proj').value.trim(), zona:z, Z:ZF[z], A0:A0Z[z], sc, soil, s:SDI[soil], MM:1.2,
+    W:num('W',0), fps:v('tipo').value==='fps', tipoTxt:v('tipo').options[v('tipo').selectedIndex].text,
+    TD:Math.max(num('TD',2),0.05), TM:Math.max(num('TM',2),0.05),
+    bD:Math.max(num('bD',5),0), bM:Math.max(num('bM',5),0),
+    kDx:parseFloat(v('kDx').value), kMx:parseFloat(v('kMx').value),
+    bmode:v('bmode').value, bmodeTxt:v('bmode').options[v('bmode').selectedIndex].text,
+    sysTxt:SYS[sel.value][0], hmax:SYS[sel.value][2],
+    Rs:Math.max(num('Rs',2),1), Rb:Math.min(Math.max(num('Rb',1.5),1),1.5), Tf:Math.max(num('Tf',0.5),0),
+    b:num('pb',0), d:num('pd',0), y:num('py',0), e:num('pe',0),
+    R433:Math.max(num('R433',7),1), Vw:parseFloat(v('Vw').value), Vy:parseFloat(v('Vy').value),
+    cut:Math.max(num('cut',0.8),0), tmax:Math.min(Math.max(num('tmax',5),0.5),10), dt:Math.max(num('dt',0.01),0.001),
+  };
+}
+
+function compute(p){
+  const s=p.s, g=9.81, o={};
+  o.BD=Btab(p.bD); o.BM=Btab(p.bM);
+  if(p.bmode==='c18'){ o.BD=Bc18(p.bD,p.TD,p.soil); o.BM=Bc18(p.bM,p.TM,p.soil); }
+  o.CD=s.CD*p.Z/10; o.CM=s.CD*p.MM*p.Z/10;
+  o.DD=o.CD/o.BD; o.DM=o.CM/o.BM;
+  o.kDn=4*Math.PI*Math.PI*p.W/(g*p.TD*p.TD); o.kMn=4*Math.PI*Math.PI*p.W/(g*p.TM*p.TM);
+  o.kD=isFinite(p.kDx)&&p.kDx>0?p.kDx:o.kDn; o.kM=isFinite(p.kMx)&&p.kMx>0?p.kMx:o.kMn;
+  o.ft=p.fps?1:1+p.y*12*p.e/(p.b*p.b+p.d*p.d||1);
+  o.DTD=o.DD*o.ft; o.DTM=o.DM*o.ft;
+  o.DDp=o.DD/Math.sqrt(1+Math.pow(p.Tf/p.TD,2)); o.DMp=o.DM/Math.sqrt(1+Math.pow(p.Tf/p.TM,2));
+  o.DTDp=o.DDp*o.ft; o.DTMp=o.DMp*o.ft;
+  o.Vb1=o.kD*o.DD/100; o.Vbf=o.kD*o.DD/100/p.Rb; o.Vs0=o.kD*o.DD/100/p.Rs;
+  const n=N433[p.sc];
+  const C433=Math.min(Math.max(2.75*p.A0/p.R433*Math.pow(n.Tp/p.TD,n.n),p.A0/6),cmax433(p.R433)*p.A0);
+  o.C433=C433; o.V433=C433*p.W;
+  o.Vwv=isFinite(p.Vw)?p.Vw:NaN; o.Vyv=isFinite(p.Vy)?1.5*p.Vy:NaN;
+  o.Vs=Math.max(o.Vs0,o.V433,isFinite(o.Vwv)?o.Vwv:0,isFinite(o.Vyv)?o.Vyv:0);
+  o.Vsel=o.kD*o.DD/100;
+  o.Vs=Math.min(o.Vs,o.Vsel);
+  o.ctrlVs=o.Vs===o.Vsel?'Espectro elástico':o.Vs===o.Vs0?'Ec. 8':o.Vs===o.V433?'NCh433':o.Vs===o.Vwv?'Viento':'Activación';
+  o.SaD=p.Z*baseSa(p.TD,p.s)/981/Bfac(p,Math.min(p.bD,30),p.TD);
+  o.SaM=p.MM*p.Z*baseSa(p.TM,p.s)/981/Bfac(p,Math.min(p.bM,30),p.TM);
+  return o;
+}
+function cmax433(R){ const tb={2:0.90,3:0.60,4:0.55,5.5:0.40}; if(R>=6) return 0.35; if(tb[R]!==undefined) return tb[R]; return 2.5/(R+0.8); }
+
+function spectrum(p,o){
+  const rows=[], n=Math.round(p.tmax/p.dt);
+  const bDc=Math.min(p.bD,30), bMc=Math.min(p.bM,30);
+  for(let i=0;i<=n;i++){
+    const T=+(i*p.dt).toFixed(6);
+    const sb=baseSa(T,p.s)/981;
+    const sdi=p.Z*sb, smp=p.MM*sdi;
+    const BDt=Bfac(p,bDc,T), BMt=Bfac(p,bMc,T);
+    const sdiC=T>=p.cut*p.TD?sdi/BDt:sdi, smpC=T>=p.cut*p.TM?smp/BMt:smp;
+    const k=T*T/(4*Math.PI*Math.PI)*981;
+    rows.push({T,sdi,smp,sdiC,smpC,ver:2/3*sdi,BDt,BMt,dsdi:sdi*k,dsmp:smp*k,dsdiC:sdi/BDt*k,dsmpC:smp/BMt*k});
+  }
+  return rows;
+}
+
+const svgNS='http://www.w3.org/2000/svg';
+function el(tag,attrs){ const n=document.createElementNS(svgNS,tag); for(const k in attrs) n.setAttribute(k,attrs[k]); return n; }
+function tx(x,y,s,o){ const t=el('text',Object.assign({x,y,'font-size':11,'text-anchor':'middle',fill:'var(--ink)'},o||{})); t.textContent=s; return t; }
+function niceStep(range,count){ const raw=range/count, m=Math.pow(10,Math.floor(Math.log10(raw))), f=raw/m; return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*m; }
+function drawChart(svg,cfg){
+  svg.innerHTML='';
+  const W=720,H=cfg.H||380,L=64,R=20,T=18,B=48;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const xmax=cfg.xmax, ymaxRaw=cfg.ymax||Math.max(...cfg.series.flatMap(s=>s.pts.map(q=>q[1])).filter(isFinite),1e-6);
+  const ys=niceStep(ymaxRaw,cfg.yticks||6), ymax=Math.ceil(ymaxRaw*1.05/ys)*ys;
+  const ymin=cfg.ymin||0;
+  const xs=niceStep(xmax,10);
+  const X=x=>L+x/xmax*(W-L-R), Y=y=>H-B-(y-ymin)/(ymax-ymin)*(H-T-B);
+  for(let y=ymin;y<=ymax+1e-9;y+=ys){
+    svg.appendChild(el('line',{x1:L,x2:W-R,y1:Y(y),y2:Y(y),stroke:'var(--grid)','stroke-width':0.6}));
+    svg.appendChild(tx(L-6,Y(y)+4,y.toFixed(cfg.ydec),{'text-anchor':'end'}));
+  }
+  for(let x=0;x<=xmax+1e-9;x+=xs){
+    svg.appendChild(el('line',{x1:X(x),x2:X(x),y1:T,y2:H-B,stroke:'var(--grid)','stroke-width':0.6}));
+    svg.appendChild(tx(X(x),H-B+16,(+x.toFixed(2)).toString()));
+  }
+  svg.appendChild(el('rect',{x:L,y:T,width:W-L-R,height:H-T-B,fill:'none',stroke:'var(--line-strong)','stroke-width':1}));
+  svg.appendChild(tx((L+W-R)/2,H-10,cfg.xlabel,{'font-weight':700}));
+  const yl=tx(14,(T+H-B)/2,cfg.ylabel,{'font-weight':700}); yl.setAttribute('transform',`rotate(-90 14 ${(T+H-B)/2})`); svg.appendChild(yl);
+  cfg.series.forEach(s=>{
+    const d=s.pts.filter(q=>isFinite(q[1])).map((q,i)=>(i?'L':'M')+X(q[0]).toFixed(1)+','+Y(q[1]).toFixed(1)).join(' ');
+    svg.appendChild(el('path',{d,fill:'none',stroke:'var(--ink)','stroke-width':s.w||1.4,'stroke-dasharray':s.dash||'none'}));
+  });
+  (cfg.marks||[]).forEach(m=>{
+    if(!isFinite(m.y)||m.x>xmax) return;
+    svg.appendChild(el('line',{x1:X(m.x),x2:X(m.x),y1:Y(ymin),y2:Y(m.y),stroke:'var(--ink)','stroke-width':0.6,'stroke-dasharray':'2,2'}));
+    svg.appendChild(el('circle',{cx:X(m.x),cy:Y(m.y),r:3,fill:'var(--paper)',stroke:'var(--ink)','stroke-width':1.2}));
+    svg.appendChild(tx(X(m.x)+5,Y(m.y)-6,m.label,{'text-anchor':'start','font-size':10.5,'font-weight':700}));
+  });
+  let ly=cfg.legend==='br'?H-B-10-17*(cfg.series.length-1):T+14;
+  cfg.series.forEach(s=>{
+    const lx=W-R-230;
+    svg.appendChild(el('rect',{x:lx-8,y:ly-11,width:234,height:17,fill:'var(--paper)'}));
+    svg.appendChild(el('line',{x1:lx,x2:lx+30,y1:ly-3,y2:ly-3,stroke:'var(--ink)','stroke-width':s.w||1.4,'stroke-dasharray':s.dash||'none'}));
+    svg.appendChild(tx(lx+38,ly+1,s.name,{'text-anchor':'start','font-size':11}));
+    ly+=17;
+  });
+}
+
+function charts(svgs,p,o,sp){
+  const [sA,sD,sB]=svgs;
+  drawChart(sA,{xmax:p.tmax,xlabel:'T [s]',ylabel:'Sa [g]',ydec:2,
+    series:[
+      {name:'SDI, ξ = 5%',pts:sp.map(q=>[q.T,q.sdi]),w:1.8},
+      {name:'SMP = MM·SDI, ξ = 5%',pts:sp.map(q=>[q.T,q.smp]),w:1},
+      {name:`SDI reducido por BD (T ≥ ${p.cut}·TD)`,pts:sp.map(q=>[q.T,q.sdiC]),dash:'6,4'},
+      {name:`SMP reducido por BM (T ≥ ${p.cut}·TM)`,pts:sp.map(q=>[q.T,q.smpC]),dash:'2,3'},
+    ],
+    marks:[{x:p.TD,y:o.SaD,label:'TD'},{x:p.TM,y:o.SaM,label:'TM'}]});
+  drawChart(sD,{H:340,legend:'br',xmax:p.tmax,xlabel:'T [s]',ylabel:'Sd [cm]',ydec:0,
+    series:[
+      {name:'SDI, ξ = 5%',pts:sp.map(q=>[q.T,q.dsdi]),w:1.8},
+      {name:'SMP, ξ = 5%',pts:sp.map(q=>[q.T,q.dsmp]),w:1},
+      {name:`SDI/BD, βD = ${p.bD}%`,pts:sp.map(q=>[q.T,q.dsdiC]),dash:'6,4'},
+      {name:`SMP/BM, βM = ${p.bM}%`,pts:sp.map(q=>[q.T,q.dsmpC]),dash:'2,3'},
+    ],
+    marks:[{x:p.TD,y:o.DD,label:'DD'},{x:p.TM,y:o.DM,label:'DM'}]});
+  drawChart(sB,{H:280,legend:'br',xmax:p.tmax,xlabel:'T [s]',ylabel:'B',ydec:2,yticks:5,
+    series:[
+      {name:`BD, βD = ${Math.min(p.bD,30)}%`,pts:sp.map(q=>[q.T,q.BDt]),w:1.8},
+      {name:`BM, βM = ${Math.min(p.bM,30)}%`,pts:sp.map(q=>[q.T,q.BMt]),dash:'6,4'},
+    ],
+    marks:[{x:p.TD,y:Bfac(p,Math.min(p.bD,30),p.TD),label:'TD'},{x:p.TM,y:Bfac(p,Math.min(p.bM,30),p.TM),label:'TM'}]});
+}
+
+const f=(x,d)=>isFinite(x)?x.toFixed(d):'-';
+function resRows(p,o){
+  return [
+    ['Desplazamientos','','',''],
+    ['Coeficiente C (7.3.1, 7.3.3)','cm',f(o.CD,1),f(o.CM,1)],
+    ['β efectivo','%',f(p.bD,1),f(p.bM,1)],
+    ['B (Tabla 2 o Ec. C.18)','',f(o.BD,3),f(o.BM,3)],
+    ['D = C/B (Ec. 1, Ec. 3)','cm',f(o.DD,2),f(o.DM,2)],
+    ['Factor torsión 1+12ye/(b²+d²)','',f(o.ft,3),f(o.ft,3)],
+    ['DT total (Ec. 5, Ec. 6)','cm',f(o.DTD,2),f(o.DTM,2)],
+    ['1,1·D (mínimo 7.3.5.3)','cm',f(1.1*o.DD,2),f(1.1*o.DM,2)],
+    ["D' con T base fija (Ec. 9, Ec. 10)",'cm',f(o.DDp,2),f(o.DMp,2)],
+    ["Mín. dinámico 90% DT', 80% DT' (8.2.1, 8.2.2)",'cm',f(0.9*o.DTDp,2),f(0.8*o.DTMp,2)],
+    ['Rigidez y período','','',''],
+    ['T efectivo (Ec. 2, Ec. 4)','s',f(p.TD,3),f(p.TM,3)],
+    ['k mín. = 4π²W/(g T²)','kN/m',f(o.kDn,0),f(o.kMn,0)],
+    ['k máx. usado','kN/m',f(o.kD,0),f(o.kM,0)],
+    ['Sa(T) reducido','g',f(o.SaD,4),f(o.SaM,4)],
+    ['Fuerzas (sismo de diseño)','','',''],
+    ['Vb sistema de aislación = kDmáx·DD (Rb = 1)','kN',f(o.Vb1,0),''],
+    [`Vb fundación y subestructura (Rb = ${p.Rb})`,'kN',f(o.Vbf,0),''],
+    [`Vs = kDmáx·DD/Rs (Ec. 8, Rs = ${p.Rs})`,'kN',f(o.Vs0,0),''],
+    [`NCh433 base fija con T = TD, I = S = 1, R = ${p.R433}`,'kN',f(o.V433,0),''],
+    ['Corte de viento','kN',f(o.Vwv,0),''],
+    ['1,5 × activación del sistema','kN',f(o.Vyv,0),''],
+    ['Vs de diseño (7.4.3.2)','kN',f(o.Vs,0),''],
+    ['Control Vs','',o.ctrlVs,''],
+    ['Vs/W','%',f(o.Vs/p.W*100,2),''],
+    ['Superestructura regular, 80% Vs (8.3.1)','kN',f(0.8*o.Vs,0),''],
+    ['Superestructura irregular, 100% Vs (8.3.2)','kN',f(o.Vs,0),''],
+    ['Subestructura dinámico, 90% Vb (8.2.3)','kN',f(0.9*o.Vbf,0),''],
+    ['Deriva máx. superestructura (8.8)','',p.fps?'0,0025':'0,0025',''],
+  ];
+}
+function renderRes(t,p,o){
+  t.innerHTML=`<thead><tr><th>Parámetro</th><th>Unidad</th><th class="num">SDI (D)</th><th class="num">SMP (M)</th></tr></thead><tbody>${
+    resRows(p,o).map(q=>q[1]===''&&q[2]===''&&q[3]===''?`<tr class="grp"><td colspan="4">${q[0]}</td></tr>`:`<tr><td>${q[0]}</td><td>${q[1]}</td><td class="num">${q[2]}</td><td class="num">${q[3]}</td></tr>`).join('')}</tbody>`;
+}
+
+function notesHtml(p){
+  const s=p.s;
+  return `Suelo ${p.sc} (tipo ${p.soil} NCh433:1996): Ta=${s.Ta}, Tb=${s.Tb}, Tc=${s.Tc}, Td=${s.Td} s, αA·A=${s.aA} cm/s², αV·V=${s.aV} cm/s, αD·D=${s.aD} cm, A=${(s.A/981).toFixed(2)} g. Z=${p.Z}, MM=${p.MM}.<br>
+  Espectro Newmark y Hall (Figura 1, Tabla 6): A en T ≤ Ta, interpolación log-log hasta αA·A en Tb, αA·A hasta Tc, 2π·αV·V/T hasta Td, 4π²·αD·D/T² hasta Te = 10 s. SDI = Z·espectro, SMP = MM·SDI (8.4.1.3).<br>
+  B se limita a β = 30% para el espectro (8.6.3.2). La reducción se aplica desde ${p.cut}·T efectivo, criterio de práctica para los modos aislados (8.6.3.1).<br>
+  Espectro vertical igual a 2/3 del horizontal (8.4.1.1), requerido para péndulos friccionales.<br>
+  Se requiere espectro de sitio si TM > 3,5 s, suelo E o F, o falla activa a menos de 10 km (8.4.1.1).<br>
+  TXT: T [s] y Sa [g] en dos columnas separadas por tabulación, sin encabezado. En ETABS usar factor de escala 9,81 (m/s²).`;
+}
+
+function render(){
+  const p=readP(), o=compute(p), sp=spectrum(p,o);
+  const warn=[];
+  if(p.TM>3.5) warn.push('TM > 3,5 s: se requiere espectro de sitio (8.4.1.1).');
+  if(isFinite(o.Vb1)&&o.Vb1<o.Vs) warn.push('Vb menor que Vs: ajustar Vb (7.4.3.1).');
+  v('warnBox').innerHTML=warn.map(w=>`<div class="warn">${w}</div>`).join('');
+  const stats=[
+    {k:'DD / DM',v:f(o.DD,1)+' / '+f(o.DM,1)+' cm'},
+    {k:'DTD / DTM',v:f(o.DTD,1)+' / '+f(o.DTM,1)+' cm'},
+    {k:'BD / BM',v:f(o.BD,2)+' / '+f(o.BM,2)},
+    {k:'Vb aislación',v:f(o.Vb1,0)+' kN'},
+    {k:'Vs / W',v:f(o.Vs/p.W*100,2)+' %'},
+  ];
+  v('statRow').innerHTML=stats.map(s=>`<div class="stat"><div class="k">${s.k}</div><div class="v">${s.v}</div></div>`).join('');
+  charts([v('chA'),v('chD'),v('chB')],p,o,sp);
+  renderRes(v('resTable'),p,o);
+  v('notes').innerHTML=notesHtml(p);
+  return {p,o,sp};
+}
+
+sel.addEventListener('change',()=>{ applySys(); render(); });
+document.querySelectorAll('input,select').forEach(i=>{ if(i!==sel&&i.id!=='txtSel'){ i.addEventListener('input',render); i.addEventListener('change',render); } });
+
+const TXTN={sdi:'SDI',smp:'SMP',sdiC:'SDI_reducido',smpC:'SMP_reducido',ver:'vertical'};
+v('txtBtn').addEventListener('click',()=>{
+  const {sp}=render();
+  const k=v('txtSel').value;
+  const txt=sp.map(q=>q.T.toFixed(3)+'\t'+q[k].toFixed(5)).join('\r\n')+'\r\n';
+  const pj=v('proj').value.trim().replace(/[^\w\-]+/g,'_');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));
+  a.download=(pj?pj+'_':'')+'NCh2745_'+TXTN[k]+'.txt';
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500);
+});
+
+function buildReport(){
+  const {p,o,sp}=render();
+  const ct=v('printReport'); ct.innerHTML='';
+  const hd=document.createElement('div'); hd.className='rpt-header';
+  hd.innerHTML=`<h1>Aislación sísmica, NCh2745:2013</h1><div class="rpt-sub">${p.proj?p.proj+', ':''}${new Date().toLocaleDateString('es-CL')}</div>`;
+  ct.appendChild(hd);
+  const pt=document.createElement('table'); pt.className='rpt-params';
+  pt.innerHTML=`
+    <tr><td class="k">Zona sísmica</td><td>${p.zona} (Z = ${p.Z})</td><td class="k">Suelo</td><td>${p.sc} (tipo ${p.soil} NCh433:1996)</td></tr>
+    <tr><td class="k">W</td><td>${p.W} kN</td><td class="k">Tipo de aislador</td><td>${p.tipoTxt}</td></tr>
+    <tr><td class="k">TD / TM</td><td>${p.TD} / ${p.TM} s</td><td class="k">βD / βM</td><td>${p.bD} / ${p.bM} %, ${p.bmodeTxt}</td></tr>
+    <tr><td class="k">Superestructura</td><td>${p.sysTxt}, Rs = ${p.Rs}, hmáx = ${p.hmax} m</td><td class="k">Rb / T base fija</td><td>${p.Rb} / ${p.Tf} s</td></tr>`;
+  ct.appendChild(pt);
+  const addSec=(title,node)=>{ const s=document.createElement('div'); s.className='rpt-section'; s.innerHTML=`<h2>${title}</h2>`; s.appendChild(node); ct.appendChild(s); return s; };
+  const mk=()=>{ const s=document.createElementNS(svgNS,'svg'); s.setAttribute('style','width:100%;max-width:640px;height:auto;display:block;margin:0 auto;'); return s; };
+  const svgs=[mk(),mk(),mk()]; charts(svgs,p,o,sp);
+  addSec('Espectros de pseudo-aceleración',svgs[0]);
+  addSec('Espectros de desplazamiento',svgs[1]);
+  addSec('Factor de reducción por amortiguamiento',svgs[2]);
+  const tr=document.createElement('table'); renderRes(tr,p,o); addSec('Resultados',tr);
+  const step=Math.max(1,Math.round(0.1/p.dt));
+  const pts=sp.filter((q,i)=>i%step===0);
+  const half=Math.ceil(pts.length/2);
+  const cell=q=>q?`<td class="num">${q.T.toFixed(2)}</td><td class="num">${q.sdi.toFixed(4)}</td><td class="num">${q.smp.toFixed(4)}</td><td class="num">${q.sdiC.toFixed(4)}</td><td class="num">${q.smpC.toFixed(4)}</td><td class="num">${q.dsdiC.toFixed(2)}</td>`:'<td></td><td></td><td></td><td></td><td></td><td></td>';
+  const hh='<th class="num">T [s]</th><th class="num">SDI [g]</th><th class="num">SMP [g]</th><th class="num">SDI red. [g]</th><th class="num">SMP red. [g]</th><th class="num">Sd/BD [cm]</th>';
+  const ts=document.createElement('table'); ts.className='rpt-small';
+  let body=''; for(let i=0;i<half;i++) body+=`<tr>${cell(pts[i])}${cell(pts[i+half])}</tr>`;
+  ts.innerHTML=`<thead><tr>${hh}${hh}</tr></thead><tbody>${body}</tbody>`;
+  const sec=addSec('Valores espectrales',ts); sec.classList.add('allow-break');
+  const ft=document.createElement('div'); ft.className='rpt-foot'; ft.innerHTML=notesHtml(p); ct.appendChild(ft);
+}
+v('pdfBtn').addEventListener('click',()=>{ buildReport(); window.print(); });
+
+render();
+</script>
+</body>
+</html>

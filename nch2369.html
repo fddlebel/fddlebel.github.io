@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Espectros NCh2369 | fddlebel</title>
+<style>
+:root{
+  --paper:#ffffff;
+  --panel:#ffffff;
+  --ink:#000000;
+  --ink-soft:#000000;
+  --line:#9a9a9a;
+  --line-strong:#7a7a7a;
+  --accent:#000000;
+  --accent-soft:#e9e9e9;
+  --input-bg:#ffffff;
+  --input-border:#7a7a7a;
+  --suction:#2f6690;
+  --pressure:#c1542c;
+  --focus:#4a4d24;
+  --grid:#d4d4d4;
+  --mono:'Arial Narrow',Arial,Helvetica,sans-serif;
+  --sans:'Arial Narrow',Arial,Helvetica,sans-serif;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--sans);padding:20px 16px 48px;
+  padding-inline:max(16px,calc((100vw - 1180px)/2));
+}
+h1,h2,h3{text-wrap:balance;font-family:var(--sans);margin:0;color:var(--ink);}
+.app-header{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px;}
+.app-header h1{font-size:22px;font-weight:700;letter-spacing:.2px;}
+.app-header .clause{font-family:var(--mono);font-size:12px;color:var(--ink);}
+.grid{display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start;}
+@media (max-width:860px){.grid{grid-template-columns:1fr;}}
+.panel{
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  padding:16px;
+}
+.panel + .panel{margin-top:14px;}
+.section-title{
+  font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--ink);margin:0 0 12px;
+}
+.seg{display:flex;border:1px solid var(--line-strong);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+.seg button{
+  flex:1;padding:9px 6px;border:none;background:var(--panel);color:var(--ink);
+  font-family:var(--sans);font-weight:600;font-size:13px;cursor:pointer;
+}
+.seg button.active{background:var(--accent);color:#fff;}
+.field{margin-bottom:11px;}
+.field label{display:block;font-size:12px;color:var(--ink);margin-bottom:4px;}
+.field label .unit{font-family:var(--mono);color:var(--ink);opacity:.75;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+input[type=number],input[type=text],select{
+  width:100%;font-family:var(--mono);font-size:13.5px;color:var(--ink);
+  background:var(--input-bg);border:1px solid var(--input-border);border-radius:4px;
+  padding:7px 8px;font-variant-numeric:tabular-nums;
+}
+input[type=number]:focus,select:focus,button:focus-visible{
+  outline:2px solid var(--focus);outline-offset:1px;
+}
+details summary{cursor:pointer;font-size:13px;color:var(--ink);font-weight:700;margin-top:4px;user-select:none;}
+details[open] summary{margin-bottom:10px;}
+.stat-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px;}
+@media (max-width:640px){.stat-row{grid-template-columns:repeat(2,1fr);}}
+.stat{
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  padding:10px 12px;
+}
+.stat .k{font-size:11px;color:var(--ink);text-transform:uppercase;letter-spacing:.04em;}
+.stat .v{font-family:var(--mono);font-size:17px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums;color:var(--ink);}
+.tabs{display:flex;gap:6px;margin-bottom:14px;}
+.tabs button{
+  font-family:var(--sans);font-weight:600;font-size:13px;color:var(--ink);
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  padding:7px 14px;cursor:pointer;
+}
+.tabs button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.diagram-wrap{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:14px;margin-bottom:14px;}
+.legend{display:flex;gap:18px;align-items:center;font-size:12px;color:var(--ink);margin-top:8px;flex-wrap:wrap;}
+.legend .sw{width:12px;height:12px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:-2px;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th,td{text-align:left;padding:6px 8px;border:1px solid var(--line);font-variant-numeric:tabular-nums;color:var(--ink);}
+th{font-size:11px;text-transform:none;letter-spacing:.03em;color:var(--ink);font-weight:700;background:var(--accent-soft);}
+td.num,th.num{font-family:var(--mono);text-align:right;}
+td.zone{font-family:var(--mono);font-weight:700;}
+.tablewrap{overflow-x:auto;}
+.warn{
+  background:var(--accent-soft);border:1px solid var(--line-strong);color:var(--ink);
+  border-radius:4px;padding:8px 10px;font-size:12px;margin-bottom:12px;
+}
+.note{font-size:11.5px;color:var(--ink);margin-top:10px;line-height:1.5;}
+svg text{font-family:var(--mono);fill:var(--ink);}
+
+#printReport{display:none;}
+.rpt-header{margin-bottom:14px;}
+.rpt-header h1{font-size:20px;font-weight:700;}
+.rpt-header .rpt-sub{font-family:var(--mono);font-size:11.5px;margin-top:2px;}
+.rpt-params{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:11.5px;}
+.rpt-params td{border:1px solid var(--line);padding:5px 8px;}
+.rpt-params td.k{font-weight:700;width:32%;background:var(--accent-soft);}
+.rpt-section{margin-bottom:16px;page-break-inside:avoid;break-inside:avoid;}
+.rpt-section h2{page-break-after:avoid;break-after:avoid;}
+.rpt-section h2{font-size:14px;font-weight:700;margin-bottom:8px;border-bottom:1px solid var(--line);padding-bottom:4px;}
+.rpt-section table{margin-top:8px;}
+.rpt-foot{font-size:10px;margin-top:18px;border-top:1px solid var(--line);padding-top:6px;}
+
+@media print{
+  body *{visibility:hidden;}
+  #printReport, #printReport *{visibility:visible;}
+  #printReport{display:block;position:absolute;left:0;top:0;width:100%;}
+  @page{margin:14mm;}
+}
+.btn{font-family:var(--sans);font-weight:700;font-size:13px;color:#fff;background:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:8px 16px;cursor:pointer;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.intable{margin-bottom:10px;}
+.intable td{padding:4px 6px;font-size:12px;}
+.intable td:first-child{white-space:nowrap;}
+.intable input.in{padding:5px 6px;font-size:13px;text-align:right;}
+.diagram-wrap .section-title{margin-bottom:6px;}
+#warnBox .warn{margin-bottom:10px;}
+.rpt-small{font-size:10.5px;}
+.rpt-small td,.rpt-small th{padding:2px 6px;}
+.rpt-section.allow-break{page-break-inside:auto;break-inside:auto;}
+.chk{display:flex;align-items:center;gap:6px;font-size:12px;}
+.chk input{width:auto;margin:0;}
+.sysblk{border-top:1px solid var(--line);padding-top:8px;margin-top:4px;}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1><a href="index.html" style="color:inherit;text-decoration:none;font-weight:400;">fddlebel</a> / Espectros sísmicos industriales</h1>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <div class="clause">NCh2369:2025, 5.4, 5.5, 5.7, 5.12 a 5.14, 6, Tablas 3, 6, 7</div>
+    <select id="txtSel" style="width:auto;">
+      <option value="H">TXT: S<sub>aH</sub> referencia</option>
+      <option value="X">TXT: S<sub>a</sub> diseño X</option>
+      <option value="Y">TXT: S<sub>a</sub> diseño Y</option>
+      <option value="V">TXT: S<sub>a</sub> diseño vertical</option>
+    </select>
+    <button class="btn" id="txtBtn">Exportar TXT</button>
+    <button class="btn" id="pdfBtn">Exportar PDF</button>
+  </div>
+</div>
+
+<div id="printReport"></div>
+
+<div class="grid">
+  <div>
+    <div class="panel">
+      <div class="field"><label>Proyecto</label><input type="text" id="proj" value=""></div>
+      <div class="section-title" style="margin-top:12px">Sitio</div>
+      <div class="row2">
+        <div class="field"><label>Zona sísmica (Tabla 3)</label>
+          <select id="zona">
+            <option value="0.2">1 (A0 = 0,20 g)</option>
+            <option value="0.3">2 (A0 = 0,30 g)</option>
+            <option value="0.4" selected>3 (A0 = 0,40 g)</option>
+          </select>
+        </div>
+        <div class="field"><label>Tipo de suelo (Tabla 6)</label>
+          <select id="suelo">
+            <option>A</option><option>B</option><option selected>C</option><option>D</option><option>E</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Categoría (4.3.2)</label>
+          <select id="cat">
+            <option value="0.8">I (I = 0,80)</option>
+            <option value="1.0" selected>II (I = 1,00)</option>
+            <option value="1.2">III (I = 1,20)</option>
+            <option value="1.2">IV (I = 1,20)</option>
+          </select>
+        </div>
+        <div class="field"><label>I adoptado</label><input type="number" id="I" value="1" step="0.05"></div>
+      </div>
+
+      <div class="section-title" style="margin-top:14px">Sistema resistente (Tabla 7)</div>
+      <div class="field"><label class="chk"><input type="checkbox" id="same" checked> Mismo sistema en ambas direcciones</label></div>
+      <div class="sysblk" data-d="X">
+        <div class="field"><label id="lblX">Dirección X</label><select id="sysX" class="sys"></select></div>
+        <div class="row3">
+          <div class="field"><label>Uniones</label><select id="unionX" class="union"><option value="0">Soldadas</option><option value="1">Empernadas</option></select></div>
+          <div class="field"><label>R</label><input type="number" id="RX" step="0.5"></div>
+          <div class="field"><label>ξ</label><input type="number" id="xiX" step="0.005"></div>
+        </div>
+      </div>
+      <div class="sysblk" data-d="Y" id="blkY">
+        <div class="field"><label>Dirección Y</label><select id="sysY" class="sys"></select></div>
+        <div class="row3">
+          <div class="field"><label>Uniones</label><select id="unionY" class="union"><option value="0">Soldadas</option><option value="1">Empernadas</option></select></div>
+          <div class="field"><label>R</label><input type="number" id="RY" step="0.5"></div>
+          <div class="field"><label>ξ</label><input type="number" id="xiY" step="0.005"></div>
+        </div>
+      </div>
+      <div class="field"><label class="chk"><input type="checkbox" id="lim" checked> Aplicar 5.12 y 5.13 (Q<sub>0</sub> mín. y máx.)</label></div>
+
+      <div class="section-title" style="margin-top:14px">Datos del modelo</div>
+      <table class="intable">
+        <thead><tr><th></th><th class="num">Dir. X</th><th class="num">Dir. Y</th></tr></thead>
+        <tbody>
+          <tr><td>P, peso sísmico [kN]</td><td><input type="number" id="Px" value="20000" step="100" class="in"></td><td><input type="number" id="Py" value="20000" step="100" class="in"></td></tr>
+          <tr><td>T*, período [s]</td><td><input type="number" id="Tx" value="0.45" step="0.01" class="in"></td><td><input type="number" id="Ty" value="0.20" step="0.01" class="in"></td></tr>
+          <tr><td>Q<sub>0</sub> modal [kN]</td><td><input type="number" id="Qx" value="" step="10" class="in" placeholder="opcional"></td><td><input type="number" id="Qy" value="" step="10" class="in" placeholder="opcional"></td></tr>
+        </tbody>
+      </table>
+
+      <details>
+        <summary>Parámetros avanzados</summary>
+        <div class="row2">
+          <div class="field"><label>R<sub>V</sub>, vertical</label><input type="number" id="RV" value="2" step="0.5"></div>
+          <div class="field"><label>ξ<sub>V</sub>, vertical</label><input type="number" id="xiV" value="0.03" step="0.005"></div>
+        </div>
+        <div class="field"><label>T<sub>V</sub>, período vertical <span class="unit">[s]</span></label><input type="number" id="TV" value="0.10" step="0.01"></div>
+        <div class="row2">
+          <div class="field"><label>h, altura <span class="unit">[m]</span></label><input type="number" id="hgt" value="15" step="0.5"></div>
+          <div class="field"><label>d<sub>máx</sub> (6.3)</label>
+            <select id="dlim">
+              <option value="0.015">Estructuras en general, 0,015h</option>
+              <option value="0.002">Prefabricado muros uniones secas, 0,002h</option>
+              <option value="0.003">Muros albañilería con particiones, 0,003h</option>
+              <option value="0.0075">Marcos con rellenos dilatados, 0,0075h</option>
+            </select>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>T máx. espectro <span class="unit">[s]</span></label><input type="number" id="tmax" value="5" step="0.5"></div>
+          <div class="field"><label>ΔT <span class="unit">[s]</span></label><input type="number" id="dt" value="0.01" step="0.005"></div>
+        </div>
+      </details>
+    </div>
+    <div class="panel">
+      <div class="section-title">Notas</div>
+      <div class="note" id="notes"></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="stat-row" id="statRow"></div>
+    <div id="warnBox"></div>
+
+    <div class="diagram-wrap">
+      <div class="section-title">Espectro horizontal de pseudo-aceleraciones</div>
+      <svg id="chH" viewBox="0 0 720 380" width="100%" style="display:block;height:auto"></svg>
+    </div>
+    <div class="diagram-wrap">
+      <div class="section-title">Factor de reducción R*</div>
+      <svg id="chR" viewBox="0 0 720 280" width="100%" style="display:block;height:auto"></svg>
+    </div>
+    <div class="diagram-wrap">
+      <div class="section-title">Espectro de desplazamientos</div>
+      <svg id="chD" viewBox="0 0 720 340" width="100%" style="display:block;height:auto"></svg>
+    </div>
+    <div class="diagram-wrap">
+      <div class="section-title">Espectro vertical de pseudo-aceleraciones</div>
+      <svg id="chV" viewBox="0 0 720 300" width="100%" style="display:block;height:auto"></svg>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">Resultados por dirección</div>
+      <div class="tablewrap"><table id="resTable"></table></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUELO = {
+  A:{S:0.90,r:4.50,T0:0.15,p:1.85,q:3.00,T1:0.15},
+  B:{S:1.00,r:4.50,T0:0.30,p:1.60,q:3.00,T1:0.27},
+  C:{S:1.05,r:4.50,T0:0.40,p:1.50,q:3.00,T1:0.35},
+  D:{S:1.00,r:3.50,T0:0.60,p:1.00,q:2.50,T1:0.41},
+  E:{S:1.00,r:3.00,T0:1.20,p:1.00,q:2.70,T1:0.79},
+};
+const SE=[0.02,0.03];
+const SYS = [
+  ['1. Estructuras diseñadas para permanecer elásticas',1,0.03],
+  ['2. Otras estructuras no incluidas en la lista',1.5,0.02],
+  ['3. Estructuras de péndulo invertido',2,0.03],
+  ['4. Estructuras sísmicas isostáticas',2,0.03],
+  ['5.1 Acero, marcos a momento con anclajes dúctiles',5,SE],
+  ['5.2 Acero, marcos a momento sin anclajes dúctiles',3,SE],
+  ['5.3 Acero, marcos arriostrados con anclajes dúctiles',5,SE],
+  ['5.4 Acero, marcos arriostrados sin anclajes dúctiles',3,SE],
+  ['5.5 Acero, nave de un piso con arriostramiento de techo y anclajes dúctiles',5,SE],
+  ['5.6 Acero, nave de un piso sin arriostramiento de techo, anclajes dúctiles',3,SE],
+  ['5.7 Acero, galpones livianos',4,SE],
+  ['6.1 HA, marcos a momento con no estructurales dilatados',5,0.05],
+  ['6.2 HA, marcos a momento con no estructurales incorporados',3,0.05],
+  ['6.3 HA, muros de corte',5,0.05],
+  ['6.4 HA, nave de un piso con arriostramiento de techo',5,0.05],
+  ['6.5 HA, nave de un piso sin arriostramiento de techo',3,0.05],
+  ['7.1 Prefabricado, uniones dúctiles húmedas, no dilatadas',3,0.05],
+  ['7.2 Prefabricado, uniones dúctiles húmedas, dilatadas',5,0.03],
+  ['7.3.1 Prefabricado, uniones secas empernadas o con barras',3,0.03],
+  ['7.3.2 Prefabricado, uniones secas soldadas',3,0.02],
+  ['7.4 Prefabricado, pilares en voladizo',3,0.02],
+  ['7.5 Prefabricado, marcos arriostrados concéntricos',4,0.03],
+  ['8.1 Albañilería armada de bloques, huecos llenos',4,0.05],
+  ['8.2 Albañilería armada sin llenado total o rejilla',3,0.05],
+  ['8.3 Albañilería confinada',4,0.05],
+  ['9.1 Chimeneas de hormigón armado',2,0.03],
+  ['9.2 Chimeneas, silos y tolvas de acero con manto al suelo',3,SE],
+  ['9.3 Silos, tolvas y estanques sobre columnas',4,SE],
+  ['9.4 Estanques de acero verticales, anclajes dúctiles',4,SE],
+  ['9.5 Estanques de acero verticales, anclajes para volcamiento',2.5,SE],
+  ['9.6 Estanques de HA verticales con manto continuo',3,0.03],
+  ['9.7 Estanques y ductos de FRP, GFRP o similares',3,0.02],
+  ['9.8 Recipientes horizontales sobre cunas, anclaje dúctil',3,0.03],
+  ['10.1 Torres de proceso',3,0.03],
+  ['10.2 Torres de enfriamiento',3,0.03],
+  ['10.3 Gabinetes eléctricos apoyados en el suelo',3,0.02],
+  ['10.4 Tuberías de acero no enterradas',3,0.03],
+  ['11.1 Estanterías generales',2,0.03],
+  ['11.2 Estanterías dúctiles',4,0.03],
+  ['12.1 Madera, muros marco plataforma',4,0.05],
+  ['12.2 Madera laminada, marcos de momento dúctiles',2.5,0.03],
+  ['12.3 Madera, arriostrados con conexiones dúctiles',3.5,0.03],
+  ['12.4 Madera, arriostrados con conexiones semi-dúctiles',2.5,0.03],
+  ['12.5 Madera, arriostrados con conexiones no dúctiles',1,0.03],
+];
+const v=id=>document.getElementById(id);
+['X','Y'].forEach(d=>{
+  const sl=v('sys'+d);
+  SYS.forEach((s,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=s[0]; sl.appendChild(o); });
+  sl.value=6;
+});
+function applySys(d){
+  const s=SYS[v('sys'+d).value];
+  v('R'+d).value=s[1];
+  const both=Array.isArray(s[2]);
+  v('union'+d).disabled=!both;
+  v('xi'+d).value=both?s[2][+v('union'+d).value]:s[2];
+}
+function syncSame(){
+  const same=v('same').checked;
+  v('blkY').hidden=same;
+  v('lblX').textContent=same?'Direcciones X e Y':'Dirección X';
+}
+applySys('X'); applySys('Y'); syncSame();
+
+const fxi=xi=>Math.pow(0.05/xi,0.4);
+function SaH(T,p){ const s=p.s, x=T/s.T0; return p.Ar*s.S*(1+s.r*Math.pow(x,s.p))/(1+Math.pow(x,s.q)); }
+function SaV(T,p){ const s=p.s, x=1.7*T/s.T0; return 0.7*p.Ar*s.S*(1+s.r*Math.pow(x,s.p))/(1+Math.pow(x,s.q)); }
+function Rstar(T,R,s){
+  if(R===1) return 1;
+  const lim=0.16*R*s.T1;
+  return T>=lim?R:1.5+(R-1.5)*T/lim;
+}
+function sysOf(d){
+  const k=v('same').checked?'X':d;
+  const i=v('sys'+k).value, u=v('union'+k);
+  return {txt:SYS[i][0]+(u.disabled?'':', uniones '+u.options[u.selectedIndex].text.toLowerCase()),
+    R:Math.max(num('R'+k,1),1), xi:Math.min(Math.max(num('xi'+k,0.05),0.02),0.05)};
+}
+function num(id,def){ const x=parseFloat(v(id).value); return isFinite(x)?x:def; }
+
+function readP(){
+  const soil=v('suelo').value, A0=parseFloat(v('zona').value);
+  return {
+    proj:v('proj').value.trim(),
+    A0, Ar:1.4*A0, zonaTxt:v('zona').options[v('zona').selectedIndex].text,
+    soil, s:SUELO[soil],
+    I:num('I',1), catTxt:v('cat').options[v('cat').selectedIndex].text,
+    same:v('same').checked,
+    lim:v('lim').checked, TV:Math.max(num('TV',0.1),0),
+    RV:num('RV',2), xiV:Math.min(Math.max(num('xiV',0.03),0.02),0.05),
+    h:num('hgt',0), dlim:parseFloat(v('dlim').value), dlimTxt:v('dlim').options[v('dlim').selectedIndex].text,
+    dir:{
+      X:Object.assign({P:num('Px',0),T:Math.max(num('Tx',0.01),0.001),Q:parseFloat(v('Qx').value)},sysOf('X')),
+      Y:Object.assign({P:num('Py',0),T:Math.max(num('Ty',0.01),0.001),Q:parseFloat(v('Qy').value)},sysOf('Y')),
+    },
+    tmax:Math.max(num('tmax',5),0.5), dt:Math.max(num('dt',0.01),0.001),
+  };
+}
+
+function compute(p){
+  const out={};
+  ['X','Y'].forEach(k=>{
+    const d=p.dir[k], T=d.T, fx=fxi(d.xi);
+    const sh=SaH(T,p), Rs=Rstar(T,d.R,p.s);
+    const Sa=0.7*p.I*sh*fx/Rs;
+    const C=Sa, Qst=C*d.P;
+    const Qmin=0.25*p.I*p.Ar*p.s.S*d.P;
+    const Qmax=2.75*p.I*p.Ar*p.s.S/(d.R+1)*fx*d.P;
+    const hasQ=isFinite(d.Q)&&d.Q>0;
+    const Q0=hasQ?d.Q:Qst;
+    let R1=Rs, kmin=1, kmax=1, ctrl='-';
+    if(p.lim && Q0>0){
+      R1=Rs*Math.min(Q0/Qmin,1);
+      if(Q0<Qmin){ kmin=Qmin/Q0; ctrl='Q0 mín.'; }
+      else if(Q0>Qmax){ kmax=Qmax/Q0; ctrl='Q0 máx.'; }
+    }
+    const Sa1=0.7*p.I*sh*fx/R1;
+    const Sd=T*T/(4*Math.PI*Math.PI)*p.I*sh*fx*981;
+    out[k]={T,P:d.P,R:d.R,xi:d.xi,txt:d.txt,fx,lim:0.16*d.R*p.s.T1,sh,Rs,Sa,C,Qst,Qmin,Qmax,hasQ,Q0,R1,kmin,kmax,ctrl,Sa1,Sd,Q:d.Q};
+  });
+  out.dmax=p.dlim*p.h*100;
+  out.CV=(p.soil==='D'?1.1:p.soil==='E'?1.0:1.2)*p.I*p.Ar*p.s.S;
+  out.fv=fxi(p.xiV);
+  out.SvT=0.7*p.I*SaV(p.TV,p)*out.fv/p.RV;
+  return out;
+}
+function SaDes(T,p,d){ return 0.7*p.I*SaH(T,p)*d.fx/Rstar(T,d.R,p.s)*d.kmin; }
+
+function spectrum(p,r){
+  const rows=[], n=Math.round(p.tmax/p.dt);
+  for(let i=0;i<=n;i++){
+    const T=+(i*p.dt).toFixed(6);
+    const sh=SaH(T,p), sv=SaV(T,p);
+    rows.push({T,sh,RsX:Rstar(T,r.X.R,p.s),RsY:Rstar(T,r.Y.R,p.s),
+      Sx:SaDes(T,p,r.X), Sy:SaDes(T,p,r.Y),
+      Sv:0.7*p.I*sv*r.fv/p.RV, sv,
+      SdX:T*T/(4*Math.PI*Math.PI)*p.I*sh*r.X.fx*981,
+      SdY:T*T/(4*Math.PI*Math.PI)*p.I*sh*r.Y.fx*981});
+  }
+  return rows;
+}
+
+const svgNS='http://www.w3.org/2000/svg';
+function el(tag,attrs){ const n=document.createElementNS(svgNS,tag); for(const k in attrs) n.setAttribute(k,attrs[k]); return n; }
+function tx(x,y,s,o){ const t=el('text',Object.assign({x,y,'font-size':11,'text-anchor':'middle',fill:'var(--ink)'},o||{})); t.textContent=s; return t; }
+function niceStep(range,count){ const raw=range/count, m=Math.pow(10,Math.floor(Math.log10(raw))), f=raw/m; return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*m; }
+
+function drawChart(svg,cfg){
+  svg.innerHTML='';
+  const W=720,H=cfg.H||380,L=64,R=20,T=18,B=48;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const xmax=cfg.xmax, ymaxRaw=Math.max(...cfg.series.flatMap(s=>s.pts.map(q=>q[1])).filter(isFinite),1e-6);
+  const ys=niceStep(ymaxRaw,cfg.yticks||6), ymax=Math.ceil(ymaxRaw*1.05/ys)*ys;
+  const xs=niceStep(xmax,10);
+  const X=x=>L+x/xmax*(W-L-R), Y=y=>H-B-y/ymax*(H-T-B);
+  for(let y=0;y<=ymax+1e-9;y+=ys){
+    svg.appendChild(el('line',{x1:L,x2:W-R,y1:Y(y),y2:Y(y),stroke:'var(--grid)','stroke-width':0.6}));
+    svg.appendChild(tx(L-6,Y(y)+4,y.toFixed(cfg.ydec),{'text-anchor':'end'}));
+  }
+  for(let x=0;x<=xmax+1e-9;x+=xs){
+    svg.appendChild(el('line',{x1:X(x),x2:X(x),y1:T,y2:H-B,stroke:'var(--grid)','stroke-width':0.6}));
+    svg.appendChild(tx(X(x),H-B+16,(+x.toFixed(2)).toString()));
+  }
+  svg.appendChild(el('rect',{x:L,y:T,width:W-L-R,height:H-T-B,fill:'none',stroke:'var(--line-strong)','stroke-width':1}));
+  svg.appendChild(tx((L+W-R)/2,H-10,cfg.xlabel,{'font-weight':700}));
+  const yl=tx(14,(T+H-B)/2,cfg.ylabel,{'font-weight':700}); yl.setAttribute('transform',`rotate(-90 14 ${(T+H-B)/2})`); svg.appendChild(yl);
+  cfg.series.forEach(s=>{
+    const d=s.pts.filter(q=>isFinite(q[1])).map((q,i)=>(i?'L':'M')+X(q[0]).toFixed(1)+','+Y(q[1]).toFixed(1)).join(' ');
+    svg.appendChild(el('path',{d,fill:'none',stroke:'var(--ink)','stroke-width':s.w||1.4,'stroke-dasharray':s.dash||'none'}));
+  });
+  (cfg.marks||[]).forEach(m=>{
+    if(!isFinite(m.y)||m.x>xmax) return;
+    svg.appendChild(el('line',{x1:X(m.x),x2:X(m.x),y1:Y(0),y2:Y(m.y),stroke:'var(--ink)','stroke-width':0.6,'stroke-dasharray':'2,2'}));
+    svg.appendChild(el('circle',{cx:X(m.x),cy:Y(m.y),r:3,fill:'var(--paper)',stroke:'var(--ink)','stroke-width':1.2}));
+    svg.appendChild(tx(X(m.x)+5,Y(m.y)-6,m.label,{'text-anchor':'start','font-size':10.5,'font-weight':700}));
+  });
+  let ly=T+14;
+  cfg.series.forEach(s=>{
+    const lx=W-R-230;
+    svg.appendChild(el('rect',{x:lx-8,y:ly-11,width:234,height:17,fill:'var(--paper)'}));
+    svg.appendChild(el('line',{x1:lx,x2:lx+30,y1:ly-3,y2:ly-3,stroke:'var(--ink)','stroke-width':s.w||1.4,'stroke-dasharray':s.dash||'none'}));
+    svg.appendChild(tx(lx+38,ly+1,s.name,{'text-anchor':'start','font-size':11}));
+    ly+=17;
+  });
+}
+
+function charts(svgs,p,r,sp){
+  const [sH,sR,sD,sV]=svgs;
+  drawChart(sH,{xmax:p.tmax,xlabel:'T [s]',ylabel:'Sa [g]',ydec:2,
+    series:[
+      {name:'SaH, referencia ξ = 5%',pts:sp.map(q=>[q.T,q.sh]),w:1.8},
+      {name:`Sa diseño X (R = ${r.X.R}, ξ = ${r.X.xi})`,pts:sp.map(q=>[q.T,q.Sx]),dash:'6,4'},
+      ...(p.same&&r.X.kmin===r.Y.kmin?[]:[{name:`Sa diseño Y (R = ${r.Y.R}, ξ = ${r.Y.xi})`,pts:sp.map(q=>[q.T,q.Sy]),dash:'2,3'}]),
+    ],
+    marks:[{x:r.X.T,y:r.X.Sa1,label:'T*x'},{x:r.Y.T,y:r.Y.Sa1,label:'T*y'}]});
+  drawChart(sR,{H:280,xmax:p.tmax,xlabel:'T [s]',ylabel:'R*',ydec:1,yticks:5,
+    series:[{name:`R* X (Cr·T1 = ${r.X.lim.toFixed(3)} s)`,pts:sp.map(q=>[q.T,q.RsX]),w:1.8},
+      ...(p.same?[]:[{name:`R* Y (Cr·T1 = ${r.Y.lim.toFixed(3)} s)`,pts:sp.map(q=>[q.T,q.RsY]),dash:'6,4'}])],
+    marks:[{x:r.X.T,y:r.X.Rs,label:'T*x'},{x:r.Y.T,y:r.Y.Rs,label:'T*y'}]});
+  drawChart(sD,{H:340,xmax:p.tmax,xlabel:'T [s]',ylabel:'Sd [cm]',ydec:0,
+    series:[{name:`Sd X, ξ = ${r.X.xi}`,pts:sp.map(q=>[q.T,q.SdX]),w:1.8},
+      ...(r.X.xi===r.Y.xi?[]:[{name:`Sd Y, ξ = ${r.Y.xi}`,pts:sp.map(q=>[q.T,q.SdY]),dash:'6,4'}])],
+    marks:[{x:r.X.T,y:r.X.Sd,label:'T*x'},{x:r.Y.T,y:r.Y.Sd,label:'T*y'}]});
+  drawChart(sV,{H:300,xmax:p.tmax,xlabel:'TV [s]',ylabel:'SaV [g]',ydec:2,yticks:5,
+    series:[
+      {name:'SaV, referencia ξ = 5%',pts:sp.map(q=>[q.T,q.sv]),w:1.8},
+      {name:`Sa diseño vertical (RV = ${p.RV}, ξV = ${p.xiV})`,pts:sp.map(q=>[q.T,q.Sv]),dash:'6,4'},
+    ],
+    marks:[{x:p.TV,y:r.SvT,label:'TV'}]});
+}
+
+const f=(x,d)=>isFinite(x)?x.toFixed(d):'-';
+function resRows(p,r){
+  const X=r.X,Y=r.Y;
+  return [
+    ['P, peso sísmico','kN',f(X.P,0),f(Y.P,0)],
+    ['T*, período fundamental','s',f(X.T,3),f(Y.T,3)],
+    ['R (Tabla 7)','',f(X.R,1),f(Y.R,1)],
+    ['ξ (Tabla 7)','',f(X.xi,3),f(Y.xi,3)],
+    ['SaH(T*), referencia','g',f(X.sh,4),f(Y.sh,4)],
+    ['(0,05/ξ)^0,4','',f(X.fx,4),f(Y.fx,4)],
+    ['Cr·T1 = 0,16·R·T1','s',f(X.lim,3),f(Y.lim,3)],
+    ['R* (Ec. 1b)','',f(X.Rs,3),f(Y.Rs,3)],
+    ['C = Sa(T*)/g (Ec. 1a)','',f(X.C,4),f(Y.C,4)],
+    ['Q0 estático = C·P (Ec. 5)','kN',f(X.Qst,0),f(Y.Qst,0)],
+    ['Q0 modal','kN',X.hasQ?f(X.Q,0):'-',Y.hasQ?f(Y.Q,0):'-'],
+    ['Q0 mín. = 0,25·I·Ar·S·P/g (Ec. 12)','kN',f(X.Qmin,0),f(Y.Qmin,0)],
+    ['Q0 máx. (Ec. 13)','kN',f(X.Qmax,0),f(Y.Qmax,0)],
+    ['Q0 usado / P','%',f(X.Q0/X.P*100,2),f(Y.Q0/Y.P*100,2)],
+    ['Control','',X.ctrl,Y.ctrl],
+    ['R1 = R*·mín(Q0/Q0mín, 1) (Ec. 14)','',f(X.R1,3),f(Y.R1,3)],
+    ['Factor espectro diseño = Q0mín/Q0 = R*/R1','',f(X.kmin,4),f(Y.kmin,4)],
+    ['Factor fuerzas Q0máx/Q0 (permitido)','',f(X.kmax,4),f(Y.kmax,4)],
+    ['Sa diseño(T*) corregido','g',f(X.Sa1,4),f(Y.Sa1,4)],
+    ['Sd(T*) = T²/4π²·I·SaH·(0,05/ξ)^0,4','cm',f(X.Sd,2),f(Y.Sd,2)],
+    [`d máx. (6.3), h = ${p.h} m`,'cm',f(r.dmax,2),f(r.dmax,2)],
+    [`Sa vertical(TV), TV = ${p.TV} s`,'g',f(r.SvT,4),f(r.SvT,4)],
+    ['CV vertical (5.7.1)','',f(r.CV,4),f(r.CV,4)],
+  ];
+}
+function renderRes(t,p,r){
+  t.innerHTML=`<thead><tr><th>Parámetro</th><th>Unidad</th><th class="num">Dir. X</th><th class="num">Dir. Y</th></tr></thead><tbody>${
+    resRows(p,r).map(q=>`<tr><td>${q[0]}</td><td>${q[1]}</td><td class="num">${q[2]}</td><td class="num">${q[3]}</td></tr>`).join('')}</tbody>`;
+}
+
+function notesHtml(p){
+  const s=p.s;
+  return `Suelo ${p.soil}: S=${s.S}, r=${s.r}, T0=${s.T0} s, p=${s.p}, q=${s.q}, T1=${s.T1} s. A0=${p.A0} g, Ar=1,4·A0=${p.Ar.toFixed(2)} g, I=${p.I}.<br>
+  SaH = Ar·S·(1+r(T/T0)^p)/(1+(T/T0)^q) (Ec. 3). Sa = 0,7·I·SaH/R*·(0,05/ξ)^0,4 (Ec. 1a).<br>
+  R* = R si T ≥ Cr·T1, si no R* = 1,5+(R−1,5)·T/(Cr·T1), con Cr = 0,16R (Ec. 1b). El espectro de diseño usa R*(T) en cada período.<br>
+  Si Q0 < Q0mín, R1 = R*·Q0/Q0mín (Ec. 14) y el espectro de diseño se amplifica por Q0mín/Q0.<br>
+  SaV = 0,7·Ar·S·(1+r(1,7TV/T0)^p)/(1+(1,7TV/T0)^q) (Ec. 4). Sa vertical = 0,7·I·SaV/RV·(0,05/ξV)^0,4 (Ec. 2).<br>
+  Q0 modal es el corte basal obtenido con el espectro de diseño sin corregir. Sin Q0 modal se usa Q0 estático. El factor Q0máx/Q0 no se aplica a desplazamientos.<br>
+  Desplazamientos según 6.1 con el espectro de referencia, I y (0,05/ξ)^0,4. Sd(T*) es la ordenada espectral en T*.<br>
+  TXT: T [s] y Sa [g] en dos columnas separadas por tabulación, sin encabezado. En ETABS usar factor de escala 9,81 (m/s²).`;
+}
+
+function render(){
+  const p=readP(), r=compute(p), sp=spectrum(p,r);
+  const warn=[];
+  if(Math.max(r.X.T,r.Y.T)>=4) warn.push('T* ≥ 4 s: se recomienda espectro de sitio y análisis según 5.10 (Tabla 6, Nota).');
+  if(Math.min(r.X.R,r.Y.R)<=2 && p.lim) warn.push('R ≤ 2: 5.12 y 5.13 no aplican a este sistema.');
+  v('warnBox').innerHTML=warn.map(w=>`<div class="warn">${w}</div>`).join('');
+  const stats=[
+    {k:'SaH máx.',v:f(Math.max(...sp.map(q=>q.sh)),3)+' g'},
+    {k:'R* X / Y',v:f(r.X.Rs,2)+' / '+f(r.Y.Rs,2)},
+    {k:'R1 X / Y',v:f(r.X.R1,2)+' / '+f(r.Y.R1,2)},
+    {k:'C X / Y',v:f(r.X.C,3)+' / '+f(r.Y.C,3)},
+    {k:'Sd(T*) X / Y',v:f(r.X.Sd,1)+' / '+f(r.Y.Sd,1)+' cm'},
+  ];
+  v('statRow').innerHTML=stats.map(s=>`<div class="stat"><div class="k">${s.k}</div><div class="v">${s.v}</div></div>`).join('');
+  charts([v('chH'),v('chR'),v('chD'),v('chV')],p,r,sp);
+  renderRes(v('resTable'),p,r);
+  v('notes').innerHTML=notesHtml(p);
+  return {p,r,sp};
+}
+
+['X','Y'].forEach(d=>{
+  v('sys'+d).addEventListener('change',()=>{ applySys(d); render(); });
+  v('union'+d).addEventListener('change',()=>{ applySys(d); render(); });
+});
+v('same').addEventListener('change',()=>{ syncSame(); render(); });
+document.querySelectorAll('input,select').forEach(i=>{ if(!i.classList.contains('sys')&&!i.classList.contains('union')&&i.id!=='txtSel'&&i.id!=='same'){ i.addEventListener('input',render); i.addEventListener('change',render); } });
+v('cat').addEventListener('change',()=>{ v('I').value=v('cat').value; render(); });
+
+const TXTKEY={H:['sh','referencia_horizontal'],X:['Sx','diseno_X'],Y:['Sy','diseno_Y'],V:['Sv','diseno_vertical']};
+v('txtBtn').addEventListener('click',()=>{
+  const {sp}=render();
+  const [key,name]=TXTKEY[v('txtSel').value];
+  const txt=sp.map(q=>q.T.toFixed(3)+'\t'+q[key].toFixed(5)).join('\r\n')+'\r\n';
+  const pj=v('proj').value.trim().replace(/[^\w\-]+/g,'_');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));
+  a.download=(pj?pj+'_':'')+'NCh2369_'+name+'.txt';
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500);
+});
+
+function buildReport(){
+  const {p,r,sp}=render();
+  const ct=v('printReport'); ct.innerHTML='';
+  const hd=document.createElement('div'); hd.className='rpt-header';
+  hd.innerHTML=`<h1>Espectros sísmicos industriales, NCh2369:2025</h1><div class="rpt-sub">${p.proj?p.proj+', ':''}${new Date().toLocaleDateString('es-CL')}</div>`;
+  ct.appendChild(hd);
+  const pt=document.createElement('table'); pt.className='rpt-params';
+  pt.innerHTML=`
+    <tr><td class="k">Zona sísmica</td><td>${p.zonaTxt}, Ar = ${p.Ar.toFixed(2)} g</td><td class="k">Tipo de suelo</td><td>${p.soil} (S=${p.s.S}, r=${p.s.r}, T0=${p.s.T0} s, p=${p.s.p}, q=${p.s.q}, T1=${p.s.T1} s)</td></tr>
+    <tr><td class="k">Categoría / I</td><td>${p.catTxt.split(' ')[0]} / ${p.I}</td><td class="k">RV / ξV / TV</td><td>${p.RV} / ${p.xiV} / ${p.TV} s</td></tr>
+    <tr><td class="k">Sistema dir. X</td><td>${r.X.txt}, R = ${r.X.R}, ξ = ${r.X.xi}</td><td class="k">Sistema dir. Y</td><td>${r.Y.txt}, R = ${r.Y.R}, ξ = ${r.Y.xi}</td></tr>`;
+  ct.appendChild(pt);
+  const addSec=(title,node)=>{ const s=document.createElement('div'); s.className='rpt-section'; s.innerHTML=`<h2>${title}</h2>`; s.appendChild(node); ct.appendChild(s); return s; };
+  const mk=()=>{ const s=document.createElementNS(svgNS,'svg'); s.setAttribute('style','width:100%;max-width:640px;height:auto;display:block;margin:0 auto;'); return s; };
+  const svgs=[mk(),mk(),mk(),mk()]; charts(svgs,p,r,sp);
+  addSec('Espectro horizontal de pseudo-aceleraciones',svgs[0]);
+  addSec('Factor de reducción R*',svgs[1]);
+  addSec('Espectro de desplazamientos',svgs[2]);
+  addSec('Espectro vertical de pseudo-aceleraciones',svgs[3]);
+  const tr=document.createElement('table'); renderRes(tr,p,r); addSec('Resultados por dirección',tr);
+  const step=Math.max(1,Math.round(0.1/p.dt));
+  const pts=sp.filter((q,i)=>i%step===0);
+  const half=Math.ceil(pts.length/2);
+  const cell=q=>q?`<td class="num">${q.T.toFixed(2)}</td><td class="num">${q.sh.toFixed(4)}</td><td class="num">${q.Sx.toFixed(4)}</td><td class="num">${q.Sy.toFixed(4)}</td><td class="num">${q.Sv.toFixed(4)}</td><td class="num">${q.SdX.toFixed(2)}</td><td class="num">${q.SdY.toFixed(2)}</td>`:'<td></td><td></td><td></td><td></td><td></td><td></td><td></td>';
+  const hh='<th class="num">T [s]</th><th class="num">SaH [g]</th><th class="num">Sa X [g]</th><th class="num">Sa Y [g]</th><th class="num">Sa V [g]</th><th class="num">Sd X [cm]</th><th class="num">Sd Y [cm]</th>';
+  const ts=document.createElement('table'); ts.className='rpt-small';
+  let body=''; for(let i=0;i<half;i++) body+=`<tr>${cell(pts[i])}${cell(pts[i+half])}</tr>`;
+  ts.innerHTML=`<thead><tr>${hh}${hh}</tr></thead><tbody>${body}</tbody>`;
+  const sec=addSec('Valores espectrales',ts); sec.classList.add('allow-break');
+  const ft=document.createElement('div'); ft.className='rpt-foot'; ft.innerHTML=notesHtml(p); ct.appendChild(ft);
+}
+v('pdfBtn').addEventListener('click',()=>{ buildReport(); window.print(); });
+
+render();
+</script>
+</body>
+</html>
