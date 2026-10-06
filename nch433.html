@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Espectros NCh433 | fddlebel</title>
+<style>
+:root{
+  --paper:#ffffff;
+  --panel:#ffffff;
+  --ink:#000000;
+  --ink-soft:#000000;
+  --line:#9a9a9a;
+  --line-strong:#7a7a7a;
+  --accent:#000000;
+  --accent-soft:#e9e9e9;
+  --input-bg:#ffffff;
+  --input-border:#7a7a7a;
+  --suction:#2f6690;
+  --pressure:#c1542c;
+  --focus:#4a4d24;
+  --grid:#d4d4d4;
+  --mono:'Arial Narrow',Arial,Helvetica,sans-serif;
+  --sans:'Arial Narrow',Arial,Helvetica,sans-serif;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--sans);padding:20px 16px 48px;
+  padding-inline:max(16px,calc((100vw - 1180px)/2));
+}
+h1,h2,h3{text-wrap:balance;font-family:var(--sans);margin:0;color:var(--ink);}
+.app-header{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px;}
+.app-header h1{font-size:22px;font-weight:700;letter-spacing:.2px;}
+.app-header .clause{font-family:var(--mono);font-size:12px;color:var(--ink);}
+.grid{display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start;}
+@media (max-width:860px){.grid{grid-template-columns:1fr;}}
+.panel{
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  padding:16px;
+}
+.panel + .panel{margin-top:14px;}
+.section-title{
+  font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--ink);margin:0 0 12px;
+}
+.seg{display:flex;border:1px solid var(--line-strong);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+.seg button{
+  flex:1;padding:9px 6px;border:none;background:var(--panel);color:var(--ink);
+  font-family:var(--sans);font-weight:600;font-size:13px;cursor:pointer;
+}
+.seg button.active{background:var(--accent);color:#fff;}
+.field{margin-bottom:11px;}
+.field label{display:block;font-size:12px;color:var(--ink);margin-bottom:4px;}
+.field label .unit{font-family:var(--mono);color:var(--ink);opacity:.75;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+input[type=number],input[type=text],select{
+  width:100%;font-family:var(--mono);font-size:13.5px;color:var(--ink);
+  background:var(--input-bg);border:1px solid var(--input-border);border-radius:4px;
+  padding:7px 8px;font-variant-numeric:tabular-nums;
+}
+input[type=number]:focus,select:focus,button:focus-visible{
+  outline:2px solid var(--focus);outline-offset:1px;
+}
+details summary{cursor:pointer;font-size:13px;color:var(--ink);font-weight:700;margin-top:4px;user-select:none;}
+details[open] summary{margin-bottom:10px;}
+.stat-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px;}
+@media (max-width:640px){.stat-row{grid-template-columns:repeat(2,1fr);}}
+.stat{
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  padding:10px 12px;
+}
+.stat .k{font-size:11px;color:var(--ink);text-transform:uppercase;letter-spacing:.04em;}
+.stat .v{font-family:var(--mono);font-size:17px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums;color:var(--ink);}
+.tabs{display:flex;gap:6px;margin-bottom:14px;}
+.tabs button{
+  font-family:var(--sans);font-weight:600;font-size:13px;color:var(--ink);
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  padding:7px 14px;cursor:pointer;
+}
+.tabs button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.diagram-wrap{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:14px;margin-bottom:14px;}
+.legend{display:flex;gap:18px;align-items:center;font-size:12px;color:var(--ink);margin-top:8px;flex-wrap:wrap;}
+.legend .sw{width:12px;height:12px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:-2px;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th,td{text-align:left;padding:6px 8px;border:1px solid var(--line);font-variant-numeric:tabular-nums;color:var(--ink);}
+th{font-size:11px;text-transform:none;letter-spacing:.03em;color:var(--ink);font-weight:700;background:var(--accent-soft);}
+td.num,th.num{font-family:var(--mono);text-align:right;}
+td.zone{font-family:var(--mono);font-weight:700;}
+.tablewrap{overflow-x:auto;}
+.warn{
+  background:var(--accent-soft);border:1px solid var(--line-strong);color:var(--ink);
+  border-radius:4px;padding:8px 10px;font-size:12px;margin-bottom:12px;
+}
+.note{font-size:11.5px;color:var(--ink);margin-top:10px;line-height:1.5;}
+svg text{font-family:var(--mono);fill:var(--ink);}
+
+#printReport{display:none;}
+.rpt-header{margin-bottom:14px;}
+.rpt-header h1{font-size:20px;font-weight:700;}
+.rpt-header .rpt-sub{font-family:var(--mono);font-size:11.5px;margin-top:2px;}
+.rpt-params{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:11.5px;}
+.rpt-params td{border:1px solid var(--line);padding:5px 8px;}
+.rpt-params td.k{font-weight:700;width:32%;background:var(--accent-soft);}
+.rpt-section{margin-bottom:16px;page-break-inside:avoid;break-inside:avoid;}
+.rpt-section h2{page-break-after:avoid;break-after:avoid;}
+.rpt-section h2{font-size:14px;font-weight:700;margin-bottom:8px;border-bottom:1px solid var(--line);padding-bottom:4px;}
+.rpt-section table{margin-top:8px;}
+.rpt-foot{font-size:10px;margin-top:18px;border-top:1px solid var(--line);padding-top:6px;}
+
+@media print{
+  body *{visibility:hidden;}
+  #printReport, #printReport *{visibility:visible;}
+  #printReport{display:block;position:absolute;left:0;top:0;width:100%;}
+  @page{margin:14mm;}
+}
+.btn{font-family:var(--sans);font-weight:700;font-size:13px;color:#fff;background:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:8px 16px;cursor:pointer;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.intable{margin-bottom:10px;}
+.intable td{padding:4px 6px;font-size:12px;}
+.intable td:first-child{white-space:nowrap;}
+.intable input.in{padding:5px 6px;font-size:13px;text-align:right;}
+.diagram-wrap .section-title{margin-bottom:6px;}
+#warnBox .warn{margin-bottom:10px;}
+.rpt-small{font-size:10.5px;}
+.rpt-small td,.rpt-small th{padding:2px 6px;}
+.rpt-section.allow-break{page-break-inside:auto;break-inside:auto;}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1><a href="index.html" style="color:inherit;text-decoration:none;font-weight:400;">fddlebel</a> / Espectros de diseño sísmico</h1>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <div class="clause">NCh433:2026, 5.9.5, 6.2.3, 6.3.4, 6.3.6, Tablas 5 a 10</div>
+    <button class="btn" id="txtBtn">Exportar TXT</button>
+    <button class="btn" id="pdfBtn">Exportar PDF</button>
+  </div>
+</div>
+
+<div id="printReport"></div>
+
+<div class="grid">
+  <div>
+    <div class="panel">
+      <div class="field"><label>Proyecto</label><input type="text" id="proj" value=""></div>
+      <div class="section-title" style="margin-top:12px">Sitio</div>
+      <div class="row2">
+        <div class="field"><label>Zona sísmica (Tabla 7)</label>
+          <select id="zona">
+            <option value="0.2">1 (A0 = 0,20 g)</option>
+            <option value="0.3">2 (A0 = 0,30 g)</option>
+            <option value="0.4" selected>3 (A0 = 0,40 g)</option>
+          </select>
+        </div>
+        <div class="field"><label>Tipo de suelo (Tabla 8)</label>
+          <select id="suelo">
+            <option>A</option><option>B</option><option selected>C</option><option>D</option><option>E</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>Categoría del edificio (Tabla 6)</label>
+        <select id="cat">
+          <option value="0.6">I (I = 0,6)</option>
+          <option value="1.0" selected>II (I = 1,0)</option>
+          <option value="1.2">III (I = 1,2)</option>
+          <option value="1.2">IV (I = 1,2)</option>
+        </select>
+      </div>
+
+      <div class="section-title" style="margin-top:14px">Estructura</div>
+      <div class="field"><label>Sistema estructural (Tabla 5)</label><select id="sys"></select></div>
+      <div class="row3">
+        <div class="field"><label>R</label><input type="number" id="R" step="0.5"></div>
+        <div class="field"><label>R<sub>0</sub></label><input type="number" id="R0" step="0.5"></div>
+        <div class="field"><label>D<sub>cm</sub> máx. <span class="unit">[‰h]</span></label><input type="number" id="drift" step="0.1"></div>
+      </div>
+      <div class="field"><label>Rigidez del modelo, T<sub>ag</sub></label>
+        <select id="rig">
+          <option value="1.5" selected>Elástica, T<sub>ag</sub> = 1,5 T*</option>
+          <option value="1">Agrietada, T<sub>ag</sub> = T*</option>
+        </select>
+      </div>
+
+      <div class="section-title" style="margin-top:14px">Datos del modelo</div>
+      <table class="intable">
+        <thead><tr><th></th><th class="num">Dir. X</th><th class="num">Dir. Y</th></tr></thead>
+        <tbody>
+          <tr><td>P, peso sísmico [kN]</td><td><input type="number" id="Px" value="129754" step="100" class="in"></td><td><input type="number" id="Py" value="129754" step="100" class="in"></td></tr>
+          <tr><td>T*, período [s]</td><td><input type="number" id="Tx" value="0.628" step="0.001" class="in"></td><td><input type="number" id="Ty" value="0.768" step="0.001" class="in"></td></tr>
+          <tr><td>Q<sub>e</sub> modal con S<sub>ae</sub> [kN]</td><td><input type="number" id="Vx" value="60598" step="10" class="in"></td><td><input type="number" id="Vy" value="40834" step="10" class="in"></td></tr>
+        </tbody>
+      </table>
+
+      <details>
+        <summary>Parámetros avanzados</summary>
+        <div class="row2">
+          <div class="field"><label>T máx. espectro <span class="unit">[s]</span></label><input type="number" id="tmax" value="5" step="0.5"></div>
+          <div class="field"><label>ΔT <span class="unit">[s]</span></label><input type="number" id="dt" value="0.01" step="0.005"></div>
+        </div>
+        <div class="field"><label>Factor de mayoración E</label><input type="number" id="fE" value="1.4" step="0.1"></div>
+      </details>
+    </div>
+    <div class="panel">
+      <div class="section-title">Notas</div>
+      <div class="note" id="notes"></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="stat-row" id="statRow"></div>
+    <div id="warnBox"></div>
+
+    <div class="diagram-wrap">
+      <div class="section-title">Espectro de pseudo-aceleraciones</div>
+      <svg id="chA" viewBox="0 0 720 380" width="100%" style="display:block;height:auto"></svg>
+    </div>
+    <div class="diagram-wrap">
+      <div class="section-title">Espectro elástico de desplazamientos</div>
+      <svg id="chD" viewBox="0 0 720 380" width="100%" style="display:block;height:auto"></svg>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">Resultados por dirección</div>
+      <div class="tablewrap"><table id="resTable"></table></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUELO = {
+  A:{S:0.90,T0:0.15,Tp:0.20,n:1.00,p:2.0},
+  B:{S:1.00,T0:0.30,Tp:0.35,n:1.33,p:1.5},
+  C:{S:1.05,T0:0.40,Tp:0.45,n:1.40,p:1.6},
+  D:{S:1.20,T0:0.75,Tp:0.85,n:1.80,p:1.0},
+  E:{S:1.30,T0:1.20,Tp:1.35,n:1.80,p:1.0},
+};
+const SYS = [
+  ['Acero, marcos corrientes (OMF)',3.5,3.5,2.5],
+  ['Acero, marcos intermedios (IMF)',5,6,2.5],
+  ['Acero, marcos especiales (SMF)',7,11,2.5],
+  ['Acero, marco de vigas enrejadas (STMF)',6,10,2.5],
+  ['Acero, marcos conformados en frío apernados',3.5,3,2.5],
+  ['HA, marcos especiales vaciados en sitio',7,11,2.0],
+  ['HA, marcos especiales con prefabricados no sismorresistentes',7,11,2.0],
+  ['HA, marcos especiales prefabricados, uniones dúctiles',7,11,2.0],
+  ['HA, marcos especiales prefabricados, uniones secas',5,6,2.0],
+  ['Acero, marcos concéntricos corrientes (OCBF)',3,3,2.5],
+  ['Acero, marcos concéntricos especiales (SCBF)',5.5,8,2.5],
+  ['Acero, marcos excéntricos (EBF)',6,10,2.5],
+  ['Muros conformados en frío, diagonales o placas (S240)',3,4,2.0],
+  ['Muros conformados en frío, placas madera o acero (S400)',5.5,7,2.0],
+  ['Muros conformados en frío, diagonales (S400)',4,5,2.0],
+  ['HA, muros especiales vaciados en sitio',7,11,2.0],
+  ['HA, muros especiales con prefabricados no sismorresistentes',7,11,2.0],
+  ['HA, muros especiales prefabricados, uniones dúctiles',7,11,2.0],
+  ['HA, muros especiales prefabricados, uniones secas',5,6,2.0],
+  ['HA, muros intermedios prefabricados, uniones dúctiles',4,4,2.0],
+  ['HA, muros ordinarios vaciados en sitio',4,4,2.0],
+  ['HA, muros ordinarios prefabricados',3,3,2.0],
+  ['HA y albañilería confinada, cumple criterio A',6,9,2.0],
+  ['HA y albañilería confinada, no cumple criterio A',4,4,2.0],
+  ['Albañilería confinada',4,4,2.0],
+  ['Albañilería armada, huecos llenos',4,4,2.0],
+  ['Albañilería armada, rejilla o huecos sin llenar',3,3,2.0],
+  ['Madera, muros y sistemas arriostrados',5.5,7,2.0],
+  ['Madera, marco plataforma',6.5,7,2.5],
+  ['Madera, CLT',2,2,2.0],
+];
+const v = id=>document.getElementById(id);
+const sel = v('sys');
+SYS.forEach((s,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=s[0]; sel.appendChild(o); });
+sel.value = 15;
+function applySys(){ const s=SYS[sel.value]; v('R').value=s[1]; v('R0').value=s[2]; v('drift').value=s[3]; }
+applySys();
+
+function alpha(T, s){ return (1+4.5*Math.pow(T/s.T0,s.p))/(1+Math.pow(T/s.T0,3)); }
+function cdStar(T, soil){
+  if(soil==='A') return T<=0.23?1:T<=2.52?-0.055*T*T+0.36*T+0.92:0.08*T*T-0.9*T+3.24;
+  if(soil==='B') return T<=0.47?1:T<=2.02?0.95*T+0.55:0.065*T*T-0.75*T+3.72;
+  if(soil==='C') return T<=0.65?1:T<=2.02?0.57*T+0.63:0.055*T*T-0.63*T+2.83;
+  if(soil==='D') return T<=0.90?1:T<=1.75?1.1*T:1.93;
+  return NaN;
+}
+function cmaxCoef(R){
+  const tb={2:0.90,3:0.60,4:0.55,5.5:0.40};
+  if(R>=6) return 0.35;
+  if(tb[R]!==undefined) return tb[R];
+  return 2.5/(R+0.8);
+}
+function num(id,def){ const x=parseFloat(v(id).value); return isFinite(x)?x:def; }
+
+function readP(){
+  const soil=v('suelo').value;
+  return {
+    proj:v('proj').value.trim(),
+    A0:parseFloat(v('zona').value), zonaTxt:v('zona').options[v('zona').selectedIndex].text,
+    soil, s:SUELO[soil],
+    I:parseFloat(v('cat').value), catTxt:v('cat').options[v('cat').selectedIndex].text,
+    sysTxt:SYS[sel.value][0],
+    R:num('R',1), R0:num('R0',1), drift:num('drift',2),
+    kag:parseFloat(v('rig').value), rigTxt:v('rig').value==='1.5'?'Elástica':'Agrietada',
+    dir:{
+      X:{P:num('Px',0), T:Math.max(num('Tx',0.01),0.001), V:parseFloat(v('Vx').value)},
+      Y:{P:num('Py',0), T:Math.max(num('Ty',0.01),0.001), V:parseFloat(v('Vy').value)},
+    },
+    tmax:Math.max(num('tmax',5),0.5), dt:Math.max(num('dt',0.01),0.001), fE:num('fE',1.4),
+  };
+}
+
+function compute(p){
+  const s=p.s, out={};
+  ['X','Y'].forEach(k=>{
+    const d=p.dir[k], T=d.T;
+    const a=alpha(T,s);
+    const Sae=p.I*s.S*p.A0*a;
+    const Rs=1+T/(0.10*s.T0+T/p.R0);
+    const Ccalc=2.75*s.S*p.A0/p.R*Math.pow(s.Tp/T,s.n);
+    const Cmin=p.A0*s.S/6;
+    const Cmax=cmaxCoef(p.R)*s.S*p.A0;
+    const C=Math.min(Math.max(Ccalc,Cmin),Cmax);
+    const Qst=C*p.I*d.P;
+    const Qmin=p.I*s.S*p.A0*d.P/6;
+    const Qmax=p.I*Cmax*d.P;
+    const hasV=isFinite(d.V)&&d.V>0;
+    const Q0=hasV?d.V/Rs:NaN;
+    let Rss=Rs, ctrl='R*';
+    if(hasV){ if(Q0<Qmin){Rss=Q0/Qmin*Rs; ctrl='Q mín.';} else if(Q0>Qmax){Rss=Q0/Qmax*Rs; ctrl='Q máx.';} }
+    const Tag=p.kag*T;
+    const aag=alpha(Tag,s);
+    const cd=cdStar(Tag,p.soil);
+    const Sde=Tag*Tag/(4*Math.PI*Math.PI)*aag*p.A0*981*cd;
+    const du=1.3*p.I*Sde;
+    out[k]={T,a,Sae,Rs,Ccalc,Cmin,Cmax,C,Qst,Qmin,Qmax,hasV,Q0,Rss,ctrl,Tag,aag,cd,Sde,du,P:d.P,V:d.V,Qd:hasV?d.V/Rss:NaN};
+  });
+  return out;
+}
+
+function spectrum(p, r){
+  const rows=[], n=Math.round(p.tmax/p.dt);
+  for(let i=0;i<=n;i++){
+    const T=+(i*p.dt).toFixed(6);
+    const a=alpha(T,p.s);
+    const Sae=p.I*p.s.S*p.A0*a;
+    const cd=cdStar(T,p.soil);
+    const Sde=T*T/(4*Math.PI*Math.PI)*a*p.A0*981*cd;
+    rows.push({T,a,Sae,Sx:Sae/r.X.Rss,Sy:Sae/r.Y.Rss,cd,Sde});
+  }
+  return rows;
+}
+
+const svgNS='http://www.w3.org/2000/svg';
+function el(tag,attrs){ const n=document.createElementNS(svgNS,tag); for(const k in attrs) n.setAttribute(k,attrs[k]); return n; }
+function tx(x,y,s,o){ const t=el('text',Object.assign({x,y,'font-size':11,'text-anchor':'middle',fill:'var(--ink)'},o||{})); t.textContent=s; return t; }
+function niceStep(range,count){ const raw=range/count, m=Math.pow(10,Math.floor(Math.log10(raw))), f=raw/m; return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*m; }
+
+function drawChart(svg, cfg){
+  svg.innerHTML='';
+  const W=720,H=380,L=64,R=20,T=18,B=48;
+  const xmax=cfg.xmax, ymaxRaw=Math.max(...cfg.series.flatMap(s=>s.pts.map(q=>q[1])).filter(isFinite),1e-6);
+  const ys=niceStep(ymaxRaw,6), ymax=Math.ceil(ymaxRaw*1.05/ys)*ys;
+  const xs=niceStep(xmax,10);
+  const X=x=>L+x/xmax*(W-L-R), Y=y=>H-B-y/ymax*(H-T-B);
+  for(let y=0;y<=ymax+1e-9;y+=ys){
+    svg.appendChild(el('line',{x1:L,x2:W-R,y1:Y(y),y2:Y(y),stroke:'var(--grid)','stroke-width':0.6}));
+    svg.appendChild(tx(L-6,Y(y)+4,y.toFixed(cfg.ydec),{'text-anchor':'end'}));
+  }
+  for(let x=0;x<=xmax+1e-9;x+=xs){
+    svg.appendChild(el('line',{x1:X(x),x2:X(x),y1:T,y2:H-B,stroke:'var(--grid)','stroke-width':0.6}));
+    svg.appendChild(tx(X(x),H-B+16,(+x.toFixed(2)).toString()));
+  }
+  svg.appendChild(el('rect',{x:L,y:T,width:W-L-R,height:H-T-B,fill:'none',stroke:'var(--line-strong)','stroke-width':1}));
+  svg.appendChild(tx((L+W-R)/2,H-10,cfg.xlabel,{'font-weight':700}));
+  const yl=tx(14,(T+H-B)/2,cfg.ylabel,{'font-weight':700}); yl.setAttribute('transform',`rotate(-90 14 ${(T+H-B)/2})`); svg.appendChild(yl);
+  cfg.series.forEach(s=>{
+    const d=s.pts.filter(q=>isFinite(q[1])).map((q,i)=>(i?'L':'M')+X(q[0]).toFixed(1)+','+Y(q[1]).toFixed(1)).join(' ');
+    svg.appendChild(el('path',{d,fill:'none',stroke:'var(--ink)','stroke-width':s.w||1.4,'stroke-dasharray':s.dash||'none'}));
+  });
+  (cfg.marks||[]).forEach(m=>{
+    if(!isFinite(m.y)||m.x>xmax) return;
+    svg.appendChild(el('line',{x1:X(m.x),x2:X(m.x),y1:Y(0),y2:Y(m.y),stroke:'var(--ink)','stroke-width':0.6,'stroke-dasharray':'2,2'}));
+    svg.appendChild(el('circle',{cx:X(m.x),cy:Y(m.y),r:3,fill:'var(--paper)',stroke:'var(--ink)','stroke-width':1.2}));
+    svg.appendChild(tx(X(m.x)+5,Y(m.y)-6,m.label,{'text-anchor':'start','font-size':10.5,'font-weight':700}));
+  });
+  const lg=el('g',{}); let ly=T+14;
+  cfg.series.forEach(s=>{
+    const lx=W-R-200;
+    lg.appendChild(el('rect',{x:lx-8,y:ly-11,width:204,height:17,fill:'var(--paper)'}));
+    lg.appendChild(el('line',{x1:lx,x2:lx+30,y1:ly-3,y2:ly-3,stroke:'var(--ink)','stroke-width':s.w||1.4,'stroke-dasharray':s.dash||'none'}));
+    lg.appendChild(tx(lx+38,ly+1,s.name,{'text-anchor':'start','font-size':11}));
+    ly+=17;
+  });
+  svg.appendChild(lg);
+}
+
+function charts(svgA, svgD, p, r, sp){
+  drawChart(svgA,{
+    xmax:p.tmax, xlabel:'T [s]', ylabel:'Sa [g]', ydec:2,
+    series:[
+      {name:'Sae, elástico', pts:sp.map(q=>[q.T,q.Sae]), w:1.8},
+      {name:`Sae/R** X (R** = ${r.X.Rss.toFixed(2)})`, pts:sp.map(q=>[q.T,q.Sx]), dash:'6,4'},
+      {name:`Sae/R** Y (R** = ${r.Y.Rss.toFixed(2)})`, pts:sp.map(q=>[q.T,q.Sy]), dash:'2,3'},
+    ],
+    marks:[{x:r.X.T,y:r.X.Sae,label:'T*x'},{x:r.Y.T,y:r.Y.Sae,label:'T*y'}],
+  });
+  drawChart(svgD,{
+    xmax:p.tmax, xlabel:'T [s]', ylabel:'Sde [cm]', ydec:0,
+    series:[{name:'Sde, 5% amortiguamiento', pts:sp.map(q=>[q.T,q.Sde]), w:1.8}],
+    marks:[{x:r.X.Tag,y:r.X.Sde,label:'Tag x'},{x:r.Y.Tag,y:r.Y.Sde,label:'Tag y'}],
+  });
+}
+
+const f=(x,d)=>isFinite(x)?x.toFixed(d):'-';
+function resRows(p,r){
+  const X=r.X,Y=r.Y;
+  return [
+    ['P, peso sísmico','kN',f(X.P,0),f(Y.P,0)],
+    ['T*, período fundamental','s',f(X.T,3),f(Y.T,3)],
+    ['α(T*)','',f(X.a,3),f(Y.a,3)],
+    ['Sae(T*) = I·S·A0·α','g',f(X.Sae,3),f(Y.Sae,3)],
+    ['R* (Ec. 10)','',f(X.Rs,3),f(Y.Rs,3)],
+    ['C (Ec. 4)','',f(X.Ccalc,4),f(Y.Ccalc,4)],
+    ['C mín. = A0·S/6g','',f(X.Cmin,4),f(Y.Cmin,4)],
+    ['C máx. (Tabla 9)','',f(X.Cmax,4),f(Y.Cmax,4)],
+    ['C diseño','',f(X.C,4),f(Y.C,4)],
+    ['Q0 estático = C·I·P','kN',f(X.Qst,0),f(Y.Qst,0)],
+    ['Q mín. = I·S·A0·P/6g','kN',f(X.Qmin,0),f(Y.Qmin,0)],
+    ['Q máx. = I·Cmáx·P','kN',f(X.Qmax,0),f(Y.Qmax,0)],
+    ['Qe modal con Sae','kN',f(X.V,0),f(Y.V,0)],
+    ['Q0 modal = Qe/R*','kN',f(X.Q0,0),f(Y.Q0,0)],
+    ['Q0/P','%',f(X.Q0/X.P*100,2),f(Y.Q0/Y.P*100,2)],
+    ['Control','',X.hasV?X.ctrl:'-',Y.hasV?Y.ctrl:'-'],
+    ['R** de diseño','',f(X.Rss,3),f(Y.Rss,3)],
+    ['Q0 de diseño = Qe/R**','kN',f(X.Qd,0),f(Y.Qd,0)],
+    ['Factor espectro 1/R**','',f(1/X.Rss,4),f(1/Y.Rss,4)],
+    [`Factor espectro ${p.fE}/R**`,'',f(p.fE/X.Rss,4),f(p.fE/Y.Rss,4)],
+    ['Factor ETABS g/R** (Sae en g)','m/s²',f(9.81/X.Rss,4),f(9.81/Y.Rss,4)],
+    ['Tag','s',f(X.Tag,3),f(Y.Tag,3)],
+    ['α(Tag)','',f(X.aag,3),f(Y.aag,3)],
+    ['Cd*(Tag) (Tabla 10)','',f(X.cd,3),f(Y.cd,3)],
+    ['Sde(Tag) (Ec. 11)','cm',f(X.Sde,2),f(Y.Sde,2)],
+    ['δu = 1,3·I·Sde(Tag) (Ec. 2)','cm',f(X.du,2),f(Y.du,2)],
+    ['Dcm máx. (Tabla 5)','‰h',f(p.drift,1),f(p.drift,1)],
+  ];
+}
+function renderRes(t,p,r){
+  t.innerHTML=`<thead><tr><th>Parámetro</th><th>Unidad</th><th class="num">Dir. X</th><th class="num">Dir. Y</th></tr></thead><tbody>${
+    resRows(p,r).map(q=>`<tr><td>${q[0]}</td><td>${q[1]}</td><td class="num">${q[2]}</td><td class="num">${q[3]}</td></tr>`).join('')}</tbody>`;
+}
+
+function notesHtml(p){
+  const s=p.s;
+  return `Suelo ${p.soil}: S=${s.S}, T0=${s.T0} s, T'=${s.Tp} s, n=${s.n}, p=${s.p}. A0=${p.A0} g, I=${p.I}.<br>
+  Sa = I·S·A0·α/R* (Ec. 8). α = (1+4,5(Tn/T0)^p)/(1+(Tn/T0)³) (Ec. 9). R* = 1+T*/(0,10T0+T*/R0) (Ec. 10).<br>
+  Qe es el corte basal del análisis modal con el espectro elástico Sae. Si Q0 = Qe/R* queda bajo Q mín. o sobre Q máx. (6.3.6), R** ajusta el espectro. Sin Qe se usa R** = R*.<br>
+  Sde = Tn²/(4π²)·α·A0·Cd* con A0 en cm/s² (Ec. 11). δu = 1,3·I·Sde(Tag) (Ec. 2).<br>
+  TXT: T [s] y Sae [g] en dos columnas separadas por tabulación, sin encabezado.`;
+}
+
+function render(){
+  const p=readP(), r=compute(p), sp=spectrum(p,r);
+  const warn=[];
+  if(p.soil==='E') warn.push('Suelo E: Sde requiere estudio especial (6.3.4.4). Cd* no definido.');
+  if(Math.max(r.X.Tag,r.Y.Tag)>5) warn.push('Tag mayor que 5 s, fuera del rango de Tabla 10.');
+  v('warnBox').innerHTML=warn.map(w=>`<div class="warn">${w}</div>`).join('');
+  const stats=[
+    {k:'Sae máx.',v:f(Math.max(...sp.map(q=>q.Sae)),3)+' g'},
+    {k:'R** X / Y',v:f(r.X.Rss,2)+' / '+f(r.Y.Rss,2)},
+    {k:'Q0/P X / Y',v:(r.X.hasV?f(r.X.Qd/r.X.P*100,1):'-')+' / '+(r.Y.hasV?f(r.Y.Qd/r.Y.P*100,1):'-')+' %'},
+    {k:'Sde X / Y',v:f(r.X.Sde,1)+' / '+f(r.Y.Sde,1)+' cm'},
+    {k:'δu X / Y',v:f(r.X.du,1)+' / '+f(r.Y.du,1)+' cm'},
+  ];
+  v('statRow').innerHTML=stats.map(s=>`<div class="stat"><div class="k">${s.k}</div><div class="v">${s.v}</div></div>`).join('');
+  charts(v('chA'),v('chD'),p,r,sp);
+  renderRes(v('resTable'),p,r);
+  v('notes').innerHTML=notesHtml(p);
+  return {p,r,sp};
+}
+
+sel.addEventListener('change',()=>{ applySys(); render(); });
+document.querySelectorAll('input,select').forEach(i=>{ if(i!==sel){ i.addEventListener('input',render); i.addEventListener('change',render); } });
+
+function fname(ext){ const p=v('proj').value.trim().replace(/[^\w\-]+/g,'_'); return (p?p+'_':'')+'espectro_elastico_NCh433.'+ext; }
+v('txtBtn').addEventListener('click',()=>{
+  const {sp}=render();
+  const txt=sp.map(q=>q.T.toFixed(3)+'\t'+q.Sae.toFixed(5)).join('\r\n')+'\r\n';
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));
+  a.download=fname('txt'); document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500);
+});
+
+function buildReport(){
+  const {p,r,sp}=render();
+  const ct=v('printReport'); ct.innerHTML='';
+  const hd=document.createElement('div'); hd.className='rpt-header';
+  hd.innerHTML=`<h1>Espectros de diseño sísmico, NCh433:2026</h1><div class="rpt-sub">${p.proj?p.proj+', ':''}${new Date().toLocaleDateString('es-CL')}</div>`;
+  ct.appendChild(hd);
+  const pt=document.createElement('table'); pt.className='rpt-params';
+  pt.innerHTML=`
+    <tr><td class="k">Zona sísmica</td><td>${p.zonaTxt}</td><td class="k">Tipo de suelo</td><td>${p.soil} (S=${p.s.S}, T0=${p.s.T0} s, T'=${p.s.Tp} s, n=${p.s.n}, p=${p.s.p})</td></tr>
+    <tr><td class="k">Categoría</td><td>${p.catTxt}</td><td class="k">Sistema estructural</td><td>${p.sysTxt}</td></tr>
+    <tr><td class="k">R / R0</td><td>${p.R} / ${p.R0}</td><td class="k">Rigidez del modelo</td><td>${p.rigTxt}, Tag = ${p.kag} T*</td></tr>`;
+  ct.appendChild(pt);
+  const addSec=(title,node)=>{ const s=document.createElement('div'); s.className='rpt-section'; s.innerHTML=`<h2>${title}</h2>`; s.appendChild(node); ct.appendChild(s); return s; };
+  const mk=()=>{ const s=document.createElementNS(svgNS,'svg'); s.setAttribute('viewBox','0 0 720 380'); s.setAttribute('style','width:100%;max-width:640px;height:auto;display:block;margin:0 auto;'); return s; };
+  const sA=mk(), sD=mk(); charts(sA,sD,p,r,sp);
+  addSec('Espectro de pseudo-aceleraciones',sA);
+  addSec('Espectro elástico de desplazamientos',sD);
+  const tr=document.createElement('table'); renderRes(tr,p,r); addSec('Resultados por dirección',tr);
+  const step=Math.max(1,Math.round(0.1/p.dt));
+  const pts=sp.filter((q,i)=>i%step===0);
+  const half=Math.ceil(pts.length/2);
+  const cell=q=>q?`<td class="num">${q.T.toFixed(2)}</td><td class="num">${q.Sae.toFixed(4)}</td><td class="num">${q.Sx.toFixed(4)}</td><td class="num">${q.Sy.toFixed(4)}</td><td class="num">${isFinite(q.Sde)?q.Sde.toFixed(2):'-'}</td>`:'<td></td><td></td><td></td><td></td><td></td>';
+  const hh='<th class="num">T [s]</th><th class="num">Sae [g]</th><th class="num">Sa X [g]</th><th class="num">Sa Y [g]</th><th class="num">Sde [cm]</th>';
+  const ts=document.createElement('table'); ts.className='rpt-small';
+  let body=''; for(let i=0;i<half;i++) body+=`<tr>${cell(pts[i])}${cell(pts[i+half])}</tr>`;
+  ts.innerHTML=`<thead><tr>${hh}${hh}</tr></thead><tbody>${body}</tbody>`;
+  const sec=addSec('Valores espectrales',ts); sec.classList.add('allow-break');
+  const ft=document.createElement('div'); ft.className='rpt-foot'; ft.innerHTML=notesHtml(p); ct.appendChild(ft);
+}
+v('pdfBtn').addEventListener('click',()=>{ buildReport(); window.print(); });
+
+render();
+</script>
+</body>
+</html>

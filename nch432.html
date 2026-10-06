@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zonas de Viento NCh432 | fddlebel</title>
+<style>
+:root{
+  --paper:#ffffff;
+  --panel:#ffffff;
+  --ink:#000000;
+  --ink-soft:#000000;
+  --line:#9a9a9a;
+  --line-strong:#7a7a7a;
+  --accent:#000000;
+  --accent-soft:#e9e9e9;
+  --input-bg:#ffffff;
+  --input-border:#7a7a7a;
+  --suction:#2f6690;
+  --pressure:#c1542c;
+  --focus:#4a4d24;
+  --mono:'Arial Narrow',Arial,Helvetica,sans-serif;
+  --sans:'Arial Narrow',Arial,Helvetica,sans-serif;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--sans);padding:20px 16px 48px;
+  padding-inline:max(16px,calc((100vw - 1180px)/2));
+}
+h1,h2,h3{text-wrap:balance;font-family:var(--sans);margin:0;color:var(--ink);}
+.app-header{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px;}
+.app-header h1{font-size:22px;font-weight:700;letter-spacing:.2px;}
+.app-header .clause{font-family:var(--mono);font-size:12px;color:var(--ink);}
+.grid{display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start;}
+@media (max-width:860px){.grid{grid-template-columns:1fr;}}
+.panel{
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  padding:16px;
+}
+.panel + .panel{margin-top:14px;}
+.section-title{
+  font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--ink);margin:0 0 12px;
+}
+.seg{display:flex;border:1px solid var(--line-strong);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+.seg button{
+  flex:1;padding:9px 6px;border:none;background:var(--panel);color:var(--ink);
+  font-family:var(--sans);font-weight:600;font-size:13px;cursor:pointer;
+}
+.seg button.active{background:var(--accent);color:#fff;}
+.field{margin-bottom:11px;}
+.field label{display:block;font-size:12px;color:var(--ink);margin-bottom:4px;}
+.field label .unit{font-family:var(--mono);color:var(--ink);opacity:.75;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+input[type=number],select{
+  width:100%;font-family:var(--mono);font-size:13.5px;color:var(--ink);
+  background:var(--input-bg);border:1px solid var(--input-border);border-radius:4px;
+  padding:7px 8px;font-variant-numeric:tabular-nums;
+}
+input[type=number]:focus,select:focus,button:focus-visible{
+  outline:2px solid var(--focus);outline-offset:1px;
+}
+details summary{cursor:pointer;font-size:13px;color:var(--ink);font-weight:700;margin-top:4px;user-select:none;}
+details[open] summary{margin-bottom:10px;}
+.stat-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px;}
+@media (max-width:640px){.stat-row{grid-template-columns:repeat(2,1fr);}}
+.stat{
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  padding:10px 12px;
+}
+.stat .k{font-size:11px;color:var(--ink);text-transform:uppercase;letter-spacing:.04em;}
+.stat .v{font-family:var(--mono);font-size:17px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums;color:var(--ink);}
+.tabs{display:flex;gap:6px;margin-bottom:14px;}
+.tabs button{
+  font-family:var(--sans);font-weight:600;font-size:13px;color:var(--ink);
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  padding:7px 14px;cursor:pointer;
+}
+.tabs button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.diagram-wrap{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:14px;margin-bottom:14px;}
+.legend{display:flex;gap:18px;align-items:center;font-size:12px;color:var(--ink);margin-top:8px;flex-wrap:wrap;}
+.legend .sw{width:12px;height:12px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:-2px;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th,td{text-align:left;padding:6px 8px;border:1px solid var(--line);font-variant-numeric:tabular-nums;color:var(--ink);}
+th{font-size:11px;text-transform:none;letter-spacing:.03em;color:var(--ink);font-weight:700;background:var(--accent-soft);}
+td.num,th.num{font-family:var(--mono);text-align:right;}
+td.zone{font-family:var(--mono);font-weight:700;}
+.tablewrap{overflow-x:auto;}
+.warn{
+  background:var(--accent-soft);border:1px solid var(--line-strong);color:var(--ink);
+  border-radius:4px;padding:8px 10px;font-size:12px;margin-bottom:12px;
+}
+.note{font-size:11.5px;color:var(--ink);margin-top:10px;line-height:1.5;}
+svg text{font-family:var(--mono);fill:var(--ink);}
+
+#printReport{display:none;}
+.rpt-header{margin-bottom:14px;}
+.rpt-header h1{font-size:20px;font-weight:700;}
+.rpt-header .rpt-sub{font-family:var(--mono);font-size:11.5px;margin-top:2px;}
+.rpt-params{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:11.5px;}
+.rpt-params td{border:1px solid var(--line);padding:5px 8px;}
+.rpt-params td.k{font-weight:700;width:32%;background:var(--accent-soft);}
+.rpt-section{margin-bottom:16px;page-break-inside:avoid;break-inside:avoid;}
+.rpt-section h2{page-break-after:avoid;break-after:avoid;}
+.rpt-section h2{font-size:14px;font-weight:700;margin-bottom:8px;border-bottom:1px solid var(--line);padding-bottom:4px;}
+.rpt-section table{margin-top:8px;}
+.rpt-foot{font-size:10px;margin-top:18px;border-top:1px solid var(--line);padding-top:6px;}
+
+@media print{
+  body *{visibility:hidden;}
+  #printReport, #printReport *{visibility:visible;}
+  #printReport{display:block;position:absolute;left:0;top:0;width:100%;}
+  @page{margin:14mm;}
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1><a href="index.html" style="color:inherit;text-decoration:none;font-weight:400;">fddlebel</a> / Zonas de presión de viento</h1>
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+    <div class="clause">NCh432:2025, cláusula 6, Figura 4, Tablas 1 a 7</div>
+    <button id="exportPdfBtn" style="font-family:var(--sans);font-weight:700;font-size:13px;color:#fff;background:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:8px 16px;cursor:pointer;">Exportar PDF</button>
+  </div>
+</div>
+
+<div id="printReport"></div>
+
+<div class="grid">
+  <div>
+    <div class="panel">
+      <div class="section-title">Tipo de techo</div>
+      <div class="seg" id="roofSeg">
+        <button data-roof="duo" class="active">Dos aguas</button>
+        <button data-roof="mono">Pendiente única</button>
+      </div>
+
+      <div class="section-title">Geometría</div>
+      <div class="row2">
+        <div class="field"><label>h<sub>e</sub>, altura alero <span class="unit">[m]</span></label><input type="number" id="he" value="8" step="0.1"></div>
+        <div class="field"><label>θ, pendiente techo <span class="unit">[°]</span></label><input type="number" id="theta" value="15" step="0.1"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>d, dimensión <span class="unit">[m] (viento 0°)</span></label><input type="number" id="d" value="30" step="0.5"></div>
+        <div class="field"><label>b, dimensión <span class="unit">[m] (transversal)</span></label><input type="number" id="b" value="60" step="0.5"></div>
+      </div>
+
+      <div class="section-title" style="margin-top:14px">Viento</div>
+      <div class="row2">
+        <div class="field"><label>Zona (Tabla 1)</label>
+          <select id="zona">
+            <option value="27">I-A</option>
+            <option value="30">I-B</option>
+            <option value="27">II-A</option>
+            <option value="35">II-B</option>
+            <option value="34" selected>III-A</option>
+            <option value="35">III-B</option>
+            <option value="37">IV-A</option>
+            <option value="40">IV-B</option>
+            <option value="40">V</option>
+            <option value="44">VI</option>
+            <option value="32">NC1</option>
+            <option value="50">NC2</option>
+            <option value="60">NC3</option>
+          </select>
+        </div>
+        <div class="field"><label>V, velocidad básica <span class="unit">[m/s]</span></label><input type="number" id="V" value="34" step="0.1"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Exposición</label>
+          <select id="exp">
+            <option value="B">B, urbano/boscoso</option>
+            <option value="C" selected>C, terreno abierto</option>
+            <option value="D">D, plano/costa</option>
+          </select>
+        </div>
+        <div class="field"><label>Categoría ocupación</label>
+          <select id="cat">
+            <option value="0.87">I (I=0,87)</option>
+            <option value="1.00" selected>II (I=1,00)</option>
+            <option value="1.15">III (I=1,15)</option>
+            <option value="1.22">IV (I=1,22)</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>Cerramiento (Tabla 7)</label>
+        <select id="encl">
+          <option value="0.18">Cerrado (GC<sub>pi</sub> ±0,18)</option>
+          <option value="0.55">Parcialmente cerrado (±0,55)</option>
+          <option value="0.18p">Parcialmente abierto (±0,18)</option>
+        </select>
+      </div>
+
+      <details>
+        <summary>Parámetros avanzados</summary>
+        <div class="row2">
+          <div class="field"><label>K<sub>zt</sub>, topográfico</label><input type="number" id="kzt" value="1" step="0.01"></div>
+          <div class="field"><label>z<sub>e</sub>, elevación terreno <span class="unit">[msnm]</span></label><input type="number" id="ze" value="0" step="10"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>K<sub>d</sub>, direccionalidad</label><input type="number" id="kd" value="0.85" step="0.01"></div>
+          <div class="field"><label>G, efecto ráfaga</label><input type="number" id="G" value="0.85" step="0.01"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>K<sub>e</sub></label>
+            <select id="keMode">
+              <option value="calc">e<sup>-0,000119 z<sub>e</sub></sup></option>
+              <option value="one">1,00</option>
+            </select>
+          </div>
+          <div class="field"><label>R<sub>i</sub>, gran volumen</label><input type="number" id="ri" value="1" step="0.01"></div>
+        </div>
+      </details>
+    </div>
+    <div class="panel">
+      <div class="section-title">Notas</div>
+      <div class="note" id="notes"></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="stat-row" id="statRow"></div>
+
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+      <div class="tabs" id="dirTabs">
+        <button data-dir="0" class="active">Viento θ = 0°</button>
+        <button data-dir="90">Viento θ = 90°</button>
+      </div>
+      <div class="tabs" id="caseTabs">
+        <button data-case="0" class="active">Caso 1</button>
+        <button data-case="1">Caso 2</button>
+      </div>
+    </div>
+
+    <div class="diagram-wrap">
+      <div id="warnBox"></div>
+      <svg id="diagram" viewBox="0 0 720 360" width="100%" style="max-width:100%;height:auto;display:block"></svg>
+      <div class="legend">
+        <span><span class="sw" style="background:var(--suction)"></span>succión (C<sub>p</sub> &lt; 0)</span>
+        <span><span class="sw" style="background:var(--pressure)"></span>presión (C<sub>p</sub> &gt; 0)</span>
+        <span>valores p<sub>e</sub> = q·K<sub>d</sub>·G·C<sub>p</sub></span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">Presiones por zona</div>
+      <div class="tablewrap"><table id="zoneTable"></table></div>
+    </div>
+    <div class="panel">
+      <div class="section-title">Muro barlovento, q<sub>z</sub> en altura</div>
+      <div class="tablewrap"><table id="profTable"></table></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const EXPO = {
+  B:{alpha:7.5, zg:1000, zmin:10},
+  C:{alpha:9.8, zg:750, zmin:5},
+  D:{alpha:11.5, zg:590, zmin:2},
+};
+const ROOF_ANG = [10,15,20,25,30,35,45,60,80,90];
+const ROOF_HL = [0.25,0.5,1.0];
+const ROOF_NEG = [
+  [-0.7,-0.5,-0.3,-0.2,-0.2,0,0,0,0,0],
+  [-0.9,-0.7,-0.4,-0.3,-0.2,-0.2,0,0,0,0],
+  [-1.3,-1.0,-0.7,-0.5,-0.3,-0.2,0,0,0,0],
+];
+const ROOF_POS = [
+  [-0.18,0,0.2,0.3,0.3,0.4,0.4,0.6,0.8,0.8],
+  [-0.18,-0.18,0,0.2,0.2,0.3,0.4,0.6,0.8,0.8],
+  [-0.18,-0.18,-0.18,0,0.2,0.2,0.3,0.6,0.8,0.8],
+];
+const LEE_ANG = [10,15,20];
+const ROOF_LEE = [[-0.3,-0.5,-0.6],[-0.5,-0.5,-0.6],[-0.7,-0.6,-0.6]];
+const STRIP05 = [[0,0.5,-0.9],[0.5,1,-0.9],[1,2,-0.5],[2,Infinity,-0.3]];
+const STRIP10 = [[0,0.5,-1.3],[0.5,1,-0.7],[1,2,-0.7],[2,Infinity,-0.7]];
+const STRIP_LBL = ['0 a h/2','h/2 a h','h a 2h','> 2h'];
+
+function interp1(xs, ys, x){
+  const n = xs.length;
+  if(x<=xs[0]) return ys[0];
+  if(x>=xs[n-1]) return ys[n-1];
+  let i=0; while(i<n-2 && xs[i+1]<x) i++;
+  const f=(x-xs[i])/(xs[i+1]-xs[i]);
+  return ys[i] + f*(ys[i+1]-ys[i]);
+}
+function interp2(rows, angs, th, hL){
+  const v = rows.map(r=>interp1(angs, r, th));
+  return interp1(ROOF_HL, v, hL);
+}
+function Kz(z, exp){
+  const e = EXPO[exp];
+  const zz = Math.max(z, e.zmin);
+  return Math.min(2.41*Math.pow(zz/e.zg, 2/e.alpha), 2.41);
+}
+
+const state = { roof:'duo', dir:0, cs:0 };
+const v = id=>document.getElementById(id);
+
+function readParams(){
+  const encl = v('encl').value;
+  const ze = parseFloat(v('ze').value)||0;
+  return {
+    he: parseFloat(v('he').value)||0.01,
+    theta: parseFloat(v('theta').value)||0,
+    d: parseFloat(v('d').value)||0.01,
+    b: parseFloat(v('b').value)||0.01,
+    V: parseFloat(v('V').value)||0,
+    zona: v('zona').options[v('zona').selectedIndex].text,
+    exp: v('exp').value,
+    I: parseFloat(v('cat').value),
+    cat: v('cat').options[v('cat').selectedIndex].text,
+    gcpi: parseFloat(encl)*(parseFloat(v('ri').value)||1),
+    enclTxt: v('encl').options[v('encl').selectedIndex].text,
+    kzt: parseFloat(v('kzt').value)||1,
+    ze,
+    Ke: v('keMode').value==='one' ? 1 : Math.exp(-0.000119*ze),
+    Kd: parseFloat(v('kd').value)||0.85,
+    G: parseFloat(v('G').value)||0.85,
+    ri: parseFloat(v('ri').value)||1,
+  };
+}
+
+function roofHeight(p){
+  if(p.theta<=10) return p.he;
+  const t = Math.tan(p.theta*Math.PI/180);
+  return state.roof==='duo' ? p.he + p.d*t/4 : p.he + p.d*t/2;
+}
+function qz(p, z){ return 0.613*p.I*Kz(z,p.exp)*p.kzt*p.Ke*p.V*p.V; }
+
+function stripZones(h, L, hL){
+  const f = Math.min(Math.max((hL-0.5)/0.5,0),1);
+  const out=[];
+  STRIP05.forEach((s,i)=>{
+    const x0 = s[0]*h; if(x0>=L) return;
+    const x1 = Math.min(s[1]*h, L);
+    const c = s[2] + f*(STRIP10[i][2]-s[2]);
+    out.push({n:'R'+(i+1), desc:'Techo, '+STRIP_LBL[i], x0, x1, c1:c, c2:-0.18});
+  });
+  return out;
+}
+
+function buildZones(p){
+  const {roof, dir} = state;
+  const h = roofHeight(p);
+  const along = dir===90 ? p.b : p.d;
+  const cross = dir===90 ? p.d : p.b;
+  const hL = h/along;
+  const LB = along/cross;
+  const walls = {
+    BAR:{desc:'Muro barlovento', c:0.8, ww:true},
+    SOT:{desc:'Muro sotavento', c:interp1([1,2,4],[-0.5,-0.3,-0.2],LB)},
+    LAT:{desc:'Muro lateral', c:-0.7},
+  };
+  let mode, roofZ=[], warn=null;
+  const normal = dir!==90;
+  if(normal && p.theta>=10){
+    const neg = interp2(ROOF_NEG, ROOF_ANG, p.theta, hL);
+    const pos = interp2(ROOF_POS, ROOF_ANG, p.theta, hL);
+    const lee = interp2(ROOF_LEE, LEE_ANG, p.theta, hL);
+    const tb = {n:'TB', desc:'Techo barlovento', c1:neg, c2:pos};
+    const ts = {n:'TS', desc:'Techo sotavento', c1:lee, c2:lee};
+    if(roof==='duo'){ mode='duo'; roofZ=[tb,ts]; }
+    else if(dir===0){ mode='monoW'; roofZ=[tb]; }
+    else { mode='monoL'; roofZ=[ts]; }
+    if(p.theta>45 && roof==='duo') warn=null;
+  } else {
+    mode='strip';
+    roofZ = stripZones(h, along, hL);
+  }
+  if(p.theta>90) warn='θ fuera del rango de la Figura 4.';
+  return {walls, roofZ, mode, h, hL, LB, along, cross, warn};
+}
+
+function zoneColor(c){
+  const mag = Math.min(Math.abs(c)/1.4, 1);
+  const op = 0.18 + 0.62*mag;
+  return {fill: c<0?'var(--suction)':'var(--pressure)', opacity: c===0?0.06:op};
+}
+
+const svgNS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs){ const n=document.createElementNS(svgNS,tag); for(const k in attrs) n.setAttribute(k,attrs[k]); return n; }
+function textEl(x,y,str,size,anchor,weight){
+  const t = el('text',{x,y,'font-size':size||10,'text-anchor':anchor||'middle','font-weight':weight||500});
+  t.textContent=str; t.setAttribute('fill','var(--ink)'); return t;
+}
+let CALLOUTS=[];
+const FS_L=11, FS_V=9.5;
+function valStr(pe){ return pe.toFixed(3)+' kN/m²'; }
+function rectZone(x,y,w,h,c,label,pe){
+  const g=el('g',{}); const col=zoneColor(c);
+  g.appendChild(el('rect',{x,y,width:Math.max(w,0.01),height:Math.max(h,0.01),fill:col.fill,'fill-opacity':col.opacity,stroke:'var(--line-strong)','stroke-width':0.75}));
+  if(w>=70 && h>=26){
+    g.appendChild(textEl(x+w/2,y+h/2-2,label,FS_L,'middle',700));
+    g.appendChild(textEl(x+w/2,y+h/2+11,valStr(pe),FS_V,'middle',400));
+  } else CALLOUTS.push({ax:x+w/2, ay:h>60?y+h*0.3:y+h/2, label, we:pe});
+  return g;
+}
+function calloutText(x,y,anchor,label,pe){
+  const t=el('text',{x,y,'text-anchor':anchor,'dominant-baseline':'middle'}); t.setAttribute('fill','var(--ink)');
+  const t1=el('tspan',{'font-size':FS_L,'font-weight':700}); t1.textContent=label+' ';
+  const t2=el('tspan',{'font-size':FS_V,'font-weight':400}); t2.textContent=valStr(pe);
+  t.appendChild(t1); t.appendChild(t2); return t;
+}
+function placeCallouts(svg, items, colX, side, minY, maxY){
+  if(!items.length) return 0;
+  items.sort((p,q)=>p.ay-q.ay);
+  const gap=17; let y=minY;
+  items.forEach(it=>{ it.ly=Math.max(it.ay,y); y=it.ly+gap; });
+  if(items[items.length-1].ly-maxY>0){
+    for(let i=items.length-1;i>=0;i--){ const lim=i===items.length-1?maxY:items[i+1].ly-gap; items[i].ly=Math.min(items[i].ly,lim); }
+    for(let i=1;i<items.length;i++) items[i].ly=Math.max(items[i].ly,items[i-1].ly+gap);
+  }
+  items.forEach(it=>{
+    const ex = side==='L'?colX+4:colX-4;
+    svg.appendChild(el('polyline',{points:`${it.ax},${it.ay} ${ex},${it.ly}`,fill:'none',stroke:'var(--ink)','stroke-width':0.6}));
+    svg.appendChild(el('circle',{cx:it.ax,cy:it.ay,r:1.6,fill:'var(--ink)'}));
+    svg.appendChild(calloutText(colX,it.ly,side==='L'?'end':'start',it.label,it.we));
+  });
+  return items[items.length-1].ly;
+}
+
+function calc(p, z){
+  const qh = qz(p, z.h);
+  const f = p.Kd*p.G;
+  return {qh, Kh:Kz(z.h,p.exp), f};
+}
+
+function renderStats(p, z, c){
+  const stats = [
+    {k:'h, altura techo', v:z.h.toFixed(2)+' m'},
+    {k:'K_h', v:c.Kh.toFixed(3)},
+    {k:'q_h', v:(c.qh/1000).toFixed(3)+' kPa'},
+    {k:'q_h·K_d·G', v:(c.qh*c.f/1000).toFixed(3)+' kPa'},
+    {k:'h/L · L/B', v:z.hL.toFixed(2)+' · '+z.LB.toFixed(2)},
+  ];
+  v('statRow').innerHTML = stats.map(s=>`<div class="stat"><div class="k">${s.k}</div><div class="v">${s.v}</div></div>`).join('');
+}
+
+function drawDiagram(svg, p, z, cs, maxH){
+  svg.innerHTML=''; CALLOUTS=[];
+  const c = calc(p,z);
+  const {dir, roof} = state;
+  const pe = cp=>c.qh*c.f*cp/1000;
+  const W=720, L=130, R=130, T=52, B=36;
+  const scale = Math.min((W-L-R)/z.along, (maxH||440)/z.cross);
+  const bw=z.along*scale, bh=z.cross*scale;
+  const bx=L+((W-L-R)-bw)/2, by=T;
+
+  const defs=el('defs',{}); const aid='arrow-'+Math.random().toString(36).slice(2);
+  const mk=el('marker',{id:aid,markerWidth:8,markerHeight:8,refX:6,refY:3,orient:'auto'});
+  mk.appendChild(el('path',{d:'M0,0 L6,3 L0,6 Z',fill:'var(--accent)'})); defs.appendChild(mk); svg.appendChild(defs);
+  svg.appendChild(el('line',{x1:bx,y1:by-30,x2:bx+56,y2:by-30,stroke:'var(--accent)','stroke-width':2,'marker-end':`url(#${aid})`}));
+  svg.appendChild(textEl(bx+64,by-26,`Viento θ = ${dir}°`+(hasDual(z)?`, caso ${cs+1}`:''),FS_L,'start',700));
+
+  const stripT = Math.min(30, bh*0.12);
+  const lat = z.walls.LAT.c;
+  svg.appendChild(rectZone(bx,by,bw,stripT,lat,'LAT',pe(lat)));
+  svg.appendChild(rectZone(bx,by+bh-stripT,bw,stripT,lat,'LAT',pe(lat)));
+  const ry0=by+stripT, rh=bh-2*stripT;
+  const cv = zn=>cs===0?zn.c1:zn.c2;
+  if(roof==='duo' && dir===90 && p.theta>0){
+    const mid=ry0+rh/2;
+    svg.appendChild(el('line',{x1:bx,y1:mid,x2:bx+bw,y2:mid,stroke:'var(--ink-soft)','stroke-width':0.8,'stroke-dasharray':'3,3'}));
+  }
+
+  if(z.mode==='strip'){
+    z.roofZ.forEach(zn=>{ const x=bx+zn.x0*scale, w=(zn.x1-zn.x0)*scale; svg.appendChild(rectZone(x,ry0,w,rh,cv(zn),zn.n,pe(cv(zn)))); });
+  } else if(z.mode==='duo'){
+    const ridge=bx+bw/2;
+    svg.appendChild(el('line',{x1:ridge,y1:by,x2:ridge,y2:by+bh,stroke:'var(--ink-soft)','stroke-width':0.8,'stroke-dasharray':'3,3'}));
+    svg.appendChild(rectZone(bx,ry0,bw/2,rh,cv(z.roofZ[0]),'TB',pe(cv(z.roofZ[0]))));
+    svg.appendChild(rectZone(ridge,ry0,bw/2,rh,cv(z.roofZ[1]),'TS',pe(cv(z.roofZ[1]))));
+  } else {
+    const zn=z.roofZ[0];
+    svg.appendChild(rectZone(bx,ry0,bw,rh,cv(zn),zn.n,pe(cv(zn))));
+  }
+  svg.appendChild(el('rect',{x:bx,y:by,width:bw,height:bh,fill:'none',stroke:'var(--line-strong)','stroke-width':1.2}));
+  CALLOUTS.push({ax:bx, ay:by+bh/2, label:'BAR (z=h)', we:pe(0.8)});
+  CALLOUTS.push({ax:bx+bw, ay:by+bh/2, label:'SOT', we:pe(z.walls.SOT.c)});
+  const left=CALLOUTS.filter(k=>k.ax<=bx+bw/2), right=CALLOUTS.filter(k=>k.ax>bx+bw/2);
+  const l1=placeCallouts(svg,left,bx-22,'L',by+6,by+bh-6);
+  const l2=placeCallouts(svg,right,bx+bw+22,'R',by+6,by+bh-6);
+  if(roof==='mono' && dir!==90){
+    const lbl = dir===0?['alero bajo','alero alto']:['alero alto','alero bajo'];
+    svg.appendChild(textEl(bx,by+bh+18,lbl[0],FS_V,'start',400));
+    svg.appendChild(textEl(bx+bw,by+bh+18,lbl[1],FS_V,'end',400));
+  }
+  const Htot=Math.max(by+bh+B,l1+14,l2+14);
+  svg.setAttribute('viewBox',`0 0 ${W} ${Math.ceil(Htot)}`);
+  return c;
+}
+
+function hasDual(z){ return z.roofZ.some(r=>Math.abs(r.c1-r.c2)>1e-9); }
+
+function f3(x){ return x.toFixed(3); }
+function renderTable(t, p, z, c, only){
+  const k = c.f/1000, qi = c.qh*p.Kd*p.gcpi/1000;
+  const rows=[];
+  const add=(n,desc,cp,q)=>{ const e=q*k*cp; rows.push([n,desc,cp,q/1000,e,e-qi,e+qi]); };
+  Object.entries(z.walls).forEach(([n,w])=>add(n, w.desc+(w.ww?' (z=h)':''), w.c, c.qh));
+  const dual = hasDual(z) && only===undefined;
+  z.roofZ.forEach(r=>{
+    const dsc = r.desc+(r.x0!==undefined?` [${r.x0.toFixed(1)} a ${r.x1.toFixed(1)} m]`:'');
+    if(only!==undefined){ add(r.n, dsc, only===0?r.c1:r.c2, c.qh); return; }
+    add(r.n+(dual?' c1':''), dsc, r.c1, c.qh);
+    if(dual) add(r.n+' c2', r.desc, r.c2, c.qh);
+  });
+  t.innerHTML = `<thead><tr><th>Zona</th><th>Superficie</th><th class="num">C<sub>p</sub></th><th class="num">q [kPa]</th><th class="num">p<sub>e</sub> [kN/m²]</th><th class="num">p (+GC<sub>pi</sub>)</th><th class="num">p (−GC<sub>pi</sub>)</th></tr></thead>
+  <tbody>${rows.map(r=>`<tr><td class="zone">${r[0]}</td><td>${r[1]}</td><td class="num">${r[2].toFixed(2)}</td><td class="num">${f3(r[3])}</td><td class="num">${f3(r[4])}</td><td class="num">${f3(r[5])}</td><td class="num">${f3(r[6])}</td></tr>`).join('')}</tbody>`;
+}
+
+function renderProfile(t, p, z, c){
+  const e = EXPO[p.exp];
+  const std=[2,4,5,6,8,10,12,14,16,18,20,25,30,35,40,45,50,60,70,80,90,100,120,150];
+  let zs = std.filter(x=>x<z.h-0.25 && x>=e.zmin);
+  zs.unshift(e.zmin<z.h?e.zmin:z.h);
+  zs = [...new Set([...zs, z.h])].sort((a,b)=>a-b);
+  const k = p.Kd*p.G/1000, qi = c.qh*p.Kd*p.gcpi/1000;
+  const rows = zs.map(zz=>{ const q=qz(p,zz); const pe=q*k*0.8; return [zz,Kz(zz,p.exp),q/1000,pe,pe-qi,pe+qi]; });
+  t.innerHTML = `<thead><tr><th class="num">z [m]</th><th class="num">K<sub>z</sub></th><th class="num">q<sub>z</sub> [kPa]</th><th class="num">p<sub>e</sub> [kN/m²]</th><th class="num">p (+GC<sub>pi</sub>)</th><th class="num">p (−GC<sub>pi</sub>)</th></tr></thead>
+  <tbody>${rows.map((r,i)=>`<tr><td class="num">${(i===0&&r[0]>0&&r[0]===e.zmin?'0 a ':'')+r[0].toFixed(2)}</td><td class="num">${r[1].toFixed(3)}</td><td class="num">${f3(r[2])}</td><td class="num">${f3(r[3])}</td><td class="num">${f3(r[4])}</td><td class="num">${f3(r[5])}</td></tr>`).join('')}</tbody>`;
+}
+
+function syncCaseTabs(z){
+  const dual = hasDual(z);
+  v('caseTabs').style.display = dual?'flex':'none';
+  if(!dual) state.cs=0;
+  document.querySelectorAll('#caseTabs button').forEach(b=>b.classList.toggle('active', parseInt(b.dataset.case,10)===state.cs));
+}
+
+function notesHtml(p, z){
+  const e = EXPO[p.exp];
+  return `Exposición ${p.exp}: α=${e.alpha}, z<sub>g</sub>=${e.zg} m, z<sub>mín</sub>=${e.zmin} m. K<sub>e</sub>=${p.Ke.toFixed(3)}, K<sub>zt</sub>=${p.kzt}, I=${p.I.toFixed(2)}, GC<sub>pi</sub>=±${p.gcpi.toFixed(2)}.<br>
+  q<sub>z</sub> = 0,613·I·K<sub>z</sub>·K<sub>zt</sub>·K<sub>e</sub>·V² (Ec. 2). p = q·K<sub>d</sub>·G·C<sub>p</sub> − q<sub>h</sub>·K<sub>d</sub>·(GC<sub>pi</sub>) (Ec. 4).<br>
+  h = altura media del techo, para θ ≤ 10° se usa la altura del alero. Interpolación lineal en θ, h/L y L/B según Nota 2 de la Figura 4.<br>
+  Caso 1 / caso 2 corresponden a las dos filas o columnas de C<sub>p</sub> del techo (máxima succión y máxima presión).<br>
+  C<sub>p</sub> = −1,3 en 0 a h/2 sin reducción por área (Nota b). Carga mínima 6.1.5: 0,25 kN/m² en muros y 0,13 kN/m² en techo proyectado.`;
+}
+
+function render(){
+  const p = readParams();
+  const z = buildZones(p);
+  syncCaseTabs(z);
+  v('warnBox').innerHTML = z.warn?`<div class="warn">${z.warn}</div>`:'';
+  const c = drawDiagram(v('diagram'), p, z, state.cs);
+  renderStats(p, z, c);
+  renderTable(v('zoneTable'), p, z, c);
+  renderProfile(v('profTable'), p, z, c);
+  v('notes').innerHTML = notesHtml(p, z);
+}
+
+v('roofSeg').addEventListener('click', e=>{
+  const btn=e.target.closest('button'); if(!btn) return;
+  state.roof=btn.dataset.roof;
+  document.querySelectorAll('#roofSeg button').forEach(b=>b.classList.toggle('active',b===btn));
+  v('dirTabs').innerHTML = state.roof==='mono'
+    ? `<button data-dir="0" class="active">θ = 0° (bajo→alto)</button><button data-dir="180">θ = 180° (alto→bajo)</button><button data-dir="90">θ = 90°</button>`
+    : `<button data-dir="0" class="active">Viento θ = 0°</button><button data-dir="90">Viento θ = 90°</button>`;
+  state.dir=0; render();
+});
+v('dirTabs').addEventListener('click', e=>{
+  const btn=e.target.closest('button'); if(!btn) return;
+  state.dir=parseInt(btn.dataset.dir,10);
+  document.querySelectorAll('#dirTabs button').forEach(b=>b.classList.toggle('active',b===btn));
+  render();
+});
+v('caseTabs').addEventListener('click', e=>{
+  const btn=e.target.closest('button'); if(!btn) return;
+  state.cs=parseInt(btn.dataset.case,10); render();
+});
+v('zona').addEventListener('change', ()=>{ v('V').value=v('zona').value; });
+document.querySelectorAll('input,select').forEach(inp=>{ inp.addEventListener('input',render); inp.addEventListener('change',render); });
+
+function dirLabel(roof,d){
+  if(roof==='mono'&&d===180) return 'θ = 180° (alero alto → alero bajo)';
+  if(roof==='mono'&&d===0) return 'θ = 0° (alero bajo → alero alto)';
+  return `θ = ${d}°`;
+}
+function buildReport(){
+  const p=readParams(); const roof=state.roof; const sDir=state.dir, sCs=state.cs;
+  const dirs = roof==='duo'?[0,90]:[0,180,90];
+  const ct=v('printReport'); ct.innerHTML='';
+  const hd=document.createElement('div'); hd.className='rpt-header';
+  hd.innerHTML=`<h1>Zonas de presión de viento, NCh432:2025</h1><div class="rpt-sub">${roof==='duo'?'Techo a dos aguas':'Techo de pendiente única'}, ${new Date().toLocaleDateString('es-CL')}</div>`;
+  ct.appendChild(hd);
+  const e=EXPO[p.exp];
+  const pt=document.createElement('table'); pt.className='rpt-params';
+  pt.innerHTML=`
+    <tr><td class="k">Tipo de techo</td><td>${roof==='duo'?'Dos aguas':'Pendiente única'}</td><td class="k">h<sub>e</sub>, altura alero</td><td>${p.he} m</td></tr>
+    <tr><td class="k">θ, pendiente</td><td>${p.theta}°</td><td class="k">d / b</td><td>${p.d} m / ${p.b} m</td></tr>
+    <tr><td class="k">Zona / V</td><td>${p.zona} / ${p.V} m/s</td><td class="k">Categoría ocupación</td><td>${p.cat}</td></tr>
+    <tr><td class="k">Exposición</td><td>${p.exp} (α=${e.alpha}, z<sub>g</sub>=${e.zg} m, z<sub>mín</sub>=${e.zmin} m)</td><td class="k">Cerramiento</td><td>${p.enclTxt.replace(/<[^>]+>/g,'')}, R<sub>i</sub>=${p.ri}</td></tr>
+    <tr><td class="k">K<sub>zt</sub> / K<sub>e</sub></td><td>${p.kzt} / ${p.Ke.toFixed(3)} (z<sub>e</sub>=${p.ze} m)</td><td class="k">K<sub>d</sub> / G</td><td>${p.Kd} / ${p.G}</td></tr>`;
+  ct.appendChild(pt);
+  dirs.forEach(d=>{
+    state.dir=d; state.cs=0;
+    const z=buildZones(p);
+    const dual = hasDual(z);
+    const c0 = calc(p,z);
+    (dual?[0,1]:[0]).forEach(cs=>{
+      const blk=document.createElement('div'); blk.className='rpt-section';
+      if(cs===0){
+        const h2=document.createElement('h2'); h2.textContent=`Dirección del viento, ${dirLabel(roof,d)}`; blk.appendChild(h2);
+        const st=document.createElement('div'); st.className='rpt-sub'; st.style.margin='0 0 8px';
+        st.innerHTML=`h = ${z.h.toFixed(2)} m · K<sub>h</sub> = ${c0.Kh.toFixed(3)} · q<sub>h</sub> = ${(c0.qh/1000).toFixed(3)} kPa · h/L = ${z.hL.toFixed(2)} · L/B = ${z.LB.toFixed(2)}`;
+        blk.appendChild(st);
+      }
+      if(dual){ const h3=document.createElement('div'); h3.style.cssText='font-weight:700;font-size:12.5px;margin:4px 0 6px;'; h3.textContent=`Caso ${cs+1}`; blk.appendChild(h3); }
+      const svg=document.createElementNS(svgNS,'svg'); svg.setAttribute('width','100%');
+      svg.setAttribute('style','width:100%;max-width:640px;height:auto;display:block;margin:0 auto 6px;');
+      const c=drawDiagram(svg,p,z,cs,250); blk.appendChild(svg);
+      const tb=document.createElement('table'); renderTable(tb,p,z,c,dual?cs:undefined); blk.appendChild(tb);
+      ct.appendChild(blk);
+    });
+  });
+  state.dir=0; state.cs=0;
+  const z0=buildZones(p), c0=calc(p,z0);
+  const sec=document.createElement('div'); sec.className='rpt-section';
+  sec.innerHTML='<h2>Muro barlovento, q<sub>z</sub> en altura</h2>';
+  const tp=document.createElement('table'); renderProfile(tp,p,z0,c0); sec.appendChild(tp); ct.appendChild(sec);
+  const ft=document.createElement('div'); ft.className='rpt-foot';
+  ft.innerHTML=notesHtml(p,z0); ct.appendChild(ft);
+  state.dir=sDir; state.cs=sCs; render();
+}
+v('exportPdfBtn').addEventListener('click', ()=>{ buildReport(); window.print(); });
+
+render();
+</script>
+</body>
+</html>
