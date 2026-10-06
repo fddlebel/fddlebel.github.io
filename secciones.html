@@ -1,0 +1,1278 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Secciones HA | fddlebel</title>
+<style>
+:root{
+  --paper:#ffffff;--panel:#ffffff;--ink:#000000;--line:#9a9a9a;--line-strong:#7a7a7a;
+  --accent:#000000;--accent-soft:#e9e9e9;--grid:#d9d9d9;--conc:#c0c0c0;--conc-dark:#a8a8a8;
+  --fail:#b3261e;--focus:#4a4d24;
+  --sans:'Arial Narrow',Arial,Helvetica,sans-serif;
+}
+*{box-sizing:border-box;}
+[hidden]{display:none!important;}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);padding-block:20px 48px;padding-inline:max(16px,calc((100vw - 1400px)/2));}
+h1{font-size:22px;font-weight:700;margin:0;}
+.app-header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+.clause{font-size:12px;}
+.btn{font-family:var(--sans);font-weight:700;font-size:13px;color:#fff;background:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:7px 14px;cursor:pointer;}
+.btn.sec{background:var(--panel);color:var(--ink);border-color:var(--line-strong);}
+.grid{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;align-items:start;}
+@media (max-width:900px){.grid{grid-template-columns:1fr;}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:14px;}
+.panel+.panel{margin-top:12px;}
+.section-title{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:0 0 10px;}
+.field{margin-bottom:9px;min-width:0;}
+.field label{display:block;font-size:12px;margin-bottom:3px;}
+.unit{opacity:.75;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+input[type=number],input[type=text],select,textarea{width:100%;font-family:var(--sans);font-size:13px;color:var(--ink);background:#fff;border:1px solid var(--line-strong);border-radius:4px;padding:6px 7px;font-variant-numeric:tabular-nums;}
+textarea{font-size:12px;resize:vertical;}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--focus);outline-offset:1px;}
+details summary{cursor:pointer;font-size:13px;font-weight:700;margin-top:4px;user-select:none;}
+details[open] summary{margin-bottom:8px;}
+.chk{display:flex;align-items:center;gap:6px;font-size:12px;}
+.chk input{width:auto;margin:0;}
+.toolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px;}
+.tool{font-family:var(--sans);font-size:12.5px;font-weight:700;background:var(--panel);color:var(--ink);border:1px solid var(--line-strong);border-radius:4px;padding:6px 10px;cursor:pointer;}
+.tool.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.toolbar select{width:auto;}
+.toolbar .sep{width:1px;height:24px;background:var(--line);margin:0 4px;}
+#gridWrap{position:relative;border:1px solid var(--line);border-radius:4px;overflow:auto;max-height:560px;background:#fff;}
+#gridCanvas{display:block;cursor:crosshair;touch-action:none;}
+#gridInfo{font-size:12px;margin-top:6px;min-height:16px;}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 10px;}
+.tabs button{font-family:var(--sans);font-weight:700;font-size:13px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:7px 14px;cursor:pointer;}
+.tabs button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:12px;}
+.stat{border:1px solid var(--line);border-radius:4px;padding:8px 10px;}
+.stat .k{font-size:11px;text-transform:uppercase;letter-spacing:.04em;}
+.stat .v{font-size:16px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th,td{text-align:left;padding:5px 8px;border:1px solid var(--line);font-variant-numeric:tabular-nums;}
+th{font-size:11px;font-weight:700;background:var(--accent-soft);}
+td.num,th.num{text-align:right;}
+tr.fail td{color:var(--fail);font-weight:700;}
+.tablewrap{overflow-x:auto;}
+.chartwrap{border:1px solid var(--line);border-radius:4px;padding:10px;margin-bottom:12px;}
+.ctrls{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-bottom:10px;}
+.ctrls .field{margin:0;width:150px;}
+#glWrap{position:relative;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:#fff;}
+#glCanvas{display:block;width:100%;height:560px;cursor:grab;touch-action:none;}
+#glLabels{position:absolute;inset:0;pointer-events:none;font-size:11px;}
+#glLabels span{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;}
+.note{font-size:11.5px;line-height:1.5;}
+.warn{background:var(--accent-soft);border:1px solid var(--line-strong);border-radius:4px;padding:7px 10px;font-size:12px;margin-bottom:10px;}
+#busy{font-size:12px;margin-left:8px;}
+svg text{font-family:var(--sans);}
+#printReport{display:none;}
+.rpt-header{margin-bottom:12px;}
+.rpt-header h1{font-size:20px;}
+.rpt-sub{font-size:11.5px;margin-top:2px;}
+.rpt-params{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:11px;}
+.rpt-params td{border:1px solid var(--line);padding:4px 7px;}
+.rpt-params td.k{font-weight:700;width:22%;background:var(--accent-soft);}
+.rpt-section{margin-bottom:16px;page-break-inside:avoid;break-inside:avoid;}
+.rpt-section h2{font-size:14px;font-weight:700;margin:0 0 8px;border-bottom:1px solid var(--line);padding-bottom:4px;break-after:avoid;}
+.rpt-section.allow-break{page-break-inside:auto;break-inside:auto;}
+.rpt-foot{font-size:10px;margin-top:14px;border-top:1px solid var(--line);padding-top:6px;}
+.rpt-small{font-size:10px;}
+.rpt-small td,.rpt-small th{padding:2px 5px;}
+@media print{
+  body *{visibility:hidden;}
+  #printReport,#printReport *{visibility:visible;}
+  #printReport{display:block;position:absolute;left:0;top:0;width:100%;}
+  @page{margin:12mm;}
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1><a href="index.html" style="color:inherit;text-decoration:none;font-weight:400;">fddlebel</a> / Secciones de hormigón armado</h1>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+    <div class="clause">ACI 318-19, 22.2, 21.2. Análisis por fibras</div>
+    <button class="btn sec" id="saveBtn">Guardar proyecto</button>
+    <button class="btn sec" id="loadBtn">Abrir proyecto</button>
+    <input type="file" id="loadFile" accept=".json" hidden>
+    <select id="txtSel" style="width:auto;">
+      <option value="mc">TXT: momento-curvatura</option>
+      <option value="pm">TXT: interacción P-M</option>
+      <option value="surf">TXT: superficie P-Mx-My</option>
+      <option value="grid">TXT: grilla de la sección</option>
+    </select>
+    <button class="btn" id="txtBtn">Exportar TXT</button>
+    <button class="btn" id="pdfBtn">Exportar PDF</button>
+  </div>
+</div>
+
+<div id="printReport"></div>
+
+<div class="grid">
+  <div>
+    <div class="panel">
+      <div class="field"><label>Proyecto / elemento</label><input type="text" id="proj" value=""></div>
+      <div class="section-title" style="margin-top:12px">Grilla</div>
+      <div class="row2">
+        <div class="field"><label>N° celdas x</label><input type="number" id="nx" value="52" step="1" min="1"></div>
+        <div class="field"><label>N° celdas y</label><input type="number" id="ny" value="27" step="1" min="1"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Δx celda <span class="unit">[mm]</span></label><input type="number" id="dx" value="40" step="5"></div>
+        <div class="field"><label>Δy celda <span class="unit">[mm]</span></label><input type="number" id="dy" value="40" step="5"></div>
+      </div>
+
+      <div class="section-title" style="margin-top:12px">Hormigón</div>
+      <div class="row2">
+        <div class="field"><label>f'c <span class="unit">[MPa]</span></label><input type="number" id="fc" value="30" step="1"></div>
+        <div class="field"><label>Ec <span class="unit">[MPa]</span></label><input type="number" id="Ec" value="" step="100" placeholder="4700√f'c"></div>
+      </div>
+      <div class="field"><label>Curva para momento-curvatura</label>
+        <select id="ccurve">
+          <option value="hog">Hognestad (1951)</option>
+          <option value="cp" selected>Collins y Porasz (1989), Carreira y Chu</option>
+        </select>
+      </div>
+      <div class="field"><label>Hormigón para interacción</label>
+        <select id="pmConc">
+          <option value="whit" selected>Bloque de Whitney (ACI 22.2.2.4)</option>
+          <option value="curve">Curva constitutiva, εcu = 0,003</option>
+        </select>
+      </div>
+
+      <div class="section-title" style="margin-top:12px">Acero</div>
+      <div class="row2">
+        <div class="field"><label>fy <span class="unit">[MPa]</span></label><input type="number" id="fy" value="420" step="10"></div>
+        <div class="field"><label>Es <span class="unit">[MPa]</span></label><input type="number" id="Es" value="200000" step="1000"></div>
+      </div>
+      <div class="field"><label>Modelo para momento-curvatura</label>
+        <select id="smodel">
+          <option value="ep">Elastoplástico</option>
+          <option value="park" selected>Con endurecimiento (Park, 1975)</option>
+        </select>
+      </div>
+      <div class="row3" id="parkBox">
+        <div class="field"><label>fsu <span class="unit">[MPa]</span></label><input type="number" id="fsu" value="630" step="10"></div>
+        <div class="field"><label>εsh</label><input type="number" id="esh" value="0.008" step="0.001"></div>
+        <div class="field"><label>εsu</label><input type="number" id="esu" value="0.12" step="0.01"></div>
+      </div>
+
+      <div class="section-title" style="margin-top:12px">Momento-curvatura</div>
+      <div class="row2">
+        <div class="field"><label>P en dirección + <span class="unit">[kN]</span></label><input type="number" id="Pp" value="1500" step="50"></div>
+        <div class="field"><label>P en dirección − <span class="unit">[kN]</span></label><input type="number" id="Pn" value="1500" step="50"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>εc máx.</label><input type="number" id="ecmax" value="0.008" step="0.0005"></div>
+        <div class="field"><label>εs máx.</label><input type="number" id="esmax" value="0.05" step="0.005"></div>
+      </div>
+      <div class="field"><label>Control de la dirección</label>
+        <select id="mcMode">
+          <option value="res" selected>Momento resultante en α</option>
+          <option value="na">Eje neutro perpendicular a α</option>
+        </select>
+      </div>
+
+      <details>
+        <summary>Parámetros avanzados</summary>
+        <div class="row2">
+          <div class="field"><label>Tamaño fibra máx. <span class="unit">[mm]</span></label><input type="number" id="fib" value="20" step="5"></div>
+          <div class="field"><label>Referencia de momentos</label>
+            <select id="refpt"><option value="pc">Centroide plástico</option><option value="gc">Centroide geométrico</option></select>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Meridianos superficie</label><input type="number" id="nmer" value="72" step="12"></div>
+          <div class="field"><label>Factor φPn,máx</label><input type="number" id="pcapf" value="0.80" step="0.05"></div>
+        </div>
+        <div class="field"><label class="chk"><input type="checkbox" id="mpr"> Momento probable: fs = 1,25 fy y φ = 1</label></div>
+      </details>
+    </div>
+    <div class="panel">
+      <div class="section-title">Propiedades de la sección</div>
+      <div class="tablewrap"><table id="propTable"></table></div>
+    </div>
+    <div class="panel">
+      <div class="section-title">Notas</div>
+      <div class="note" id="notes"></div>
+    </div>
+  </div>
+
+  <div style="min-width:0;">
+    <div class="panel">
+      <div class="toolbar" id="tools">
+        <button class="tool active" data-t="conc">Hormigón</button>
+        <button class="tool" data-t="rect">Rectángulo</button>
+        <button class="tool" data-t="erase">Borrar</button>
+        <span class="sep"></span>
+        <button class="tool" data-t="bar">Barra</button>
+        <button class="tool" data-t="line">Línea de barras</button>
+        <select id="diam" title="Diámetro de barra">
+          <option>8</option><option>10</option><option>12</option><option selected>16</option><option>18</option><option>22</option><option>25</option><option>28</option><option>32</option><option>36</option>
+        </select>
+        <label class="chk">cada <input type="number" id="lineStep" value="5" min="1" step="1" style="width:52px;"> celdas</label>
+        <span class="sep"></span>
+        <select id="tpl" title="Plantilla">
+          <option value="">Plantilla...</option>
+          <option value="rect">Muro rectangular</option>
+          <option value="L">Muro L</option>
+          <option value="T">Muro T</option>
+          <option value="C">Muro C</option>
+        </select>
+        <button class="tool" id="pasteBtn">Pegar grilla</button>
+        <button class="tool" id="clearBtn">Limpiar</button>
+      </div>
+      <div id="tplBox" class="ctrls" hidden>
+        <div class="field"><label>Largo alma <span class="unit">[mm]</span></label><input type="number" id="tLw" value="2000" step="50"></div>
+        <div class="field"><label>Largo ala <span class="unit">[mm]</span></label><input type="number" id="tLf" value="1000" step="50"></div>
+        <div class="field"><label>Espesor <span class="unit">[mm]</span></label><input type="number" id="tT" value="200" step="10"></div>
+        <div class="field"><label>Ø malla / Ø borde</label><div class="row2"><input type="number" id="tDm" value="10"><input type="number" id="tDb" value="18"></div></div>
+        <div class="field"><label>Separación malla <span class="unit">[celdas]</span></label><input type="number" id="tS" value="5" step="1"></div>
+        <button class="btn" id="tplGo">Generar</button>
+      </div>
+      <div id="pasteBox" hidden>
+        <textarea id="pasteTxt" rows="5" placeholder="Pegar celdas desde Excel. Número = diámetro de barra (con hormigón), x o 0 = hormigón, vacío = sin sección."></textarea>
+        <div style="display:flex;gap:6px;margin-top:6px;"><button class="btn" id="pasteGo">Aplicar</button><button class="btn sec" id="pasteCancel">Cancelar</button></div>
+      </div>
+      <div id="gridWrap"><canvas id="gridCanvas"></canvas></div>
+      <div id="gridInfo"></div>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <button data-tab="mc" class="active">Momento-curvatura</button>
+      <button data-tab="pm">Interacción P-M</button>
+      <button data-tab="s3d">Superficie 3D</button>
+      <button data-tab="loads">Cargas</button>
+      <span id="busy"></span>
+    </div>
+
+    <div class="tabpane" data-pane="mc">
+      <div class="ctrls">
+        <div class="field"><label>Ángulo α <span class="unit">[°]</span></label><input type="number" id="alphaMC" value="0" step="5"></div>
+        <div class="note" style="max-width:520px;">α = 0° comprime el lado +x, α = 90° comprime el lado +y. La rama negativa corresponde a α + 180°.</div>
+      </div>
+      <div class="stat-row" id="mcStats"></div>
+      <div class="chartwrap"><svg id="mcChart" viewBox="0 0 760 420" width="100%" style="display:block;height:auto"></svg></div>
+      <div class="tablewrap"><table id="mcTable"></table></div>
+    </div>
+
+    <div class="tabpane" data-pane="pm" hidden>
+      <div class="ctrls">
+        <div class="field"><label>Ángulo α <span class="unit">[°]</span></label><input type="number" id="alphaPM" value="0" step="5"></div>
+        <div class="field"><label>P contorno Mx-My <span class="unit">[kN]</span></label><input type="number" id="Pring" value="1500" step="50"></div>
+        <label class="chk" style="margin-bottom:6px;"><input type="checkbox" id="pmLoads" checked> Mostrar cargas</label>
+      </div>
+      <div class="stat-row" id="pmStats"></div>
+      <div class="chartwrap"><svg id="pmChart" viewBox="0 0 760 460" width="100%" style="display:block;height:auto"></svg></div>
+      <div class="chartwrap"><svg id="ringChart" viewBox="0 0 760 460" width="100%" style="display:block;height:auto"></svg></div>
+    </div>
+
+    <div class="tabpane" data-pane="s3d" hidden>
+      <div class="ctrls">
+        <label class="chk"><input type="checkbox" id="showNom" checked> Superficie nominal</label>
+        <label class="chk"><input type="checkbox" id="showDes" checked> Superficie de diseño</label>
+        <label class="chk"><input type="checkbox" id="showLoads3" checked> Cargas</label>
+        <button class="tool" id="viewReset">Vista inicial</button>
+        <span class="note">Arrastrar para rotar, rueda para acercar.</span>
+      </div>
+      <div id="glWrap"><canvas id="glCanvas"></canvas><div id="glLabels"></div></div>
+    </div>
+
+    <div class="tabpane" data-pane="loads" hidden>
+      <div class="ctrls">
+        <label class="chk"><input type="checkbox" id="etabsSign" checked> Compresión negativa (convención ETABS)</label>
+      </div>
+      <div class="field"><label>Cargas: nombre P Mx My por línea [kN, kN·m]. Mx comprime +y, My comprime +x.</label>
+        <textarea id="loadsTxt" rows="7">Comb1 -1800 900 120
+Comb2 -900 -1400 60
+Comb3 -2600 300 -250
+Comb4 400 600 0</textarea></div>
+      <div class="tablewrap"><table id="loadsTable"></table></div>
+    </div>
+  </div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const DEG=Math.PI/180;
+function num(id,def){ const x=parseFloat($(id).value); return isFinite(x)?x:def; }
+const clamp=(x,a,b)=>x<a?a:x>b?b:x;
+
+let S={nx:52,ny:27,dx:40,dy:40,conc:new Uint8Array(52*27),bars:new Float32Array(52*27)};
+
+function readMat(){
+  const fc=Math.max(num('fc',30),5);
+  const Ec=num('Ec',NaN)>0?num('Ec',0):4700*Math.sqrt(fc);
+  const fy=Math.max(num('fy',420),1), Es=Math.max(num('Es',200000),1);
+  const m={fc,Ec,fy,Es,ey:fy/Es,
+    ccurve:$('ccurve').value, smodel:$('smodel').value,
+    fsu:Math.max(num('fsu',1.5*fy),fy), esh:Math.max(num('esh',0.008),fy/Es), esu:Math.max(num('esu',0.12),0.01),
+    pmConc:$('pmConc').value, mpr:$('mpr').checked,
+    fib:Math.max(num('fib',20),2), refpt:$('refpt').value, nmer:clamp(Math.round(num('nmer',72)),12,360),
+    pcapf:clamp(num('pcapf',0.8),0.1,1),
+    ecmax:Math.max(num('ecmax',0.008),0.001), esmax:Math.max(num('esmax',0.05),0.003),
+    Pp:num('Pp',0), Pn:num('Pn',0), mcMode:$('mcMode').value};
+  if(m.esu<=m.esh) m.esu=m.esh+0.01;
+  m.beta1=fc<=28?0.85:Math.max(0.65,0.85-0.05*(fc-28)/7);
+  m.fyD=m.mpr?1.25*fy:fy;
+  if(m.ccurve==='cp'){
+    m.n=fc>29.4?0.8+fc/17:1.55+Math.pow(fc/32.4,3);
+    m.e0=fc/Ec*m.n/(m.n-1); m.kpost=0.67+fc/62;
+  } else m.e0=2*fc/Ec;
+  return m;
+}
+
+function concStress(e,m){
+  if(e<=0) return 0;
+  if(m.ccurve==='cp'){
+    const r=e/m.e0, k=e<=m.e0?1:m.kpost;
+    return m.fc*m.n*r/(m.n-1+Math.pow(r,m.n*k));
+  }
+  if(e<=m.e0){ const r=e/m.e0; return m.fc*(2*r-r*r); }
+  const ecu=Math.max(0.0038,m.e0*1.2);
+  return Math.max(0,m.fc*(1-0.15*(e-m.e0)/(ecu-m.e0)));
+}
+function steelStress(e,m){
+  if(m.smodel!=='park'){ const s=m.Es*e; return s>m.fy?m.fy:s<-m.fy?-m.fy:s; }
+  const a=Math.abs(e), sg=e<0?-1:1;
+  if(a<=m.ey) return m.Es*e;
+  if(a<=m.esh) return sg*m.fy;
+  if(a<=m.esu){
+    const r=m.esu-m.esh, x=a-m.esh, q=(30*r+1)*(30*r+1);
+    const mm=((m.fsu/m.fy)*q-60*r-1)/(15*r*r);
+    return sg*m.fy*((mm*x+2)/(60*x+2)+x*(60-mm)/(2*q));
+  }
+  return sg*m.fsu;
+}
+
+function buildFibers(S,m){
+  const {nx,ny,dx,dy}=S;
+  const sub=Math.max(1,Math.ceil(Math.max(dx,dy)/m.fib));
+  const fdx=dx/sub, fdy=dy/sub, fa=fdx*fdy;
+  let ncell=0; for(let k=0;k<nx*ny;k++) if(S.conc[k]) ncell++;
+  const cx=new Float64Array(ncell*sub*sub), cy=new Float64Array(ncell*sub*sub);
+  const kx=[],ky=[];
+  const bx=[],by=[],ba=[],bd=[],bin=[];
+  let f=0, Ac=0, Sx=0, Sy=0, Ixx=0, Iyy=0;
+  for(let j=0;j<ny;j++) for(let i=0;i<nx;i++){
+    const k=j*nx+i, x0=i*dx, y0=(ny-1-j)*dy;
+    if(S.conc[k]){
+      for(let a=0;a<sub;a++) for(let b=0;b<sub;b++){ cx[f]=x0+(a+0.5)*fdx; cy[f]=y0+(b+0.5)*fdy; f++; }
+      kx.push(x0,x0+dx,x0,x0+dx); ky.push(y0,y0,y0+dy,y0+dy);
+      const A=dx*dy, xc=x0+dx/2, yc=y0+dy/2;
+      Ac+=A; Sx+=A*xc; Sy+=A*yc; Ixx+=A*yc*yc+dx*dy*dy*dy/12; Iyy+=A*xc*xc+dy*dx*dx*dx/12;
+    }
+    if(S.bars[k]>0){ bx.push(x0+dx/2); by.push(y0+dy/2); bd.push(S.bars[k]); ba.push(Math.PI*S.bars[k]*S.bars[k]/4); bin.push(S.conc[k]?1:0); }
+  }
+  const F={n:f,cx,cy,fa,fdx,fdy,kx:Float64Array.from(kx),ky:Float64Array.from(ky),
+    nb:bx.length,bx:Float64Array.from(bx),by:Float64Array.from(by),ba:Float64Array.from(ba),bd,bin:Uint8Array.from(bin),Ac};
+  F.As=ba.reduce((s,a)=>s+a,0);
+  F.AsIn=ba.reduce((s,a,i)=>s+(bin[i]?a:0),0);
+  F.xg=Ac?Sx/Ac:0; F.yg=Ac?Sy/Ac:0;
+  F.Ixg=Ixx-Ac*F.yg*F.yg; F.Iyg=Iyy-Ac*F.xg*F.xg;
+  const c85=0.85*m.fc;
+  let N=c85*Ac, Mx=c85*Sx, My=c85*Sy;
+  for(let i=0;i<F.nb;i++){ const w=m.fyD-(F.bin[i]?c85:0); N+=w*F.ba[i]; Mx+=w*F.ba[i]*F.bx[i]; My+=w*F.ba[i]*F.by[i]; }
+  F.xp=N?Mx/N:F.xg; F.yp=N?My/N:F.yg;
+  F.rx=m.refpt==='gc'?F.xg:F.xp; F.ry=m.refpt==='gc'?F.yg:F.yp;
+  F.Po=(c85*(Ac-F.AsIn)+m.fyD*F.As)/1e3;
+  F.Pt=-m.fyD*F.As/1e3;
+  F.rho=Ac?F.As/Ac:0;
+  return F;
+}
+
+function extent(F,ux,uy){
+  let smax=-1e18,smin=1e18;
+  for(let i=0;i<F.kx.length;i++){ const s=(F.kx[i]-F.rx)*ux+(F.ky[i]-F.ry)*uy; if(s>smax) smax=s; if(s<smin) smin=s; }
+  return [smax,smin];
+}
+
+function pmPoint(F,m,th,c,smax){
+  const ux=Math.cos(th), uy=Math.sin(th), ecu=0.003, c85=0.85*m.fc;
+  const whit=m.pmConc==='whit', sb=smax-m.beta1*c;
+  const hs=(Math.abs(ux)*F.fdx+Math.abs(uy)*F.fdy)/2;
+  let P=0,X=0,Y=0;
+  for(let i=0;i<F.n;i++){
+    const ddx=F.cx[i]-F.rx, ddy=F.cy[i]-F.ry, s=ddx*ux+ddy*uy;
+    let sc;
+    if(whit){ const fr=(s+hs-sb)/(2*hs); sc=fr<=0?0:fr>=1?c85:c85*fr; }
+    else sc=concStress(ecu*(s-(smax-c))/c,m);
+    if(sc){ const fF=sc*F.fa; P+=fF; X+=fF*ddx; Y+=fF*ddy; }
+  }
+  let emin=1e9;
+  for(let i=0;i<F.nb;i++){
+    const ddx=F.bx[i]-F.rx, ddy=F.by[i]-F.ry, s=ddx*ux+ddy*uy;
+    const e=ecu*(s-(smax-c))/c;
+    if(e<emin) emin=e;
+    let fs=m.Es*e; fs=fs>m.fyD?m.fyD:fs<-m.fyD?-m.fyD:fs;
+    let fcb=0;
+    if(F.bin[i]) fcb=whit?(s>=sb?c85:0):concStress(e,m);
+    const fF=(fs-fcb)*F.ba[i]; P+=fF; X+=fF*ddx; Y+=fF*ddy;
+  }
+  const et=-emin;
+  const phi=m.mpr?1:(et<=m.ey?0.65:et>=m.ey+0.003?0.9:0.65+0.25*(et-m.ey)/0.003);
+  return {P:P/1e3,X:X/1e6,Y:Y/1e6,phi,c,et};
+}
+function endPoints(F,m){
+  const c85=0.85*m.fc;
+  let Xo=0,Yo=0;
+  for(let i=0;i<F.n;i++){ Xo+=c85*F.fa*(F.cx[i]-F.rx); Yo+=c85*F.fa*(F.cy[i]-F.ry); }
+  let Xt=0,Yt=0;
+  for(let i=0;i<F.nb;i++){
+    const w=m.fyD-(F.bin[i]?c85:0);
+    Xo+=w*F.ba[i]*(F.bx[i]-F.rx); Yo+=w*F.ba[i]*(F.by[i]-F.ry);
+    Xt+=-m.fyD*F.ba[i]*(F.bx[i]-F.rx); Yt+=-m.fyD*F.ba[i]*(F.by[i]-F.ry);
+  }
+  return {o:{P:F.Po,X:Xo/1e6,Y:Yo/1e6,phi:m.mpr?1:0.65},t:{P:F.Pt,X:Xt/1e6,Y:Yt/1e6,phi:m.mpr?1:0.9}};
+}
+
+function buildSurface(F,m){
+  const K=m.nmer, Nc=70, ends=endPoints(F,m);
+  const Pcap=m.pcapf*(m.mpr?1:0.65)*F.Po;
+  const mers=[];
+  for(let k=0;k<K;k++){
+    const th=2*Math.PI*k/K, ux=Math.cos(th), uy=Math.sin(th);
+    const [smax,smin]=extent(F,ux,uy), D=Math.max(smax-smin,1);
+    const pts=[ends.t];
+    for(let j=0;j<Nc;j++){ const c=D*Math.exp(Math.log(0.01)+(Math.log(4)-Math.log(0.01))*j/(Nc-1)); pts.push(pmPoint(F,m,th,c,smax)); }
+    pts.push(ends.o);
+    const nom=pts.map(p=>[p.P,p.X,p.Y]);
+    const des=pts.map(p=>[p.phi*p.P,p.phi*p.X,p.phi*p.Y]);
+    const cut=[];
+    for(let i=0;i<des.length;i++){
+      if(des[i][0]<=Pcap) cut.push(des[i]);
+      else{
+        if(i>0){ const a=des[i-1],b=des[i],t=(Pcap-a[0])/(b[0]-a[0]); cut.push([Pcap,a[1]+t*(b[1]-a[1]),a[2]+t*(b[2]-a[2])]); }
+        break;
+      }
+    }
+    mers.push({th,nom,des:cut});
+  }
+  const sf={K,mers,Pcap,Po:F.Po,Pt:F.Pt,phiPt:(m.mpr?1:0.9)*F.Pt,ends};
+  sf.levN=levels(F.Pt,F.Po,48); sf.levD=levels(sf.phiPt,Pcap,48);
+  sf.ringsN=sf.levN.map(P=>ringAt(sf,P,'nom'));
+  sf.ringsD=sf.levD.map(P=>ringAt(sf,P,'des'));
+  let Ms=0; sf.ringsN.forEach(r=>r&&r.forEach(q=>{ const v=Math.hypot(q[0],q[1]); if(v>Ms) Ms=v; }));
+  sf.Ms=Ms||1;
+  return sf;
+}
+function levels(a,b,n){ const out=[]; for(let i=0;i<=n;i++){ const t=i/n, s=0.5-0.5*Math.cos(Math.PI*t); out.push(a+(b-a)*s); } return out; }
+function interpArr(arr,P){
+  const n=arr.length; if(!n) return null;
+  if(Math.abs(P-arr[0][0])<1e-9) return [arr[0][1],arr[0][2]];
+  if(Math.abs(P-arr[n-1][0])<1e-9) return [arr[n-1][1],arr[n-1][2]];
+  let best=null, bestR=Infinity;
+  for(let i=1;i<n;i++){
+    const a=arr[i-1],b=arr[i];
+    if((P-a[0])*(P-b[0])<=0&&a[0]!==b[0]){
+      const t=(P-a[0])/(b[0]-a[0]), q=[a[1]+t*(b[1]-a[1]),a[2]+t*(b[2]-a[2])], rr=Math.hypot(q[0],q[1]);
+      if(rr<bestR){ bestR=rr; best=q; }
+    }
+  }
+  return best;
+}
+function ringAt(sf,P,key){
+  const r=[];
+  for(const me of sf.mers){ const q=interpArr(me[key],P); if(!q) return null; r.push(q); }
+  return r;
+}
+function rayR(ring,a){
+  if(!ring) return 0;
+  const dx=Math.cos(a), dy=Math.sin(a); let best=0;
+  for(let i=0;i<ring.length;i++){
+    const p=ring[i], q=ring[(i+1)%ring.length], ex=q[0]-p[0], ey=q[1]-p[1];
+    const den=dx*ey-dy*ex; if(Math.abs(den)<1e-14) continue;
+    const r=(p[0]*ey-p[1]*ex)/den, t=(p[0]*dy-p[1]*dx)/den;
+    if(t>=-1e-9&&t<=1+1e-9&&r>best) best=r;
+  }
+  return best;
+}
+function pmCurve(sf,alpha,key){
+  const lev=key==='nom'?sf.levN:sf.levD, rings=key==='nom'?sf.ringsN:sf.ringsD;
+  const R=[],L=[];
+  const ca=Math.cos(alpha), sa=Math.sin(alpha);
+  const f=key==='nom'?1:null;
+  const endT=key==='nom'?sf.ends.t:{P:sf.phiPt,X:sf.ends.t.X*sf.ends.t.phi,Y:sf.ends.t.Y*sf.ends.t.phi};
+  R.push([endT.X*ca+endT.Y*sa,endT.P]); L.push([endT.X*ca+endT.Y*sa,endT.P]);
+  for(let i=1;i<lev.length-1;i++){
+    const rg=rings[i]; if(!rg) continue;
+    R.push([rayR(rg,alpha),lev[i]]); L.push([-rayR(rg,alpha+Math.PI),lev[i]]);
+  }
+  if(key==='nom'){ const o=sf.ends.o, pr=o.X*ca+o.Y*sa; R.push([pr,o.P]); L.push([pr,o.P]); }
+  else{ const rg=rings[lev.length-1]; R.push([rayR(rg,alpha),sf.Pcap]); L.push([-rayR(rg,alpha+Math.PI),sf.Pcap]); }
+  return {R,L,f};
+}
+function dcr(sf,P,X,Y){
+  const Mu=Math.hypot(X,Y);
+  if(P>sf.Pcap+1e-9||P<sf.phiPt-1e-9) return {d:Infinity,R:0};
+  const rg=ringAt(sf,P,'des');
+  if(Mu<1e-9) return {d:P>=0?P/sf.Pcap:P/sf.phiPt,R:0};
+  const R=rayR(rg,Math.atan2(Y,X));
+  return {d:R>0?Mu/R:Infinity,R};
+}
+
+function mcEval(F,m,th,e0,kap){
+  const ux=Math.cos(th), uy=Math.sin(th);
+  let P=0,X=0,Y=0;
+  for(let i=0;i<F.n;i++){
+    const ddx=F.cx[i]-F.rx, ddy=F.cy[i]-F.ry, e=e0+kap*(ddx*ux+ddy*uy);
+    if(e>0){ const fF=concStress(e,m)*F.fa; P+=fF; X+=fF*ddx; Y+=fF*ddy; }
+  }
+  let emin=1e9, emax=-1e9;
+  for(let i=0;i<F.nb;i++){
+    const ddx=F.bx[i]-F.rx, ddy=F.by[i]-F.ry, e=e0+kap*(ddx*ux+ddy*uy);
+    if(e<emin) emin=e; if(e>emax) emax=e;
+    const fF=(steelStress(e,m)-(F.bin[i]?concStress(e,m):0))*F.ba[i]; P+=fF; X+=fF*ddx; Y+=fF*ddy;
+  }
+  return {P:P/1e3,X:X/1e6,Y:Y/1e6,esT:-emin,esC:emax};
+}
+function solveE0(F,m,th,kap,Pt,g){
+  const f=e=>mcEval(F,m,th,e,kap).P-Pt;
+  let a=g-2e-4,b=g+2e-4,fa=f(a),fb=f(b),st=4e-4,it=0;
+  while(fa>0&&it<60){ b=a; fb=fa; a-=st; st*=2; fa=f(a); it++; }
+  while(fb<0&&it<120){ a=b; fa=fb; b+=st; st*=2; fb=f(b); it++; }
+  if(fa>0||fb<0) return null;
+  let side=0, c=a, fc=fa;
+  const tol=Math.max(1e-3,Math.abs(Pt)*1e-6);
+  for(let k=0;k<60;k++){
+    c=(a*fb-b*fa)/(fb-fa); fc=f(c);
+    if(Math.abs(fc)<tol||Math.abs(b-a)<1e-12) break;
+    if(fc*fb>0){ b=c; fb=fc; if(side===-1) fa/=2; side=-1; }
+    else{ a=c; fa=fc; if(side===1) fb/=2; side=1; }
+  }
+  return c;
+}
+function mcState(F,m,alpha,th,kap,Pt,g){
+  const e0=solveE0(F,m,th,kap,Pt,g); if(e0===null) return null;
+  const r=mcEval(F,m,th,e0,kap);
+  const [smax]=extent(F,Math.cos(th),Math.sin(th));
+  r.e0=e0; r.ec=e0+kap*smax; r.th=th; r.kap=kap;
+  r.M=r.X*Math.cos(alpha)+r.Y*Math.sin(alpha);
+  r.Mp=-r.X*Math.sin(alpha)+r.Y*Math.cos(alpha);
+  r.cna=kap>0?r.ec/kap:Infinity;
+  return r;
+}
+function mcSolveStep(F,m,alpha,kap,Pt,prev){
+  const g=prev?prev.e0:0, th0=prev?prev.th:alpha;
+  if(m.mcMode==='na') return mcState(F,m,alpha,alpha,kap,Pt,g);
+  let t0=th0, s0=mcState(F,m,alpha,t0,kap,Pt,g); if(!s0) return null;
+  const tol=s=>Math.abs(s.Mp)<=1e-4*Math.abs(s.M)+1e-3;
+  if(tol(s0)) return s0;
+  let t1=t0+0.01, s1=mcState(F,m,alpha,t1,kap,Pt,s0.e0); if(!s1) return s0;
+  for(let i=0;i<12;i++){
+    if(tol(s1)) return s1;
+    const d=s1.Mp-s0.Mp; if(Math.abs(d)<1e-12) break;
+    let t2=t1-s1.Mp*(t1-t0)/d;
+    if(Math.abs(t2-alpha)>1.2) t2=alpha+Math.sign(t2-alpha)*1.2;
+    const s2=mcState(F,m,alpha,t2,kap,Pt,s1.e0); if(!s2) break;
+    t0=t1; s0=s1; t1=t2; s1=s2;
+  }
+  return s1;
+}
+function mcRun(F,m,alpha,Pt){
+  const ux=Math.cos(alpha), uy=Math.sin(alpha), [smax,smin]=extent(F,ux,uy), D=Math.max(smax-smin,1);
+  const ratio=s=>Math.max(s.ec/m.ecmax,s.esT/m.esmax);
+  const out={pts:[[0,0]],states:[],alpha,P:Pt,ok:true};
+  if(Pt>F.Po*0.98||Pt<F.Pt*0.98){ out.ok=false; out.msg='P fuera del rango axial de la sección'; return out; }
+  let dk=m.ecmax/(0.1*D)/300, kap=0, prev=null, yld=null, nom=null, n=0;
+  let s0=mcSolveStep(F,m,alpha,1e-12,Pt,null); prev=s0;
+  while(n<2000){
+    n++; const kNew=kap+dk;
+    const s=mcSolveStep(F,m,alpha,kNew,Pt,prev);
+    if(!s){ out.end='Sin equilibrio axial'; break; }
+    if(!yld&&s.esT>=m.ey){ const a=prev, t=(m.ey-a.esT)/(s.esT-a.esT); yld={kap:a.kap+t*(s.kap-a.kap),M:a.M+t*(s.M-a.M),ec:a.ec+t*(s.ec-a.ec),c:s.cna}; }
+    if(!nom&&(s.ec>=0.004||s.esT>=0.015)){ const a=prev; const fa=Math.max(a.ec/0.004,a.esT/0.015)-1, fb=Math.max(s.ec/0.004,s.esT/0.015)-1, t=-fa/(fb-fa); nom={kap:a.kap+t*(s.kap-a.kap),M:a.M+t*(s.M-a.M),ctrl:s.ec/0.004>=s.esT/0.015?'εc = 0,004':'εs = 0,015'}; }
+    if(ratio(s)>=1){
+      let lo=prev, hi=s;
+      for(let i=0;i<14;i++){ const km=(lo.kap+hi.kap)/2, sm=mcSolveStep(F,m,alpha,km,Pt,lo); if(!sm) break; if(ratio(sm)>=1) hi=sm; else lo=sm; }
+      out.pts.push([hi.kap,hi.M]); out.states.push(hi);
+      out.ult=hi; out.end=hi.ec/m.ecmax>=hi.esT/m.esmax?'εc máx.':'εs máx.';
+      break;
+    }
+    out.pts.push([s.kap,s.M]); out.states.push(s);
+    prev=s; kap=kNew;
+    if(n===300||n===600||n===1000) dk*=2;
+  }
+  if(!out.ult&&out.states.length){ out.ult=out.states[out.states.length-1]; out.end=out.end||'Límite de pasos'; }
+  out.yld=yld; out.nom=nom;
+  out.Mmax=out.pts.reduce((a,p)=>Math.max(a,p[1]),0);
+  if(yld&&nom){ out.kyId=yld.kap*nom.M/yld.M; }
+  if(out.ult&&out.kyId) out.mu=out.ult.kap/out.kyId;
+  return out;
+}
+const cv=$('gridCanvas'), cx2=cv.getContext('2d');
+const ED={tool:'conc',scale:1,cw:10,ch:10,drag:null,hover:null,undo:[],F:null};
+
+function snapshot(){ ED.undo.push({nx:S.nx,ny:S.ny,dx:S.dx,dy:S.dy,conc:S.conc.slice(),bars:S.bars.slice()}); if(ED.undo.length>60) ED.undo.shift(); }
+function undo(){ const u=ED.undo.pop(); if(!u) return; S=u; $('nx').value=S.nx; $('ny').value=S.ny; $('dx').value=S.dx; $('dy').value=S.dy; layoutGrid(); changed('geom'); }
+
+function resizeGrid(nx,ny){
+  nx=clamp(Math.round(nx),1,400); ny=clamp(Math.round(ny),1,400);
+  if(nx===S.nx&&ny===S.ny) return;
+  snapshot();
+  const c=new Uint8Array(nx*ny), b=new Float32Array(nx*ny);
+  for(let j=0;j<Math.min(ny,S.ny);j++) for(let i=0;i<Math.min(nx,S.nx);i++){ c[j*nx+i]=S.conc[j*S.nx+i]; b[j*nx+i]=S.bars[j*S.nx+i]; }
+  S.nx=nx; S.ny=ny; S.conc=c; S.bars=b;
+}
+
+function layoutGrid(){
+  const wrapW=Math.max($('gridWrap').clientWidth-2,200);
+  const sc=Math.min(wrapW/(S.nx*S.dx),520/(S.ny*S.dy));
+  const minCell=8/Math.min(S.dx,S.dy);
+  ED.scale=Math.max(sc,minCell);
+  ED.cw=S.dx*ED.scale; ED.ch=S.dy*ED.scale;
+  const dpr=window.devicePixelRatio||1;
+  const W=Math.ceil(S.nx*ED.cw)+1, H=Math.ceil(S.ny*ED.ch)+1;
+  cv.width=W*dpr; cv.height=H*dpr; cv.style.width=W+'px'; cv.style.height=H+'px';
+  cx2.setTransform(dpr,0,0,dpr,0,0);
+  drawGrid();
+}
+
+function drawGrid(){
+  const {cw,ch}=ED, W=S.nx*cw, H=S.ny*ch;
+  cx2.clearRect(0,0,W+2,H+2);
+  cx2.fillStyle='#fff'; cx2.fillRect(0,0,W,H);
+  const css=getComputedStyle(document.documentElement);
+  cx2.fillStyle=css.getPropertyValue('--conc').trim()||'#c0c0c0';
+  for(let j=0;j<S.ny;j++) for(let i=0;i<S.nx;i++) if(S.conc[j*S.nx+i]) cx2.fillRect(i*cw,j*ch,cw,ch);
+  cx2.strokeStyle='#e2e2e2'; cx2.lineWidth=0.5; cx2.beginPath();
+  if(cw>=4){ for(let i=0;i<=S.nx;i++){ cx2.moveTo(i*cw+0.25,0); cx2.lineTo(i*cw+0.25,H); } }
+  if(ch>=4){ for(let j=0;j<=S.ny;j++){ cx2.moveTo(0,j*ch+0.25); cx2.lineTo(W,j*ch+0.25); } }
+  cx2.stroke();
+  const big=Math.min(cw,ch)>=18;
+  for(let j=0;j<S.ny;j++) for(let i=0;i<S.nx;i++){
+    const d=S.bars[j*S.nx+i]; if(!(d>0)) continue;
+    const r=Math.max(2.5,Math.min(d*ED.scale/2,Math.min(cw,ch)*0.45));
+    cx2.fillStyle='#000'; cx2.beginPath(); cx2.arc((i+0.5)*cw,(j+0.5)*ch,r,0,2*Math.PI); cx2.fill();
+    if(big&&r<Math.min(cw,ch)*0.3){ cx2.font='bold 9px Arial Narrow, Arial'; cx2.textAlign='center'; cx2.fillText(String(d),(i+0.5)*cw,(j+0.5)*ch-r-2); }
+  }
+  if(ED.F&&ED.F.Ac>0){
+    const F=ED.F, px=F.rx*ED.scale, py=H-F.ry*ED.scale;
+    cx2.strokeStyle='#000'; cx2.lineWidth=1.2; cx2.beginPath();
+    cx2.moveTo(px-7,py); cx2.lineTo(px+7,py); cx2.moveTo(px,py-7); cx2.lineTo(px,py+7); cx2.stroke();
+    cx2.beginPath(); cx2.arc(px,py,4,0,2*Math.PI); cx2.stroke();
+  }
+  cx2.strokeStyle='#000'; cx2.lineWidth=1.2; cx2.beginPath();
+  cx2.moveTo(4,H-4); cx2.lineTo(34,H-4); cx2.moveTo(4,H-4); cx2.lineTo(4,H-34); cx2.stroke();
+  cx2.fillStyle='#000'; cx2.font='bold 11px Arial Narrow, Arial'; cx2.textAlign='left';
+  cx2.fillText('x',37,H-1); cx2.fillText('y',1,H-38);
+  const d=ED.drag;
+  if(d&&(d.tool==='rect'||d.tool==='line')&&d.cur){
+    cx2.strokeStyle='#000'; cx2.lineWidth=1.5; cx2.setLineDash([4,3]);
+    if(d.tool==='rect'){
+      const i0=Math.min(d.i0,d.cur.i), i1=Math.max(d.i0,d.cur.i), j0=Math.min(d.j0,d.cur.j), j1=Math.max(d.j0,d.cur.j);
+      cx2.strokeRect(i0*cw,j0*ch,(i1-i0+1)*cw,(j1-j0+1)*ch);
+    } else {
+      cx2.beginPath(); cx2.moveTo((d.i0+0.5)*cw,(d.j0+0.5)*ch); cx2.lineTo((d.cur.i+0.5)*cw,(d.cur.j+0.5)*ch); cx2.stroke();
+    }
+    cx2.setLineDash([]);
+  }
+}
+
+function cellAt(ev){
+  const r=cv.getBoundingClientRect();
+  const i=Math.floor((ev.clientX-r.left)/ED.cw), j=Math.floor((ev.clientY-r.top)/ED.ch);
+  if(i<0||j<0||i>=S.nx||j>=S.ny) return null;
+  return {i,j};
+}
+function applyCell(c,tool){
+  const k=c.j*S.nx+c.i, d=parseFloat($('diam').value);
+  if(tool==='conc') S.conc[k]=1;
+  else if(tool==='erase'){ S.conc[k]=0; S.bars[k]=0; }
+  else if(tool==='bar'){ S.bars[k]=d; S.conc[k]=1; }
+  else if(tool==='barOff'){ S.bars[k]=0; }
+}
+function lineCells(a,b){
+  const out=[]; let x0=a.i,y0=a.j; const x1=b.i,y1=b.j, dx=Math.abs(x1-x0), dy=-Math.abs(y1-y0), sx=x0<x1?1:-1, sy=y0<y1?1:-1; let err=dx+dy;
+  while(true){ out.push({i:x0,j:y0}); if(x0===x1&&y0===y1) break; const e2=2*err; if(e2>=dy){ err+=dy; x0+=sx; } if(e2<=dx){ err+=dx; y0+=sy; } }
+  return out;
+}
+cv.addEventListener('pointerdown',ev=>{
+  const c=cellAt(ev); if(!c) return;
+  cv.setPointerCapture(ev.pointerId);
+  snapshot();
+  let tool=ED.tool;
+  if(tool==='bar'){ const k=c.j*S.nx+c.i; if(S.bars[k]===parseFloat($('diam').value)) tool='barOff'; }
+  ED.drag={tool,i0:c.i,j0:c.j,cur:c,last:c};
+  if(tool==='conc'||tool==='erase'||tool==='bar'||tool==='barOff'){ applyCell(c,tool); drawGrid(); }
+});
+cv.addEventListener('pointermove',ev=>{
+  const c=cellAt(ev);
+  if(c){
+    const k=c.j*S.nx+c.i, x=(c.i+0.5)*S.dx, y=(S.ny-c.j-0.5)*S.dy;
+    $('gridInfo').textContent=`Celda (${c.i+1}, ${c.j+1}), centro x = ${x.toFixed(0)} mm, y = ${y.toFixed(0)} mm`+(S.bars[k]>0?`, barra Ø${S.bars[k]}`:'')+(S.conc[k]?', hormigón':'');
+  }
+  const d=ED.drag; if(!d||!c) return;
+  d.cur=c;
+  if(d.tool==='conc'||d.tool==='erase'||d.tool==='bar'||d.tool==='barOff'){ lineCells(d.last,c).forEach(q=>applyCell(q,d.tool)); d.last=c; }
+  drawGrid();
+});
+function endDrag(){
+  const d=ED.drag; if(!d) return;
+  ED.drag=null;
+  if(d.tool==='rect'&&d.cur){
+    const i0=Math.min(d.i0,d.cur.i), i1=Math.max(d.i0,d.cur.i), j0=Math.min(d.j0,d.cur.j), j1=Math.max(d.j0,d.cur.j);
+    for(let j=j0;j<=j1;j++) for(let i=i0;i<=i1;i++) S.conc[j*S.nx+i]=1;
+  }
+  if(d.tool==='line'&&d.cur){
+    const st=Math.max(1,Math.round(num('lineStep',5))), cells=lineCells({i:d.i0,j:d.j0},d.cur);
+    cells.forEach((q,idx)=>{ if(idx%st===0||idx===cells.length-1) applyCell(q,'bar'); });
+  }
+  drawGrid(); changed('geom');
+}
+cv.addEventListener('pointerup',endDrag);
+cv.addEventListener('pointercancel',endDrag);
+cv.addEventListener('pointerleave',()=>{ if(!ED.drag) $('gridInfo').textContent=''; });
+
+document.querySelectorAll('#tools .tool[data-t]').forEach(b=>b.addEventListener('click',()=>{
+  ED.tool=b.dataset.t;
+  document.querySelectorAll('#tools .tool[data-t]').forEach(x=>x.classList.toggle('active',x===b));
+}));
+document.addEventListener('keydown',ev=>{ if((ev.ctrlKey||ev.metaKey)&&ev.key.toLowerCase()==='z'&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)){ ev.preventDefault(); undo(); } });
+
+$('clearBtn').addEventListener('click',()=>{ snapshot(); S.conc.fill(0); S.bars.fill(0); drawGrid(); changed('geom'); });
+['nx','ny'].forEach(id=>$(id).addEventListener('change',()=>{ resizeGrid(num('nx',S.nx),num('ny',S.ny)); layoutGrid(); changed('geom'); }));
+['dx','dy'].forEach(id=>$(id).addEventListener('change',()=>{ snapshot(); S.dx=Math.max(num('dx',40),1); S.dy=Math.max(num('dy',40),1); layoutGrid(); changed('geom'); }));
+window.addEventListener('resize',()=>{ clearTimeout(ED.rt); ED.rt=setTimeout(layoutGrid,150); });
+
+$('tpl').addEventListener('change',()=>{ $('tplBox').hidden=!$('tpl').value; });
+$('tplGo').addEventListener('click',()=>{ genTemplate($('tpl').value); });
+function genTemplate(type){
+  const dx=S.dx, dy=S.dy;
+  const lw=num('tLw',2000), lf=num('tLf',1000), t=num('tT',200), dm=num('tDm',10), db=num('tDb',18), s=Math.max(1,Math.round(num('tS',5)));
+  const nwx=Math.max(1,Math.round(lw/dx)), tw=Math.max(1,Math.round(t/dy)), tfx=Math.max(1,Math.round(t/dx)), nfy=Math.max(1,Math.round(lf/dy));
+  let nx,ny; const legs=[];
+  if(type==='rect'){ nx=nwx+2; ny=tw+2; legs.push({i:1,j:1,w:nwx,h:tw,dir:'x',ends:[0,1]}); }
+  else if(type==='L'){ nx=nwx+2; ny=nfy+2; legs.push({i:1,j:1+nfy-tw,w:nwx,h:tw,dir:'x',ends:[1]}); legs.push({i:1,j:1,w:tfx,h:nfy,dir:'y',ends:[0]}); }
+  else if(type==='T'){ nx=nwx+2; ny=nfy+2; const jm=1+Math.round((nfy-tw)/2); legs.push({i:1,j:jm,w:nwx,h:tw,dir:'x',ends:[1]}); legs.push({i:1,j:1,w:tfx,h:nfy,dir:'y',ends:[0,1]}); }
+  else if(type==='C'){ nx=nwx+2; ny=nfy+2; legs.push({i:1,j:1+nfy-tw,w:nwx,h:tw,dir:'x',ends:[]}); legs.push({i:1,j:1,w:tfx,h:nfy,dir:'y',ends:[0]}); legs.push({i:nwx+1-tfx,j:1,w:tfx,h:nfy,dir:'y',ends:[0]}); }
+  else return;
+  snapshot();
+  S.nx=nx; S.ny=ny; S.conc=new Uint8Array(nx*ny); S.bars=new Float32Array(nx*ny);
+  $('nx').value=nx; $('ny').value=ny;
+  const set=(i,j,d)=>{ if(i<0||j<0||i>=nx||j>=ny) return; S.conc[j*nx+i]=1; if(d) S.bars[j*nx+i]=d; };
+  legs.forEach(L=>{ for(let j=L.j;j<L.j+L.h;j++) for(let i=L.i;i<L.i+L.w;i++) set(i,j,0); });
+  legs.forEach(L=>{
+    const len=L.dir==='x'?L.w:L.h, th=L.dir==='x'?L.h:L.w;
+    const across=th>=4?[1,th-2]:[Math.floor(th/2)];
+    const along=[]; for(let p=1;p<=len-2;p+=s) along.push(p); if(len>=3&&along[along.length-1]!==len-2) along.push(len-2);
+    const endZone=p=>L.ends.some(e=>e===0?p<=5:p>=len-6);
+    along.forEach(p=>across.forEach(q=>{ const i=L.dir==='x'?L.i+p:L.i+q, j=L.dir==='x'?L.j+q:L.j+p; set(i,j,endZone(p)?db:dm); }));
+    L.ends.forEach(e=>{ [1,3,5].forEach(p0=>{ const p=e===0?p0:len-1-p0; if(p<1||p>len-2) return; across.forEach(q=>{ const i=L.dir==='x'?L.i+p:L.i+q, j=L.dir==='x'?L.j+q:L.j+p; set(i,j,db); }); }); });
+  });
+  if(type!=='rect'){
+    const W=legs[0];
+    legs.slice(1).forEach(L=>{
+      for(let j=0;j<ny;j++) for(let i=0;i<nx;i++){
+        const k=j*nx+i; if(!S.bars[k]) continue;
+        const inWeb=j>=W.j&&j<W.j+W.h&&i>=L.i-4&&i<L.i+L.w+4;
+        const inFl=i>=L.i&&i<L.i+L.w&&j>=W.j-4&&j<W.j+W.h+4;
+        if(inWeb||inFl) S.bars[k]=db;
+      }
+    });
+  }
+  $('tpl').value=''; $('tplBox').hidden=true;
+  layoutGrid(); changed('geom');
+}
+
+$('pasteBtn').addEventListener('click',()=>{ $('pasteBox').hidden=false; $('pasteTxt').focus(); });
+$('pasteCancel').addEventListener('click',()=>{ $('pasteBox').hidden=true; });
+$('pasteGo').addEventListener('click',()=>{
+  const rows=$('pasteTxt').value.replace(/\r/g,'').split('\n');
+  while(rows.length&&!rows[rows.length-1].trim()) rows.pop();
+  if(!rows.length) return;
+  const cells=rows.map(r=>r.split('\t'));
+  const nx=Math.max(...cells.map(r=>r.length)), ny=cells.length;
+  snapshot();
+  S.nx=nx; S.ny=ny; S.conc=new Uint8Array(nx*ny); S.bars=new Float32Array(nx*ny);
+  cells.forEach((r,j)=>r.forEach((tk,i)=>{
+    tk=tk.trim().replace(',','.'); if(!tk) return;
+    const k=j*nx+i; if(/^[xX]$/.test(tk)){ S.conc[k]=1; return; }
+    const v=parseFloat(tk); if(!isFinite(v)) return;
+    S.conc[k]=1; if(v>0) S.bars[k]=v;
+  }));
+  $('nx').value=nx; $('ny').value=ny;
+  $('pasteBox').hidden=true; $('pasteTxt').value='';
+  layoutGrid(); changed('geom');
+});
+function gridText(){
+  const L=[];
+  for(let j=0;j<S.ny;j++){ const r=[]; for(let i=0;i<S.nx;i++){ const k=j*S.nx+i; r.push(S.bars[k]>0?String(S.bars[k]):S.conc[k]?'x':''); } L.push(r.join('\t')); }
+  return L.join('\r\n')+'\r\n';
+}
+
+const INPUT_IDS=['proj','nx','ny','dx','dy','fc','Ec','ccurve','pmConc','fy','Es','smodel','fsu','esh','esu','Pp','Pn','ecmax','esmax','mcMode','fib','refpt','nmer','pcapf','mpr','alphaMC','alphaPM','Pring','loadsTxt','etabsSign'];
+function projectData(){
+  const inp={}; INPUT_IDS.forEach(id=>{ const e=$(id); if(!e) return; inp[id]=e.type==='checkbox'?e.checked:e.value; });
+  const bars=[]; for(let k=0;k<S.nx*S.ny;k++) if(S.bars[k]>0) bars.push([k,S.bars[k]]);
+  const conc=[]; for(let k=0;k<S.nx*S.ny;k++) if(S.conc[k]) conc.push(k);
+  return {app:'fddlebel-secciones',v:1,grid:{nx:S.nx,ny:S.ny,dx:S.dx,dy:S.dy,conc,bars},inputs:inp};
+}
+function loadProject(d){
+  if(!d||!d.grid) return false;
+  const g=d.grid;
+  S={nx:g.nx,ny:g.ny,dx:g.dx,dy:g.dy,conc:new Uint8Array(g.nx*g.ny),bars:new Float32Array(g.nx*g.ny)};
+  (g.conc||[]).forEach(k=>{ if(k<S.conc.length) S.conc[k]=1; });
+  (g.bars||[]).forEach(([k,v])=>{ if(k<S.bars.length) S.bars[k]=v; });
+  Object.entries(d.inputs||{}).forEach(([id,v])=>{ const e=$(id); if(!e) return; if(e.type==='checkbox') e.checked=!!v; else e.value=v; });
+  $('nx').value=S.nx; $('ny').value=S.ny; $('dx').value=S.dx; $('dy').value=S.dy;
+  return true;
+}
+function autosave(){ try{ localStorage.setItem('fdd_secciones_v1',JSON.stringify(projectData())); }catch(e){} }
+function download(name,text,type){
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text],{type:type||'text/plain'})); a.download=name;
+  document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500);
+}
+function baseName(){ const p=$('proj').value.trim().replace(/[^\w\-]+/g,'_'); return p||'seccion'; }
+$('saveBtn').addEventListener('click',()=>download(baseName()+'.json',JSON.stringify(projectData()),'application/json'));
+$('loadBtn').addEventListener('click',()=>$('loadFile').click());
+$('loadFile').addEventListener('change',ev=>{
+  const f=ev.target.files[0]; if(!f) return;
+  const r=new FileReader(); r.onload=()=>{ try{ if(loadProject(JSON.parse(r.result))){ snapshot(); layoutGrid(); changed('all'); } }catch(e){ alertBox('El archivo no es un proyecto válido.'); } };
+  r.readAsText(f); ev.target.value='';
+});
+function alertBox(msg){ $('gridInfo').textContent=msg; }
+const svgNS='http://www.w3.org/2000/svg';
+function el(tag,attrs){ const n=document.createElementNS(svgNS,tag); for(const k in attrs) n.setAttribute(k,attrs[k]); return n; }
+function tx(x,y,s,o){ const t=el('text',Object.assign({x,y,'font-size':11,'text-anchor':'middle',fill:'#000'},o||{})); t.textContent=s; return t; }
+function niceStep(range,count){ const raw=Math.max(range,1e-12)/count, m=Math.pow(10,Math.floor(Math.log10(raw))), f=raw/m; return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*m; }
+function fmtTick(v,st){ const d=st>=1?0:Math.min(6,Math.ceil(-Math.log10(st))); return (Math.abs(v)<st*1e-6?0:v).toFixed(d); }
+const fmt=(x,d)=>isFinite(x)?x.toFixed(d):'-';
+const fmtk=x=>isFinite(x)?String(Math.round(x)):'-';
+const FAIL='#b3261e';
+
+function chart(svg,cfg){
+  svg.innerHTML='';
+  const W=760,H=cfg.H||420,L=70,R=18,T=16,B=46;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const xs=[],ys=[];
+  cfg.series.forEach(s=>s.pts.forEach(p=>{ if(isFinite(p[0])&&isFinite(p[1])){ xs.push(p[0]); ys.push(p[1]); } }));
+  (cfg.points||[]).forEach(p=>{ xs.push(p.x); ys.push(p.y); });
+  if(!xs.length){ svg.appendChild(tx(W/2,H/2,'Sin datos')); return; }
+  let x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+  if(cfg.zeroX){ x0=Math.min(x0,0); x1=Math.max(x1,0); } if(cfg.zeroY){ y0=Math.min(y0,0); y1=Math.max(y1,0); }
+  if(cfg.equal){ const c=(x0+x1)/2, d=(y0+y1)/2, h=Math.max(x1-x0,(y1-y0)*(W-L-R)/(H-T-B))/2; x0=c-h; x1=c+h; const hv=h*(H-T-B)/(W-L-R); y0=d-hv; y1=d+hv; }
+  const px=(x1-x0)*0.06||1, py=(y1-y0)*0.08||1; x0-=px; x1+=px; y0-=py; y1+=py;
+  const sx=niceStep(x1-x0,8), sy=niceStep(y1-y0,7);
+  x0=Math.floor(x0/sx)*sx; x1=Math.ceil(x1/sx)*sx; y0=Math.floor(y0/sy)*sy; y1=Math.ceil(y1/sy)*sy;
+  const X=x=>L+(x-x0)/(x1-x0)*(W-L-R), Y=y=>H-B-(y-y0)/(y1-y0)*(H-T-B);
+  const g=el('g',{});
+  for(let y=y0;y<=y1+sy*1e-6;y+=sy){ g.appendChild(el('line',{x1:L,x2:W-R,y1:Y(y),y2:Y(y),stroke:'#dcdcdc','stroke-width':0.6})); g.appendChild(tx(L-6,Y(y)+4,fmtTick(y,sy),{'text-anchor':'end'})); }
+  for(let x=x0;x<=x1+sx*1e-6;x+=sx){ g.appendChild(el('line',{x1:X(x),x2:X(x),y1:T,y2:H-B,stroke:'#dcdcdc','stroke-width':0.6})); g.appendChild(tx(X(x),H-B+15,fmtTick(x,sx))); }
+  svg.appendChild(g);
+  if(x0<0&&x1>0) svg.appendChild(el('line',{x1:X(0),x2:X(0),y1:T,y2:H-B,stroke:'#555','stroke-width':0.9}));
+  if(y0<0&&y1>0) svg.appendChild(el('line',{x1:L,x2:W-R,y1:Y(0),y2:Y(0),stroke:'#555','stroke-width':0.9}));
+  svg.appendChild(el('rect',{x:L,y:T,width:W-L-R,height:H-T-B,fill:'none',stroke:'#7a7a7a','stroke-width':1}));
+  svg.appendChild(tx((L+W-R)/2,H-8,cfg.xlabel,{'font-weight':700}));
+  const yl=tx(14,(T+H-B)/2,cfg.ylabel,{'font-weight':700}); yl.setAttribute('transform',`rotate(-90 14 ${(T+H-B)/2})`); svg.appendChild(yl);
+  const clipId='c'+Math.random().toString(36).slice(2);
+  const cp=el('clipPath',{id:clipId}); cp.appendChild(el('rect',{x:L,y:T,width:W-L-R,height:H-T-B})); svg.appendChild(cp);
+  const gc=el('g',{'clip-path':`url(#${clipId})`});
+  cfg.series.forEach(s=>{
+    const d=s.pts.filter(p=>isFinite(p[0])&&isFinite(p[1])).map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)).join(' ')+(s.close?'Z':'');
+    gc.appendChild(el('path',{d,fill:'none',stroke:s.color||'#000','stroke-width':s.w||1.4,'stroke-dasharray':s.dash||'none','stroke-linejoin':'round'}));
+  });
+  (cfg.points||[]).forEach(p=>{
+    const col=p.fail?FAIL:'#000';
+    if(p.ring) gc.appendChild(el('circle',{cx:X(p.x),cy:Y(p.y),r:3.5,fill:'#fff',stroke:col,'stroke-width':1.4}));
+    else gc.appendChild(el('circle',{cx:X(p.x),cy:Y(p.y),r:3.2,fill:col}));
+    if(p.label) gc.appendChild(tx(X(p.x)+6,Y(p.y)-6,p.label,{'text-anchor':'start','font-size':10.5,'font-weight':700,fill:col}));
+  });
+  svg.appendChild(gc);
+  const named=cfg.series.filter(s=>s.name);
+  if(named.length){
+    const lx=cfg.legendRight?W-R-220:L+12; let ly=T+16;
+    svg.appendChild(el('rect',{x:lx-6,y:T+4,width:214,height:named.length*16+6,fill:'#fff',stroke:'#cfcfcf','stroke-width':0.6}));
+    named.forEach(s=>{
+      svg.appendChild(el('line',{x1:lx,x2:lx+28,y1:ly-4,y2:ly-4,stroke:s.color||'#000','stroke-width':s.w||1.4,'stroke-dasharray':s.dash||'none'}));
+      svg.appendChild(tx(lx+36,ly,s.name,{'text-anchor':'start','font-size':11}));
+      ly+=16;
+    });
+  }
+}
+
+const ST={m:null,F:null,sf:null,mc:null,loads:[],timer:null,pending:new Set()};
+
+function parseLoads(){
+  const sg=$('etabsSign').checked?-1:1;
+  return $('loadsTxt').value.split('\n').map(l=>l.trim()).filter(Boolean).map((l,i)=>{
+    const t=l.replace(/,/g,'.').split(/[\s;\t]+/);
+    let name, nums;
+    if(t.length>=4&&!isFinite(parseFloat(t[0]))){ name=t[0]; nums=t.slice(1).map(parseFloat); }
+    else{ name='L'+(i+1); nums=t.map(parseFloat); }
+    if(nums.length<3||nums.slice(0,3).some(v=>!isFinite(v))) return null;
+    return {name,P:sg*nums[0],X:nums[2],Y:nums[1]};
+  }).filter(Boolean);
+}
+function evalLoads(){
+  ST.loads=parseLoads().map(L=>{ const r=dcr(ST.sf,L.P,L.X,L.Y); return Object.assign(L,{d:r.d,R:r.R,ang:Math.atan2(L.Y,L.X)/DEG}); });
+}
+
+function computeAll(kinds){
+  const t0=performance.now();
+  const all=kinds.has('all')||kinds.has('geom');
+  if(all||kinds.has('surf')||kinds.has('mc')) ST.m=readMat();
+  if(all){ ST.F=buildFibers(S,ST.m); ED.F=ST.F; drawGrid(); renderProps(); }
+  const F=ST.F;
+  if(!F||F.Ac<=0||F.n===0){ $('busy').textContent='Dibuja la sección de hormigón para calcular.'; return; }
+  if(all||kinds.has('surf')){ ST.sf=buildSurface(F,ST.m); evalLoads(); }
+  if(all||kinds.has('mc')){
+    const a=num('alphaMC',0)*DEG;
+    ST.mc={pos:mcRun(F,ST.m,a,ST.m.Pp),neg:mcRun(F,ST.m,a+Math.PI,ST.m.Pn)};
+    renderMC();
+  }
+  if(kinds.has('loads')) evalLoads();
+  renderPM(); renderLoads(); GL.update();
+  renderNotes();
+  $('busy').textContent=`Calculado en ${Math.round(performance.now()-t0)} ms, ${F.n} fibras de hormigón, ${F.nb} barras.`;
+  autosave();
+}
+function changed(kind){
+  ST.pending.add(kind);
+  clearTimeout(ST.timer);
+  $('busy').textContent='Calculando...';
+  ST.timer=setTimeout(()=>{ const k=new Set(ST.pending); ST.pending.clear(); try{ computeAll(k); }catch(e){ $('busy').textContent='Error: '+e.message; console.error(e); } },220);
+}
+
+function renderProps(){
+  const F=ST.F, m=ST.m;
+  const rows=[
+    ['Ag','mm²',fmtk(F.Ac)],['As','mm²',fmtk(F.As)],['ρ = As/Ag','%',fmt(F.rho*100,3)],['N° barras','',String(F.nb)],
+    ['Centroide geométrico x, y','mm',fmt(F.xg,1)+', '+fmt(F.yg,1)],['Centroide plástico x, y','mm',fmt(F.xp,1)+', '+fmt(F.yp,1)],
+    ['Ix, Iy (centroide geom.)','10⁹ mm⁴',fmt(F.Ixg/1e9,3)+', '+fmt(F.Iyg/1e9,3)],
+    ['Ec','MPa',fmtk(m.Ec)],['β1','',fmt(m.beta1,3)],['εy','',fmt(m.ey,5)],
+    ['Po = 0,85f\'c(Ag−As)+fy·As','kN',fmtk(F.Po)],['φPn,máx = '+m.pcapf+'·φ·Po','kN',fmtk(m.pcapf*(m.mpr?1:0.65)*F.Po)],['Pt = −fy·As','kN',fmtk(F.Pt)],
+  ];
+  if(F.nb&&F.bin.some(b=>!b)) rows.push(['Barras fuera del hormigón','',String(F.bin.filter(b=>!b).length)]);
+  $('propTable').innerHTML=`<tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td class="num">${r[2]}</td></tr>`).join('')}</tbody>`;
+}
+
+function mcSummary(r){
+  if(!r.ok) return null;
+  return {ky:r.yld?r.yld.kap*1e3:NaN,My:r.yld?r.yld.M:NaN,kn:r.nom?r.nom.kap*1e3:NaN,Mn:r.nom?r.nom.M:NaN,
+    kyId:r.kyId?r.kyId*1e3:NaN,ku:r.ult?r.ult.kap*1e3:NaN,Mu:r.ult?r.ult.M:NaN,Mmax:r.Mmax,mu:r.mu,end:r.end||'-',
+    ecu:r.ult?r.ult.ec:NaN,esu:r.ult?r.ult.esT:NaN,c:r.ult?r.ult.cna:NaN,nomCtrl:r.nom?r.nom.ctrl:'-'};
+}
+function renderMC(svgEl,tableEl,statsEl){
+  const p=ST.mc.pos, n=ST.mc.neg;
+  const sp=mcSummary(p), sn=mcSummary(n);
+  const series=[], pts=[];
+  if(p.ok) series.push({name:`α = ${num('alphaMC',0)}°, P = ${ST.m.Pp} kN`,pts:p.pts.map(q=>[q[0]*1e3,q[1]]),w:1.8});
+  if(n.ok) series.push({name:`α + 180°, P = ${ST.m.Pn} kN`,pts:n.pts.map(q=>[-q[0]*1e3,-q[1]]),w:1.8,dash:'6,4'});
+  [[sp,1],[sn,-1]].forEach(([s,sg])=>{ if(!s) return;
+    if(isFinite(s.ky)) pts.push({x:sg*s.ky,y:sg*s.My,label:'φy',ring:true});
+    if(isFinite(s.kn)) pts.push({x:sg*s.kn,y:sg*s.Mn,label:'Mn',ring:true});
+    if(isFinite(s.ku)) pts.push({x:sg*s.ku,y:sg*s.Mu,label:'φu'});
+  });
+  chart(svgEl||$('mcChart'),{xlabel:'Curvatura φ [1/m]',ylabel:'M [kN·m]',series,points:pts,zeroX:true,zeroY:true});
+  const f2=(s,k,d)=>s?fmt(s[k],d):(k==='end'?'-':'-');
+  const rows=[
+    ['Primera fluencia φy','1/m','ky',5],['My','kN·m','My',0],['Punto nominal ('+(sp?sp.nomCtrl:'-')+')','1/m','kn',5],['Mn','kN·m','Mn',0],
+    ["φy' = φy·Mn/My",'1/m','kyId',5],['Curvatura última φu','1/m','ku',5],['Mu','kN·m','Mu',0],['M máx.','kN·m','Mmax',0],
+    ["Ductilidad μφ = φu/φy'",'','mu',2],['εc en φu','','ecu',5],['εs en φu','','esu',5],['c en φu','mm','c',0],['Control último','','end',0],
+  ];
+  const tb=tableEl||$('mcTable');
+  tb.innerHTML=`<thead><tr><th>Parámetro</th><th>Unidad</th><th class="num">α</th><th class="num">α + 180°</th></tr></thead><tbody>${
+    rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td class="num">${r[2]==='end'?(sp?sp.end:'-'):f2(sp,r[2],r[3])}</td><td class="num">${r[2]==='end'?(sn?sn.end:'-'):f2(sn,r[2],r[3])}</td></tr>`).join('')}</tbody>`;
+  if(!statsEl) statsEl=$('mcStats');
+  const st=[
+    {k:'My + / −',v:(sp?fmt(sp.My,0):'-')+' / '+(sn?fmt(sn.My,0):'-')+' kN·m'},
+    {k:'Mn + / −',v:(sp?fmt(sp.Mn,0):'-')+' / '+(sn?fmt(sn.Mn,0):'-')+' kN·m'},
+    {k:'φu + / −',v:(sp?fmt(sp.ku,4):'-')+' / '+(sn?fmt(sn.ku,4):'-')+' 1/m'},
+    {k:'μφ + / −',v:(sp?fmt(sp.mu,1):'-')+' / '+(sn?fmt(sn.mu,1):'-')},
+  ];
+  statsEl.innerHTML=st.map(s=>`<div class="stat"><div class="k">${s.k}</div><div class="v">${s.v}</div></div>`).join('');
+  const msg=[p,n].filter(r=>!r.ok).map(r=>r.msg);
+  if(msg.length) statsEl.insertAdjacentHTML('beforeend',`<div class="warn" style="grid-column:1/-1">${msg[0]}</div>`);
+}
+
+function renderPM(svgPM,svgRing,statsEl){
+  const sf=ST.sf; if(!sf) return;
+  const a=num('alphaPM',0)*DEG;
+  const cN=pmCurve(sf,a,'nom'), cD=pmCurve(sf,a,'des');
+  const nomPts=cN.L.slice().reverse().concat(cN.R), desPts=cD.L.slice().reverse().concat(cD.R); if(desPts.length) desPts.push(desPts[0]);
+  const pts=[];
+  if($('pmLoads').checked) ST.loads.forEach(L=>pts.push({x:L.X*Math.cos(a)+L.Y*Math.sin(a),y:L.P,fail:!(L.d<=1)}));
+  chart(svgPM||$('pmChart'),{H:460,xlabel:`M en α = ${num('alphaPM',0)}° [kN·m]`,ylabel:'P [kN], compresión +',zeroX:true,zeroY:true,legendRight:true,
+    series:[{name:'Nominal Pn, Mn',pts:nomPts,dash:'6,4',w:1.2},{name:ST.m.mpr?'Probable, fs = 1,25fy':'Diseño φPn, φMn',pts:desPts,w:1.8}],points:pts});
+  const Pr=num('Pring',0);
+  const rn=ringAt(sf,Pr,'nom'), rd=ringAt(sf,Pr,'des');
+  const series=[];
+  if(rn) series.push({name:'Nominal',pts:rn.map(q=>[q[0],q[1]]),close:true,dash:'6,4',w:1.2});
+  if(rd) series.push({name:'Diseño',pts:rd.map(q=>[q[0],q[1]]),close:true,w:1.8});
+  const rp=[];
+  if($('pmLoads').checked) ST.loads.forEach(L=>rp.push({x:L.X,y:L.Y,fail:!(L.d<=1),label:L.name}));
+  const R=Math.max(...(rn||[[1,1]]).map(q=>Math.hypot(q[0],q[1])));
+  series.push({pts:[[0,0],[1.1*R*Math.cos(a),1.1*R*Math.sin(a)]],w:0.8,dash:'2,3',color:'#777'});
+  chart(svgRing||$('ringChart'),{H:460,xlabel:'My [kN·m], comprime +x',ylabel:'Mx [kN·m], comprime +y',equal:true,zeroX:true,zeroY:true,legendRight:true,series,points:rp});
+  if(!rn&&!rd&&svgRing!==undefined){}
+  const M0n=rayR(ringAt(sf,0,'nom'),a), M0d=rayR(ringAt(sf,0,'des'),a);
+  const st=[
+    {k:'φPn,máx',v:fmtk(sf.Pcap)+' kN'},{k:'Po / Pt',v:fmtk(sf.Po)+' / '+fmtk(sf.Pt)+' kN'},
+    {k:'Mn (P = 0) en α',v:fmtk(M0n)+' kN·m'},{k:'φMn (P = 0) en α',v:fmtk(M0d)+' kN·m'},
+  ];
+  (statsEl||$('pmStats')).innerHTML=st.map(s=>`<div class="stat"><div class="k">${s.k}</div><div class="v">${s.v}</div></div>`).join('')+(rn?'':`<div class="warn" style="grid-column:1/-1">P = ${Pr} kN fuera del rango de la superficie.</div>`);
+}
+
+function renderLoads(tableEl){
+  const t=tableEl||$('loadsTable');
+  t.innerHTML=`<thead><tr><th>Carga</th><th class="num">P [kN]</th><th class="num">Mx [kN·m]</th><th class="num">My [kN·m]</th><th class="num">Ángulo [°]</th><th class="num">|Mu| [kN·m]</th><th class="num">φMn [kN·m]</th><th class="num">D/C</th></tr></thead><tbody>${
+    ST.loads.map(L=>`<tr class="${L.d<=1?'':'fail'}"><td>${L.name}</td><td class="num">${fmt(L.P,1)}</td><td class="num">${fmt(L.Y,1)}</td><td class="num">${fmt(L.X,1)}</td><td class="num">${fmt(L.ang,1)}</td><td class="num">${fmt(Math.hypot(L.X,L.Y),1)}</td><td class="num">${L.R>0?fmt(L.R,1):'-'}</td><td class="num">${isFinite(L.d)?fmt(L.d,3):'Fuera'}</td></tr>`).join('')}</tbody>`;
+}
+
+function renderNotes(){
+  const m=ST.m;
+  $('notes').innerHTML=`Convención: x horizontal, y vertical, origen en la esquina inferior izquierda de la grilla. P de compresión positiva. Mx comprime el lado +y y My comprime el lado +x, referidos al ${m.refpt==='gc'?'centroide geométrico':'centroide plástico'}.<br>
+  Interacción: εcu = 0,003, ${m.pmConc==='whit'?`bloque de Whitney con β1 = ${m.beta1.toFixed(3)}`:'curva constitutiva del hormigón'}, acero elastoplástico${m.mpr?' con 1,25fy':''}. φ según εt (ACI 318-19 Tabla 21.2.2, estribos), φPn,máx = ${m.pcapf}·φ·Po.<br>
+  Momento-curvatura: hormigón ${m.ccurve==='cp'?`Collins y Porasz, n = ${m.n.toFixed(2)}, ε0 = ${m.e0.toFixed(5)}`:`Hognestad, ε0 = ${m.e0.toFixed(5)}`}, sin tracción. Acero ${m.smodel==='park'?`Park, fsu = ${m.fsu} MPa, εsh = ${m.esh}, εsu = ${m.esu}`:'elastoplástico'}. Límite εc = ${m.ecmax}, εs = ${m.esmax}.<br>
+  Punto nominal en εc = 0,004 o εs = 0,015, lo que ocurra primero. Las barras descuentan el área de hormigón que ocupan.<br>
+  D/C: capacidad de diseño en la dirección del momento resultante de la carga, al mismo P.`;
+}
+
+document.querySelectorAll('#tabs button[data-tab]').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#tabs button[data-tab]').forEach(x=>x.classList.toggle('active',x===b));
+  document.querySelectorAll('.tabpane').forEach(p=>p.hidden=p.dataset.pane!==b.dataset.tab);
+  if(b.dataset.tab==='s3d') GL.resize();
+  try{ localStorage.setItem('fdd_secciones_tab',b.dataset.tab); }catch(e){}
+}));
+
+const KIND={fc:'all',Ec:'all',fy:'all',Es:'all',fib:'all',refpt:'all',pmConc:'surf',nmer:'surf',pcapf:'surf',mpr:'all',
+  ccurve:'mc',smodel:'mc',fsu:'mc',esh:'mc',esu:'mc',ecmax:'mc',esmax:'mc',Pp:'mc',Pn:'mc',mcMode:'mc',alphaMC:'mc',
+  alphaPM:'pm',Pring:'pm',pmLoads:'pm',loadsTxt:'loads',etabsSign:'loads',proj:'pm'};
+Object.entries(KIND).forEach(([id,k])=>{ const e=$(id); if(!e) return; const ev=e.tagName==='SELECT'||e.type==='checkbox'?'change':'input'; e.addEventListener(ev,()=>changed(k)); });
+$('smodel').addEventListener('change',()=>{ $('parkBox').hidden=$('smodel').value!=='park'; });
+['showNom','showDes','showLoads3'].forEach(id=>$(id).addEventListener('change',()=>GL.draw()));
+$('viewReset').addEventListener('click',()=>{ GL.reset(); });
+const GL=(()=>{
+  const canvas=$('glCanvas'), labels=$('glLabels');
+  let gl=null, progLit=null, progFlat=null, bufs={}, cam={az:0.75,el:0.42,r:4.4}, map=null, ok=true;
+  function sh(type,src){ const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s); if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; }
+  function prog(vs,fs){ const p=gl.createProgram(); gl.attachShader(p,sh(gl.VERTEX_SHADER,vs)); gl.attachShader(p,sh(gl.FRAGMENT_SHADER,fs)); gl.linkProgram(p); if(!gl.getProgramParameter(p,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p)); return p; }
+  function init(){
+    try{ gl=canvas.getContext('webgl',{antialias:true,preserveDrawingBuffer:true,premultipliedAlpha:false}); }catch(e){ gl=null; }
+    if(!gl){ ok=false; labels.innerHTML='<span style="left:50%;top:50%">WebGL no disponible en este navegador.</span>'; return; }
+    progLit=prog(`attribute vec3 p;attribute vec3 n;uniform mat4 mvp;varying vec3 vn;void main(){vn=n;gl_Position=mvp*vec4(p,1.0);}`,
+      `precision mediump float;varying vec3 vn;uniform vec4 col;uniform vec3 L;void main(){float d=abs(dot(normalize(vn),L));gl_FragColor=vec4(col.rgb*(0.38+0.62*d),col.a);}`);
+    progFlat=prog(`attribute vec3 p;uniform mat4 mvp;uniform float ps;void main(){gl_Position=mvp*vec4(p,1.0);gl_PointSize=ps;}`,
+      `precision mediump float;uniform vec4 col;uniform float rnd;void main(){if(rnd>0.5){vec2 c=gl_PointCoord-0.5;if(dot(c,c)>0.25)discard;}gl_FragColor=col;}`);
+    let drag=null;
+    canvas.addEventListener('pointerdown',e=>{ drag={x:e.clientX,y:e.clientY,az:cam.az,el:cam.el}; canvas.setPointerCapture(e.pointerId); canvas.style.cursor='grabbing'; });
+    canvas.addEventListener('pointermove',e=>{ if(!drag) return; cam.az=drag.az-(e.clientX-drag.x)*0.008; cam.el=clamp(drag.el+(e.clientY-drag.y)*0.008,-1.45,1.45); draw(); });
+    const up=()=>{ drag=null; canvas.style.cursor='grab'; };
+    canvas.addEventListener('pointerup',up); canvas.addEventListener('pointercancel',up);
+    canvas.addEventListener('wheel',e=>{ e.preventDefault(); cam.r=clamp(cam.r*Math.exp(e.deltaY*0.001),1.5,15); draw(); },{passive:false});
+  }
+  const M4={
+    persp(f,a,n,fa){ const t=1/Math.tan(f/2); return [t/a,0,0,0, 0,t,0,0, 0,0,(fa+n)/(n-fa),-1, 0,0,2*fa*n/(n-fa),0]; },
+    look(e,c,u){ let z=[e[0]-c[0],e[1]-c[1],e[2]-c[2]]; let l=Math.hypot(...z); z=z.map(v=>v/l);
+      let x=[u[1]*z[2]-u[2]*z[1],u[2]*z[0]-u[0]*z[2],u[0]*z[1]-u[1]*z[0]]; l=Math.hypot(...x); x=x.map(v=>v/l);
+      const y=[z[1]*x[2]-z[2]*x[1],z[2]*x[0]-z[0]*x[2],z[0]*x[1]-z[1]*x[0]];
+      return [x[0],y[0],z[0],0, x[1],y[1],z[1],0, x[2],y[2],z[2],0, -(x[0]*e[0]+x[1]*e[1]+x[2]*e[2]),-(y[0]*e[0]+y[1]*e[1]+y[2]*e[2]),-(z[0]*e[0]+z[1]*e[1]+z[2]*e[2]),1]; },
+    mul(a,b){ const o=new Array(16); for(let i=0;i<4;i++) for(let j=0;j<4;j++){ let s=0; for(let k=0;k<4;k++) s+=a[k*4+j]*b[i*4+k]; o[i*4+j]=s; } return o; }
+  };
+  function buf(data){ const b=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,b); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.STATIC_DRAW); return {b,n:data.length/3}; }
+  function free(){ Object.values(bufs).forEach(o=>{ if(o&&o.b) gl.deleteBuffer(o.b); if(o&&o.nb) gl.deleteBuffer(o.nb); }); bufs={}; }
+  function W(X,Y,P){ return [X/map.Ms,(P-map.Pm)/map.Ph,-Y/map.Ms]; }
+  function surfMesh(rings,lev,topCenter){
+    const K=rings[0].length, V=[], idx=(i,k)=>[i,k%K];
+    const pos=rings.map((r,i)=>r.map(q=>W(q[0],q[1],lev[i])));
+    const nrm=pos.map(r=>r.map(()=>[0,0,0]));
+    const tris=[];
+    for(let i=0;i<rings.length-1;i++) for(let k=0;k<K;k++){ const a=[i,k],b=[i,(k+1)%K],c=[i+1,(k+1)%K],d=[i+1,k]; tris.push([a,b,c],[a,c,d]); }
+    tris.forEach(t=>{ const p=t.map(q=>pos[q[0]][q[1]]); const u=[p[1][0]-p[0][0],p[1][1]-p[0][1],p[1][2]-p[0][2]], v=[p[2][0]-p[0][0],p[2][1]-p[0][1],p[2][2]-p[0][2]];
+      const nn=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]]; t.forEach(q=>{ const a=nrm[q[0]][q[1]]; a[0]+=nn[0]; a[1]+=nn[1]; a[2]+=nn[2]; }); });
+    const P=[],N=[];
+    tris.forEach(t=>t.forEach(q=>{ P.push(...pos[q[0]][q[1]]); const a=nrm[q[0]][q[1]], l=Math.hypot(...a)||1; N.push(a[0]/l,a[1]/l,a[2]/l); }));
+    if(topCenter){ const i=rings.length-1, c=W(0,0,lev[i]); for(let k=0;k<K;k++){ P.push(...c,...pos[i][k],...pos[i][(k+1)%K]); N.push(0,1,0,0,1,0,0,1,0); } }
+    return {P,N};
+  }
+  function wire(rings,lev,stepR,stepM){
+    const L=[], K=rings[0].length;
+    for(let i=0;i<rings.length;i+=stepR){ const r=rings[i]; for(let k=0;k<K;k++){ L.push(...W(r[k][0],r[k][1],lev[i]),...W(r[(k+1)%K][0],r[(k+1)%K][1],lev[i])); } }
+    for(let k=0;k<K;k+=stepM) for(let i=0;i<rings.length-1;i++){ L.push(...W(rings[i][k][0],rings[i][k][1],lev[i]),...W(rings[i+1][k][0],rings[i+1][k][1],lev[i+1])); }
+    return L;
+  }
+  function update(){
+    if(!ok) return; if(!gl) init(); if(!ok) return;
+    const sf=ST.sf; if(!sf) return;
+    free();
+    map={Ms:sf.Ms*1.0,Pm:(sf.Po+sf.Pt)/2,Ph:(sf.Po-sf.Pt)/2/1.15};
+    const rN=sf.ringsN.filter(Boolean), lN=sf.levN.filter((_,i)=>sf.ringsN[i]);
+    const rD=sf.ringsD.filter(Boolean), lD=sf.levD.filter((_,i)=>sf.ringsD[i]);
+    if(rD.length>1){ const m=surfMesh(rD,lD,true); bufs.des=buf(m.P); bufs.des.nb=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,bufs.des.nb); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(m.N),gl.STATIC_DRAW); bufs.desW=buf(wire(rD,lD,4,Math.max(1,Math.round(rD[0].length/24)))); }
+    if(rN.length>1) bufs.nomW=buf(wire(rN,lN,3,Math.max(1,Math.round(rN[0].length/36))));
+    const ax=[], yb=(sf.Pt-map.Pm)/map.Ph*1.08, yt=(sf.Po-map.Pm)/map.Ph*1.08, y0=(0-map.Pm)/map.Ph;
+    ax.push(0,yb,0, 0,yt,0, -1.25,y0,0, 1.25,y0,0, 0,y0,-1.25, 0,y0,1.25);
+    bufs.ax=buf(ax);
+    const ok1=[],bad=[];
+    ST.loads.forEach(L=>{ (L.d<=1?ok1:bad).push(...W(L.X,L.Y,L.P)); });
+    bufs.lok=buf(ok1.length?ok1:[0,0,0]); bufs.lok.n=ok1.length/3;
+    bufs.lbad=buf(bad.length?bad:[0,0,0]); bufs.lbad.n=bad.length/3;
+    resize();
+  }
+  function resize(){
+    if(!gl) return;
+    const dpr=window.devicePixelRatio||1, w=canvas.clientWidth||600, h=canvas.clientHeight||500;
+    canvas.width=Math.round(w*dpr); canvas.height=Math.round(h*dpr);
+    draw();
+  }
+  function mvpMat(){
+    const w=canvas.clientWidth||600, h=canvas.clientHeight||500;
+    const e=[cam.r*Math.cos(cam.el)*Math.sin(cam.az),cam.r*Math.sin(cam.el),cam.r*Math.cos(cam.el)*Math.cos(cam.az)];
+    return M4.mul(M4.persp(38*DEG,w/h,0.1,100),M4.look(e,[0,0,0],[0,1,0]));
+  }
+  function drawFlat(o,mode,col,mvp,ps){
+    if(!o||!o.n) return;
+    gl.useProgram(progFlat);
+    const lp=gl.getAttribLocation(progFlat,'p');
+    gl.bindBuffer(gl.ARRAY_BUFFER,o.b); gl.enableVertexAttribArray(lp); gl.vertexAttribPointer(lp,3,gl.FLOAT,false,0,0);
+    gl.uniformMatrix4fv(gl.getUniformLocation(progFlat,'mvp'),false,mvp);
+    gl.uniform4fv(gl.getUniformLocation(progFlat,'col'),col);
+    gl.uniform1f(gl.getUniformLocation(progFlat,'ps'),ps||1);
+    gl.uniform1f(gl.getUniformLocation(progFlat,'rnd'),mode===gl.POINTS?1:0);
+    gl.drawArrays(mode,0,o.n);
+  }
+  function draw(){
+    if(!gl||!map) return;
+    gl.viewport(0,0,canvas.width,canvas.height);
+    gl.clearColor(1,1,1,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.enable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+    const mvp=mvpMat();
+    drawFlat(bufs.ax,gl.LINES,[0,0,0,1],mvp);
+    if($('showLoads3').checked){ const dpr=window.devicePixelRatio||1; drawFlat(bufs.lok,gl.POINTS,[0,0,0,1],mvp,9*dpr); drawFlat(bufs.lbad,gl.POINTS,[0.70,0.15,0.12,1],mvp,10*dpr); }
+    if($('showNom').checked) drawFlat(bufs.nomW,gl.LINES,[0.55,0.55,0.55,0.55],mvp);
+    if($('showDes').checked&&bufs.des){
+      drawFlat(bufs.desW,gl.LINES,[0.15,0.15,0.15,0.8],mvp);
+      gl.depthMask(false);
+      gl.useProgram(progLit);
+      const lp=gl.getAttribLocation(progLit,'p'), ln=gl.getAttribLocation(progLit,'n');
+      gl.bindBuffer(gl.ARRAY_BUFFER,bufs.des.b); gl.enableVertexAttribArray(lp); gl.vertexAttribPointer(lp,3,gl.FLOAT,false,0,0);
+      gl.bindBuffer(gl.ARRAY_BUFFER,bufs.des.nb); gl.enableVertexAttribArray(ln); gl.vertexAttribPointer(ln,3,gl.FLOAT,false,0,0);
+      gl.uniformMatrix4fv(gl.getUniformLocation(progLit,'mvp'),false,mvp);
+      gl.uniform4fv(gl.getUniformLocation(progLit,'col'),[0.62,0.62,0.62,0.45]);
+      const e=[Math.cos(cam.el)*Math.sin(cam.az),Math.sin(cam.el),Math.cos(cam.el)*Math.cos(cam.az)];
+      gl.uniform3fv(gl.getUniformLocation(progLit,'L'),e);
+      gl.drawArrays(gl.TRIANGLES,0,bufs.des.n);
+      gl.disableVertexAttribArray(ln);
+      gl.depthMask(true);
+    }
+    drawLabels(mvp);
+  }
+  function proj(mvp,p){
+    const x=p[0],y=p[1],z=p[2];
+    const cx=mvp[0]*x+mvp[4]*y+mvp[8]*z+mvp[12], cy=mvp[1]*x+mvp[5]*y+mvp[9]*z+mvp[13], cw=mvp[3]*x+mvp[7]*y+mvp[11]*z+mvp[15];
+    if(cw<=0) return null;
+    return [(cx/cw*0.5+0.5)*canvas.clientWidth,(1-(cy/cw*0.5+0.5))*canvas.clientHeight];
+  }
+  function drawLabels(mvp){
+    const sf=ST.sf; if(!sf) return;
+    const out=[], add=(p,t,b)=>{ const s=proj(mvp,p); if(s) out.push(`<span style="left:${s[0].toFixed(1)}px;top:${s[1].toFixed(1)}px;${b?'font-weight:700;':''}">${t}</span>`); };
+    const y0=(0-map.Pm)/map.Ph;
+    const stP=niceStep(sf.Po-sf.Pt,6);
+    for(let P=Math.ceil(sf.Pt/stP)*stP;P<=sf.Po;P+=stP){ add([0.06,(P-map.Pm)/map.Ph,0.06],fmtk(P)); }
+    const stM=niceStep(map.Ms*2,6);
+    for(let M=stM;M<=map.Ms*1.2;M+=stM){ add([M/map.Ms,y0,0],fmtk(M)); add([0,y0,-M/map.Ms],fmtk(M)); }
+    add([0,(sf.Po-map.Pm)/map.Ph*1.14,0],'P [kN]',1);
+    add([1.38,y0,0],'My [kN·m]',1); add([0,y0,-1.38],'Mx [kN·m]',1);
+    labels.innerHTML=out.join('');
+  }
+  function reset(){ cam={az:0.75,el:0.42,r:4.4}; draw(); }
+  function image(){ if(!gl) return null; draw(); return canvas.toDataURL('image/png'); }
+  return {update,draw,resize,reset,image};
+})();
+function sectionSVG(){
+  const F=ST.F, W=S.nx*S.dx, H=S.ny*S.dy;
+  let i0=S.nx,i1=-1,j0=S.ny,j1=-1;
+  for(let j=0;j<S.ny;j++) for(let i=0;i<S.nx;i++) if(S.conc[j*S.nx+i]||S.bars[j*S.nx+i]>0){ i0=Math.min(i0,i); i1=Math.max(i1,i); j0=Math.min(j0,j); j1=Math.max(j1,j); }
+  if(i1<0){ i0=0;i1=S.nx-1;j0=0;j1=S.ny-1; }
+  const x0=i0*S.dx, x1=(i1+1)*S.dx, yT=(S.ny-j0)*S.dy, yB=(S.ny-1-j1)*S.dy;
+  const w=x1-x0, h=yT-yB, pad=Math.max(w,h)*0.08;
+  const svg=el('svg',{viewBox:`${x0-pad} ${-yT-pad} ${w+2*pad} ${h+2*pad}`,width:'100%',style:'max-width:640px;max-height:90mm;height:auto;display:block;margin:0 auto;'});
+  for(let j=j0;j<=j1;j++){ let i=i0; while(i<=i1){ if(!S.conc[j*S.nx+i]){ i++; continue; } let k=i; while(k+1<=i1&&S.conc[j*S.nx+k+1]) k++;
+    svg.appendChild(el('rect',{x:i*S.dx,y:-(S.ny-j)*S.dy,width:(k-i+1)*S.dx+0.5,height:S.dy+0.5,fill:'#c0c0c0'})); i=k+1; } }
+  for(let n=0;n<F.nb;n++) svg.appendChild(el('circle',{cx:F.bx[n],cy:-F.by[n],r:F.bd[n]/2,fill:'#000'}));
+  const s=Math.max(w,h)/40;
+  svg.appendChild(el('path',{d:`M${F.rx-s},${-F.ry} L${F.rx+s},${-F.ry} M${F.rx},${-F.ry-s} L${F.rx},${-F.ry+s}`,stroke:'#000','stroke-width':s/6,fill:'none'}));
+  const fs=Math.max(w,h)/30;
+  const t1=el('text',{x:(x0+x1)/2,y:-yB+pad*0.8,'font-size':fs,'text-anchor':'middle'}); t1.textContent=`${fmtk(w)} mm`; svg.appendChild(t1);
+  const t2=el('text',{x:x0-pad*0.3,y:-(yB+yT)/2,'font-size':fs,'text-anchor':'middle',transform:`rotate(-90 ${x0-pad*0.3} ${-(yB+yT)/2})`}); t2.textContent=`${fmtk(h)} mm`; svg.appendChild(t2);
+  return svg;
+}
+function barSummary(){
+  const F=ST.F, c={};
+  F.bd.forEach(d=>{ c[d]=(c[d]||0)+1; });
+  return Object.keys(c).sort((a,b)=>a-b).map(d=>`${c[d]}Ø${d}`).join(' + ')||'-';
+}
+function buildReport(){
+  const m=ST.m, F=ST.F, ct=$('printReport'); ct.innerHTML='';
+  const hd=document.createElement('div'); hd.className='rpt-header';
+  hd.innerHTML=`<h1>Análisis seccional de hormigón armado</h1><div class="rpt-sub">${$('proj').value.trim()?$('proj').value.trim()+', ':''}${new Date().toLocaleDateString('es-CL')}</div>`;
+  ct.appendChild(hd);
+  const pt=document.createElement('table'); pt.className='rpt-params';
+  pt.innerHTML=`
+    <tr><td class="k">f'c / Ec</td><td>${m.fc} MPa / ${fmtk(m.Ec)} MPa</td><td class="k">fy / Es</td><td>${m.fy} MPa / ${fmtk(m.Es)} MPa</td></tr>
+    <tr><td class="k">Curva hormigón M-φ</td><td>${$('ccurve').options[$('ccurve').selectedIndex].text}</td><td class="k">Modelo acero M-φ</td><td>${$('smodel').options[$('smodel').selectedIndex].text}${m.smodel==='park'?`, fsu = ${m.fsu} MPa, εsh = ${m.esh}, εsu = ${m.esu}`:''}</td></tr>
+    <tr><td class="k">Interacción</td><td>${$('pmConc').options[$('pmConc').selectedIndex].text}${m.mpr?', fs = 1,25fy, φ = 1':''}</td><td class="k">Grilla</td><td>${S.nx} × ${S.ny} celdas de ${S.dx} × ${S.dy} mm, fibra ≤ ${m.fib} mm</td></tr>
+    <tr><td class="k">Armadura</td><td>${barSummary()}</td><td class="k">Ag / As / ρ</td><td>${fmtk(F.Ac)} mm² / ${fmtk(F.As)} mm² / ${fmt(F.rho*100,3)} %</td></tr>`;
+  ct.appendChild(pt);
+  const addSec=(title,node,brk)=>{ const s=document.createElement('div'); s.className='rpt-section'+(brk?' allow-break':''); s.innerHTML=`<h2>${title}</h2>`; if(node) s.appendChild(node); ct.appendChild(s); return s; };
+  addSec('Sección',sectionSVG());
+  const tp=document.createElement('table'); tp.innerHTML=$('propTable').innerHTML; addSec('Propiedades',tp);
+  const mk=(h)=>{ const s=el('svg',{width:'100%',style:'max-width:640px;height:auto;display:block;margin:0 auto;'}); return s; };
+  const sMC=mk(), tMC=document.createElement('table'), dummy=document.createElement('div');
+  renderMC(sMC,tMC,dummy);
+  const secMC=addSec(`Momento-curvatura, α = ${num('alphaMC',0)}°, P+ = ${m.Pp} kN, P− = ${m.Pn} kN`,sMC); secMC.appendChild(tMC);
+  const sPM=mk(), sR=mk(), d2=document.createElement('div');
+  renderPM(sPM,sR,d2);
+  addSec(`Diagrama de interacción, α = ${num('alphaPM',0)}°`,sPM);
+  addSec(`Contorno Mx-My, P = ${num('Pring',0)} kN`,sR);
+  const img=GL.image();
+  if(img){ const im=document.createElement('img'); im.src=img; im.style.cssText='width:100%;max-width:600px;display:block;margin:0 auto;'; addSec('Superficie de interacción',im); }
+  if(ST.loads.length){ const tl=document.createElement('table'); tl.className='rpt-small'; renderLoads(tl); addSec('Verificación de cargas',tl,true); }
+  const ft=document.createElement('div'); ft.className='rpt-foot'; ft.innerHTML=$('notes').innerHTML; ct.appendChild(ft);
+}
+$('pdfBtn').addEventListener('click',()=>{ const wasHidden=document.querySelector('[data-pane="s3d"]').hidden; if(wasHidden){ document.querySelector('[data-pane="s3d"]').hidden=false; GL.resize(); } buildReport(); if(wasHidden){ document.querySelector('[data-pane="s3d"]').hidden=true; } window.print(); });
+
+$('txtBtn').addEventListener('click',()=>{
+  const k=$('txtSel').value, L=[];
+  if(k==='grid'){ download(baseName()+'_grilla.txt',gridText()); return; }
+  if(k==='mc'){
+    L.push(`# Momento-curvatura, alfa = ${num('alphaMC',0)} grados`);
+    L.push('# rama\tphi[1/m]\tM[kNm]');
+    ST.mc.pos.pts.forEach(p=>L.push(`+\t${(p[0]*1e3).toFixed(6)}\t${p[1].toFixed(2)}`));
+    ST.mc.neg.pts.forEach(p=>L.push(`-\t${(-p[0]*1e3).toFixed(6)}\t${(-p[1]).toFixed(2)}`));
+  }
+  if(k==='pm'){
+    const a=num('alphaPM',0)*DEG, cN=pmCurve(ST.sf,a,'nom'), cD=pmCurve(ST.sf,a,'des');
+    L.push(`# Interaccion P-M, alfa = ${num('alphaPM',0)} grados, P compresion positiva`);
+    L.push('# curva\tM[kNm]\tP[kN]');
+    cN.L.slice().reverse().concat(cN.R).forEach(p=>L.push(`nominal\t${p[0].toFixed(2)}\t${p[1].toFixed(2)}`));
+    cD.L.slice().reverse().concat(cD.R).forEach(p=>L.push(`diseno\t${p[0].toFixed(2)}\t${p[1].toFixed(2)}`));
+  }
+  if(k==='surf'){
+    L.push('# Superficie de interaccion, P compresion positiva, Mx comprime +y, My comprime +x');
+    L.push('# tipo\tP[kN]\tMx[kNm]\tMy[kNm]');
+    ST.sf.levN.forEach((P,i)=>{ const r=ST.sf.ringsN[i]; if(r) r.forEach(q=>L.push(`nominal\t${P.toFixed(2)}\t${q[1].toFixed(2)}\t${q[0].toFixed(2)}`)); });
+    ST.sf.levD.forEach((P,i)=>{ const r=ST.sf.ringsD[i]; if(r) r.forEach(q=>L.push(`diseno\t${P.toFixed(2)}\t${q[1].toFixed(2)}\t${q[0].toFixed(2)}`)); });
+  }
+  download(baseName()+'_'+k+'.txt',L.join('\r\n')+'\r\n');
+});
+
+function defaultSection(){
+  $('tpl').value='L'; genTemplateSilent();
+}
+function genTemplateSilent(){ genTemplate('L'); }
+
+(function init(){
+  let loaded=false;
+  try{ const d=JSON.parse(localStorage.getItem('fdd_secciones_v1')||'null'); if(d) loaded=loadProject(d); }catch(e){}
+  $('parkBox').hidden=$('smodel').value!=='park';
+  layoutGrid();
+  if(!loaded){ genTemplate('L'); } else changed('all');
+  ED.undo=[];
+  try{ const t=localStorage.getItem('fdd_secciones_tab'); if(t){ const b=document.querySelector(`#tabs button[data-tab="${t}"]`); if(b) b.click(); } }catch(e){}
+})();
+</script>
+</body></html>
