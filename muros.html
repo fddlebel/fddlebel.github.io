@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Muros de contención | fddlebel</title>
+<style>
+:root{
+  --paper:#ffffff;--panel:#ffffff;--ink:#000000;--line:#9a9a9a;--line-strong:#7a7a7a;
+  --accent:#000000;--accent-soft:#e9e9e9;--grid:#d9d9d9;--conc:#c0c0c0;--conc-dark:#a8a8a8;
+  --fail:#b3261e;--focus:#4a4d24;
+  --sans:'Arial Narrow',Arial,Helvetica,sans-serif;
+}
+*{box-sizing:border-box;}
+[hidden]{display:none!important;}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);padding-block:20px 48px;padding-inline:max(16px,calc((100vw - 1400px)/2));}
+h1{font-size:22px;font-weight:700;margin:0;}
+.app-header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+.clause{font-size:12px;}
+.btn{font-family:var(--sans);font-weight:700;font-size:13px;color:#fff;background:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:7px 14px;cursor:pointer;}
+.btn.sec{background:var(--panel);color:var(--ink);border-color:var(--line-strong);}
+.grid{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;align-items:start;}
+@media (max-width:900px){.grid{grid-template-columns:1fr;}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:14px;}
+.panel+.panel{margin-top:12px;}
+.section-title{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:0 0 10px;}
+.field{margin-bottom:9px;min-width:0;}
+.field label{display:block;font-size:12px;margin-bottom:3px;}
+.unit{opacity:.75;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+input[type=number],input[type=text],select,textarea{width:100%;font-family:var(--sans);font-size:13px;color:var(--ink);background:#fff;border:1px solid var(--line-strong);border-radius:4px;padding:6px 7px;font-variant-numeric:tabular-nums;}
+textarea{font-size:12px;resize:vertical;}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--focus);outline-offset:1px;}
+details summary{cursor:pointer;font-size:13px;font-weight:700;margin-top:4px;user-select:none;}
+details[open] summary{margin-bottom:8px;}
+.chk{display:flex;align-items:center;gap:6px;font-size:12px;}
+.chk input{width:auto;margin:0;}
+.toolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px;}
+.tool{font-family:var(--sans);font-size:12.5px;font-weight:700;background:var(--panel);color:var(--ink);border:1px solid var(--line-strong);border-radius:4px;padding:6px 10px;cursor:pointer;}
+.tool.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.toolbar select{width:auto;}
+.toolbar .sep{width:1px;height:24px;background:var(--line);margin:0 4px;}
+#gridWrap{position:relative;border:1px solid var(--line);border-radius:4px;overflow:auto;max-height:560px;background:#fff;}
+#gridCanvas{display:block;cursor:crosshair;touch-action:none;}
+#gridInfo{font-size:12px;margin-top:6px;min-height:16px;}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 10px;}
+.tabs button{font-family:var(--sans);font-weight:700;font-size:13px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:7px 14px;cursor:pointer;}
+.tabs button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:12px;}
+.stat{border:1px solid var(--line);border-radius:4px;padding:8px 10px;}
+.stat .k{font-size:11px;text-transform:uppercase;letter-spacing:.04em;}
+.stat .v{font-size:16px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th,td{text-align:left;padding:5px 8px;border:1px solid var(--line);font-variant-numeric:tabular-nums;}
+th{font-size:11px;font-weight:700;background:var(--accent-soft);}
+td.num,th.num{text-align:right;}
+tr.fail td{color:var(--fail);font-weight:700;}
+.tablewrap{overflow-x:auto;}
+.chartwrap{border:1px solid var(--line);border-radius:4px;padding:10px;margin-bottom:12px;}
+.ctrls{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-bottom:10px;}
+.ctrls .field{margin:0;width:150px;}
+#glWrap{position:relative;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:#fff;}
+#glCanvas{display:block;width:100%;height:560px;cursor:grab;touch-action:none;}
+#glLabels{position:absolute;inset:0;pointer-events:none;font-size:11px;}
+#glLabels span{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;}
+.note{font-size:11.5px;line-height:1.5;}
+.warn{background:var(--accent-soft);border:1px solid var(--line-strong);border-radius:4px;padding:7px 10px;font-size:12px;margin-bottom:10px;}
+#busy{font-size:12px;margin-left:8px;}
+svg text{font-family:var(--sans);}
+#printReport{display:none;}
+.rpt-header{margin-bottom:12px;}
+.rpt-header h1{font-size:20px;}
+.rpt-sub{font-size:11.5px;margin-top:2px;}
+.rpt-params{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:11px;}
+.rpt-params td{border:1px solid var(--line);padding:4px 7px;}
+.rpt-params td.k{font-weight:700;width:22%;background:var(--accent-soft);}
+.rpt-section{margin-bottom:16px;page-break-inside:avoid;break-inside:avoid;}
+.rpt-section h2{font-size:14px;font-weight:700;margin:0 0 8px;border-bottom:1px solid var(--line);padding-bottom:4px;break-after:avoid;}
+.rpt-section.allow-break{page-break-inside:auto;break-inside:auto;}
+.rpt-foot{font-size:10px;margin-top:14px;border-top:1px solid var(--line);padding-top:6px;}
+.rpt-small{font-size:10px;}
+.rpt-small td,.rpt-small th{padding:2px 5px;}
+@media print{
+  body *{visibility:hidden;}
+  #printReport,#printReport *{visibility:visible;}
+  #printReport{display:block;position:absolute;left:0;top:0;width:100%;}
+  @page{margin:12mm;}
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1><a href="index.html" style="color:inherit;text-decoration:none;font-weight:400;">fddlebel</a> / Muros de contención</h1>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+    <div class="clause">Coulomb, Mononobe-Okabe, ACI 318-19</div>
+    <button class="btn sec" id="saveBtn">Guardar proyecto</button>
+    <button class="btn sec" id="loadBtn">Abrir proyecto</button>
+    <input type="file" id="loadFile" accept=".json" hidden>
+    <button class="btn" id="pdfBtn">Exportar PDF</button>
+  </div>
+</div>
+
+<div id="printReport"></div>
+
+<div class="grid">
+  <div>
+    <div class="panel">
+      <div class="field"><label>Proyecto / elemento</label><input type="text" id="proj" value=""></div>
+      <div class="section-title" style="margin-top:12px">Geometría <span class="unit">[m]</span></div>
+      <div class="row3">
+        <div class="field"><label>H muro</label><input type="number" id="H" value="3" step="0.1"></div>
+        <div class="field"><label>a zapata</label><input type="number" id="a" value="0.4" step="0.05"></div>
+        <div class="field"><label>h suelo frente</label><input type="number" id="h" value="0.6" step="0.1"></div>
+      </div>
+      <div class="row3">
+        <div class="field"><label>b punta</label><input type="number" id="b" value="0.6" step="0.05"></div>
+        <div class="field"><label>c base muro</label><input type="number" id="c" value="0.3" step="0.025"></div>
+        <div class="field"><label>d talón</label><input type="number" id="d" value="1.6" step="0.05"></div>
+      </div>
+      <div class="row3">
+        <div class="field"><label>e coronamiento</label><input type="number" id="e" value="0.2" step="0.025"></div>
+        <div class="field"><label>h diente</label><input type="number" id="ht" value="0" step="0.05"></div>
+        <div class="field"><label>b diente</label><input type="number" id="bt" value="0.3" step="0.05"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Posición diente desde punta</label><input type="number" id="xt" value="0.6" step="0.05"></div>
+        <div class="field"><label>β relleno <span class="unit">[°]</span></label><input type="number" id="beta" value="0" step="1"></div>
+      </div>
+
+      <div class="section-title" style="margin-top:12px">Suelos</div>
+      <div class="row3">
+        <div class="field"><label>φ1 relleno <span class="unit">[°]</span></label><input type="number" id="phi1" value="30" step="1"></div>
+        <div class="field"><label>γ1 <span class="unit">[kN/m³]</span></label><input type="number" id="g1" value="18" step="0.5"></div>
+        <div class="field"><label>δ/φ1 muro</label><input type="number" id="dr" value="0.667" step="0.05"></div>
+      </div>
+      <div class="row3">
+        <div class="field"><label>φ2 fundación <span class="unit">[°]</span></label><input type="number" id="phi2" value="30" step="1"></div>
+        <div class="field"><label>γ2 <span class="unit">[kN/m³]</span></label><input type="number" id="g2" value="18" step="0.5"></div>
+        <div class="field"><label>δb/φ2 base</label><input type="number" id="dbr" value="0.667" step="0.05"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>q sobrecarga <span class="unit">[kPa]</span></label><input type="number" id="q" value="5" step="1"></div>
+        <div class="field"><label>σ adm. <span class="unit">[kPa]</span></label><input type="number" id="sadm" value="200" step="10"></div>
+      </div>
+      <div class="field"><label>Empuje activo</label><select id="pmeth"><option value="coul" selected>Coulomb, plano virtual en el talón</option><option value="rank">Rankine, inclinado β</option></select></div>
+
+      <div class="section-title" style="margin-top:12px">Sismo</div>
+      <div class="row3">
+        <div class="field"><label>A0/g</label><input type="number" id="A0" value="0.4" step="0.05"></div>
+        <div class="field"><label>kh = A0·</label><input type="number" id="fh" value="0.5" step="0.05"></div>
+        <div class="field"><label>kv = A0·</label><input type="number" id="fv" value="0.333" step="0.05"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Altura ΔPae / H'</label><input type="number" id="rae" value="0.667" step="0.05"></div>
+        <div class="field"><label>Factor σ adm. sísmico</label><input type="number" id="fsad" value="1.33" step="0.05"></div>
+      </div>
+      <label class="chk" style="margin-bottom:8px;"><input type="checkbox" id="soilInert" checked> Inercia del suelo sobre el talón</label>
+
+      <div class="section-title" style="margin-top:12px">Pasivo</div>
+      <div class="row3">
+        <div class="field"><label>δp/φ2</label><input type="number" id="dpr" value="0" step="0.1"></div>
+        <div class="field"><label>Fracción usada</label><input type="number" id="pfr" value="1" step="0.1"></div>
+        <div class="field"><label class="chk" style="margin-top:18px;"><input type="checkbox" id="pUseH"> Incluir h</label></div>
+      </div>
+
+      <div class="section-title" style="margin-top:12px">Factores de seguridad requeridos</div>
+      <div class="row2">
+        <div class="field"><label>Deslizamiento est. / sís.</label><div class="row2"><input type="number" id="fsDs" value="1.5" step="0.1"><input type="number" id="fsDe" value="1.1" step="0.05"></div></div>
+        <div class="field"><label>Volcamiento est. / sís.</label><div class="row2"><input type="number" id="fsVs" value="2.0" step="0.1"><input type="number" id="fsVe" value="1.5" step="0.1"></div></div>
+      </div>
+      <div class="field"><label>Área comprimida mín. est. / sís. <span class="unit">[%]</span></label><div class="row2"><input type="number" id="cmS" value="100" step="5"><input type="number" id="cmE" value="80" step="5"></div></div>
+
+      <div class="section-title" style="margin-top:12px">Hormigón armado</div>
+      <div class="row3">
+        <div class="field"><label>f'c <span class="unit">[MPa]</span></label><input type="number" id="fc" value="25" step="1"></div>
+        <div class="field"><label>fy <span class="unit">[MPa]</span></label><input type="number" id="fy" value="420" step="10"></div>
+        <div class="field"><label>γc <span class="unit">[kN/m³]</span></label><input type="number" id="gc" value="25" step="0.5"></div>
+      </div>
+      <div class="row3">
+        <div class="field"><label>Recubrimiento <span class="unit">[mm]</span></label><input type="number" id="cov" value="50" step="5"></div>
+        <div class="field"><label>ρ mín.</label><input type="number" id="rmin" value="0.0018" step="0.0002"></div>
+        <div class="field"><label>φ corte</label><input type="number" id="phv" value="0.75" step="0.05"></div>
+      </div>
+      <table class="intable">
+        <thead><tr><th></th><th class="num">Ø [mm]</th><th class="num">s [mm]</th></tr></thead>
+        <tbody>
+          <tr><td>Muro, cara relleno</td><td><input type="number" id="dbS" value="16" class="in"></td><td><input type="number" id="sS" value="200" step="25" class="in"></td></tr>
+          <tr><td>Punta, cara inferior</td><td><input type="number" id="dbT" value="12" class="in"></td><td><input type="number" id="sT" value="150" step="25" class="in"></td></tr>
+          <tr><td>Talón, cara superior</td><td><input type="number" id="dbH" value="16" class="in"></td><td><input type="number" id="sH" value="200" step="25" class="in"></td></tr>
+        </tbody>
+      </table>
+      <div class="row3">
+        <div class="field"><label>γD</label><input type="number" id="gD" value="1.2" step="0.1"></div>
+        <div class="field"><label>γH empuje</label><input type="number" id="gH" value="1.6" step="0.1"></div>
+        <div class="field"><label>γE sismo</label><input type="number" id="gE" value="1.4" step="0.1"></div>
+      </div>
+      <div class="field"><label>γL sobrecarga</label><input type="number" id="gL" value="1.6" step="0.1"></div>
+    </div>
+    <div class="panel">
+      <div class="section-title">Notas</div>
+      <div class="note" id="notes"></div>
+    </div>
+  </div>
+
+  <div style="min-width:0;">
+    <div class="stat-row" id="stats"></div>
+    <div id="warns"></div>
+    <div class="chartwrap"><svg id="wallSvg" viewBox="0 0 760 520" width="100%" style="display:block;height:auto"></svg></div>
+    <div class="tabs" id="tabs">
+      <button data-tab="st" class="active">Estabilidad</button>
+      <button data-tab="ds">Diseño</button>
+      <button data-tab="ld">Cargas</button>
+    </div>
+    <div class="tabpane" data-pane="st">
+      <div class="panel"><div class="section-title">Verificaciones de estabilidad</div><div class="tablewrap"><table id="tbStab"></table></div></div>
+      <div class="panel"><div class="section-title">Coeficientes de empuje</div><div class="tablewrap"><table id="tbK"></table></div></div>
+    </div>
+    <div class="tabpane" data-pane="ds" hidden>
+      <div class="chartwrap"><svg id="chStem" width="100%" style="display:block;height:auto"></svg></div>
+      <div class="panel"><div class="section-title">Diseño a flexión y corte, por metro de muro</div><div class="tablewrap"><table id="tbDes"></table></div></div>
+    </div>
+    <div class="tabpane" data-pane="ld" hidden>
+      <div class="panel"><div class="section-title">Pesos y empujes, por metro de muro</div><div class="tablewrap"><table id="tbLoads"></table></div></div>
+    </div>
+  </div>
+</div>
+<script>
+const svgNS='http://www.w3.org/2000/svg';
+function el(tag,attrs){ const n=document.createElementNS(svgNS,tag); for(const k in attrs) n.setAttribute(k,attrs[k]); return n; }
+function tx(x,y,s,o){ const t=el('text',Object.assign({x,y,'font-size':11,'text-anchor':'middle',fill:'#000'},o||{})); t.textContent=s; return t; }
+function niceStep(range,count){ const raw=Math.max(range,1e-12)/count, m=Math.pow(10,Math.floor(Math.log10(raw))), f=raw/m; return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*m; }
+function fmtTick(v,st){ const d=st>=1?0:Math.min(6,Math.ceil(-Math.log10(st))); return (Math.abs(v)<st*1e-6?0:v).toFixed(d); }
+const fmt=(x,d)=>isFinite(x)?x.toFixed(d):'-';
+const fmtk=x=>isFinite(x)?String(Math.round(x)):'-';
+const FAIL='#b3261e';
+
+function chart(svg,cfg){
+  svg.innerHTML='';
+  const W=760,H=cfg.H||420,L=70,R=18,T=16,B=46;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const xs=[],ys=[];
+  cfg.series.forEach(s=>s.pts.forEach(p=>{ if(isFinite(p[0])&&isFinite(p[1])){ xs.push(p[0]); ys.push(p[1]); } }));
+  (cfg.points||[]).forEach(p=>{ xs.push(p.x); ys.push(p.y); });
+  if(!xs.length){ svg.appendChild(tx(W/2,H/2,'Sin datos')); return; }
+  let x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+  if(cfg.zeroX){ x0=Math.min(x0,0); x1=Math.max(x1,0); } if(cfg.zeroY){ y0=Math.min(y0,0); y1=Math.max(y1,0); }
+  if(cfg.equal){ const c=(x0+x1)/2, d=(y0+y1)/2, h=Math.max(x1-x0,(y1-y0)*(W-L-R)/(H-T-B))/2; x0=c-h; x1=c+h; const hv=h*(H-T-B)/(W-L-R); y0=d-hv; y1=d+hv; }
+  const px=(x1-x0)*0.06||1, py=(y1-y0)*0.08||1; x0-=px; x1+=px; y0-=py; y1+=py;
+  const sx=niceStep(x1-x0,8), sy=niceStep(y1-y0,7);
+  x0=Math.floor(x0/sx)*sx; x1=Math.ceil(x1/sx)*sx; y0=Math.floor(y0/sy)*sy; y1=Math.ceil(y1/sy)*sy;
+  if(cfg.xfix){ x0=cfg.xfix[0]; x1=cfg.xfix[1]; }
+  const X=x=>L+(x-x0)/(x1-x0)*(W-L-R), Y=y=>H-B-(y-y0)/(y1-y0)*(H-T-B);
+  const g=el('g',{});
+  for(let y=y0;y<=y1+sy*1e-6;y+=sy){ g.appendChild(el('line',{x1:L,x2:W-R,y1:Y(y),y2:Y(y),stroke:'#dcdcdc','stroke-width':0.6})); g.appendChild(tx(L-6,Y(y)+4,fmtTick(y,sy),{'text-anchor':'end'})); }
+  for(let x=x0;x<=x1+sx*1e-6;x+=sx){ g.appendChild(el('line',{x1:X(x),x2:X(x),y1:T,y2:H-B,stroke:'#dcdcdc','stroke-width':0.6})); g.appendChild(tx(X(x),H-B+15,fmtTick(x,sx))); }
+  svg.appendChild(g);
+  if(x0<0&&x1>0) svg.appendChild(el('line',{x1:X(0),x2:X(0),y1:T,y2:H-B,stroke:'#555','stroke-width':0.9}));
+  if(y0<0&&y1>0) svg.appendChild(el('line',{x1:L,x2:W-R,y1:Y(0),y2:Y(0),stroke:'#555','stroke-width':0.9}));
+  svg.appendChild(el('rect',{x:L,y:T,width:W-L-R,height:H-T-B,fill:'none',stroke:'#7a7a7a','stroke-width':1}));
+  svg.appendChild(tx((L+W-R)/2,H-8,cfg.xlabel,{'font-weight':700}));
+  const yl=tx(14,(T+H-B)/2,cfg.ylabel,{'font-weight':700}); yl.setAttribute('transform',`rotate(-90 14 ${(T+H-B)/2})`); svg.appendChild(yl);
+  const clipId='c'+Math.random().toString(36).slice(2);
+  const cp=el('clipPath',{id:clipId}); cp.appendChild(el('rect',{x:L,y:T,width:W-L-R,height:H-T-B})); svg.appendChild(cp);
+  const gc=el('g',{'clip-path':`url(#${clipId})`});
+  cfg.series.forEach(s=>{
+    const d=s.pts.filter(p=>isFinite(p[0])&&isFinite(p[1])).map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)).join(' ')+(s.close?'Z':'');
+    gc.appendChild(el('path',{d,fill:'none',stroke:s.color||'#000','stroke-width':s.w||1.4,'stroke-dasharray':s.dash||'none','stroke-linejoin':'round'}));
+  });
+  (cfg.points||[]).forEach(p=>{
+    const col=p.fail?FAIL:'#000';
+    if(p.ring) gc.appendChild(el('circle',{cx:X(p.x),cy:Y(p.y),r:3.5,fill:'#fff',stroke:col,'stroke-width':1.4}));
+    else gc.appendChild(el('circle',{cx:X(p.x),cy:Y(p.y),r:3.2,fill:col}));
+    if(p.label) gc.appendChild(tx(X(p.x)+6,Y(p.y)-6,p.label,{'text-anchor':'start','font-size':10.5,'font-weight':700,fill:col}));
+  });
+  svg.appendChild(gc);
+  const named=cfg.series.filter(s=>s.name);
+  if(named.length){
+    const lx=cfg.legendRight?W-R-220:L+12; let ly=T+16;
+    svg.appendChild(el('rect',{x:lx-6,y:T+4,width:214,height:named.length*16+6,fill:'#fff',stroke:'#cfcfcf','stroke-width':0.6}));
+    named.forEach(s=>{
+      svg.appendChild(el('line',{x1:lx,x2:lx+28,y1:ly-4,y2:ly-4,stroke:s.color||'#000','stroke-width':s.w||1.4,'stroke-dasharray':s.dash||'none'}));
+      svg.appendChild(tx(lx+36,ly,s.name,{'text-anchor':'start','font-size':11}));
+      ly+=16;
+    });
+  }
+}
+
+const $=id=>document.getElementById(id);
+function num(id,def){ const x=parseFloat($(id).value); return isFinite(x)?x:def; }
+const clamp=(x,a,b)=>x<a?a:x>b?b:x;
+const D2R=Math.PI/180;
+const f1=(x,d)=>isFinite(x)?x.toFixed(d):'-';
+let R=null;
+
+function readIn(){
+  const p={};
+  ['H','a','h','b','c','d','e','ht','bt','xt','beta','phi1','g1','dr','phi2','g2','dbr','q','sadm','A0','fh','fv','rae','fsad','dpr','pfr','fsDs','fsDe','fsVs','fsVe','cmS','cmE','fc','fy','gc','cov','rmin','phv','dbS','sS','dbT','sT','dbH','sH','gD','gH','gE','gL'].forEach(k=>p[k]=num(k,0));
+  p.proj=$('proj').value.trim(); p.pmeth=$('pmeth').value; p.soilInert=$('soilInert').checked; p.pUseH=$('pUseH').checked;
+  p.e=Math.min(p.e,p.c); p.B=p.b+p.c+p.d;
+  return p;
+}
+function KaCoul(phi,delta,beta){
+  const t=Math.sin(phi+delta)*Math.sin(Math.max(phi-beta,0))/(Math.cos(delta)*Math.cos(beta));
+  return Math.cos(phi)**2/(Math.cos(delta)*(1+Math.sqrt(Math.max(t,0)))**2);
+}
+function KaRank(phi,beta){
+  const cb=Math.cos(beta), r=Math.sqrt(Math.max(cb*cb-Math.cos(phi)**2,0));
+  return cb*(cb-r)/(cb+r);
+}
+function KaeMO(phi,delta,beta,psi){
+  const t=Math.sin(phi+delta)*Math.sin(phi-beta-psi)/(Math.cos(delta+psi)*Math.cos(beta));
+  return Math.cos(phi-psi)**2/(Math.cos(psi)*Math.cos(delta+psi)*(1+Math.sqrt(Math.max(t,0)))**2);
+}
+function KpCoul(phi,delta){
+  const t=Math.sin(phi+delta)*Math.sin(phi)/Math.cos(delta);
+  return Math.cos(phi)**2/(Math.cos(delta)*(1-Math.sqrt(Math.max(t,0)))**2);
+}
+function KpeMO(phi,delta,psi){
+  const t=Math.sin(phi+delta)*Math.sin(phi-psi)/Math.cos(delta+psi);
+  return Math.cos(phi-psi)**2/(Math.cos(psi)*Math.cos(delta+psi)*(1-Math.sqrt(Math.max(t,0)))**2);
+}
+
+function analyze(p){
+  const o={p,warn:[]};
+  const {H,a,b,c,d,e,B,gc}=p;
+  if(p.beta>=p.phi1) o.warn.push('β debe ser menor que φ1.');
+  const tb=Math.tan(p.beta*D2R);
+  const W=[];
+  W.push({n:'Muro, parte rectangular',W:gc*e*H,x:b+c-e/2,y:a+H/2,wall:true});
+  if(c>e) W.push({n:'Muro, parte inclinada',W:gc*(c-e)*H/2,x:b+2*(c-e)/3,y:a+H/3,wall:true});
+  W.push({n:'Zapata',W:gc*B*a,x:B/2,y:a/2,wall:true});
+  if(p.ht>0&&p.bt>0) W.push({n:'Diente',W:gc*p.bt*p.ht,x:p.xt+p.bt/2,y:-p.ht/2,wall:true});
+  W.push({n:'Relleno sobre el talón',W:p.g1*d*H,x:b+c+d/2,y:a+H/2,soil:true});
+  if(tb>0) W.push({n:'Cuña de relleno inclinado',W:p.g1*d*d*tb/2,x:b+c+2*d/3,y:a+H+d*tb/3,soil:true});
+  if(p.h>0) W.push({n:'Suelo sobre la punta',W:p.g2*b*p.h,x:b/2,y:a+p.h/2,front:true});
+  o.W=W;
+  const phi1=p.phi1*D2R, beta=p.beta*D2R, delta=p.pmeth==='rank'?beta:p.dr*phi1;
+  const Hp=a+H+d*tb; o.Hp=Hp;
+  const Ka=p.pmeth==='rank'?KaRank(phi1,beta):KaCoul(phi1,p.dr*phi1,beta);
+  const kh=p.A0*p.fh, kv=p.A0*p.fv, psi=Math.atan(kh/(1-kv));
+  if(phi1-beta-psi<0) o.warn.push('φ1 − β − ψ < 0: Mononobe-Okabe no tiene solución, se acota la raíz a cero.');
+  const Kae=KaeMO(phi1,p.pmeth==='rank'?p.dr*phi1:delta,beta,psi);
+  const dK=Math.max(0,(1-kv)*Kae-Ka);
+  Object.assign(o,{Ka,Kae,dK,kh,kv,psi,delta});
+  const cd=Math.cos(delta), sd=Math.sin(delta);
+  const Pa=0.5*p.g1*Hp*Hp*Ka, Pq=p.q*Ka*Hp, dPae=0.5*p.g1*Hp*Hp*dK, dPq=p.q*Hp*dK;
+  o.F={Pa,Pq,dPae,dPq};
+  const phi2=p.phi2*D2R, dp=p.dpr*phi2;
+  const Kp=KpCoul(phi2,dp), Kpe=KpeMO(phi2,dp,psi);
+  const Df=a+Math.max(p.ht,0)+(p.pUseH?p.h:0);
+  const Pp=0.5*p.g2*Df*Df*Kp*p.pfr, Ppe=0.5*p.g2*Df*Df*Kpe*p.pfr;
+  Object.assign(o,{Kp,Kpe,Df,Pp,Ppe});
+  const sumW=W.reduce((s,w)=>s+w.W,0), sumWx=W.reduce((s,w)=>s+w.W*w.x,0);
+  const inert=W.filter(w=>w.wall||(w.soil&&p.soilInert));
+  const Hin=inert.reduce((s,w)=>s+kh*w.W,0), Min=inert.reduce((s,w)=>s+kh*w.W*w.y,0);
+  const mu=Math.tan(p.dbr*phi2);
+  function stab(seis){
+    const Hh=(Pa+Pq)*cd+(seis?(dPae+dPq)*cd+Hin:0);
+    const Vv=sumW+(Pa+Pq)*sd+(seis?(dPae+dPq)*sd:0);
+    const Mr=sumWx+(Pa+Pq)*sd*B+(seis?(dPae+dPq)*sd*B:0);
+    const Mo=Pa*cd*Hp/3+Pq*cd*Hp/2+(seis?dPae*cd*p.rae*Hp+dPq*cd*Hp/2+Min:0);
+    const FSv=Mo>0?Mr/Mo:Infinity;
+    const Pr=seis?Ppe:Pp;
+    const FSd=Hh>0?(Vv*mu+Pr)/Hh:Infinity;
+    const xR=(Mr-Mo)/Vv, ecc=B/2-xR;
+    let s1,s2,comp;
+    if(xR<=0){ s1=Infinity; s2=0; comp=0; }
+    else if(Math.abs(ecc)<=B/6){ s1=Vv/B*(1+6*ecc/B); s2=Vv/B*(1-6*ecc/B); comp=1; }
+    else if(ecc>0){ s1=2*Vv/(3*xR); s2=0; comp=Math.min(1,3*xR/B); }
+    else{ const xr2=B-xR; s1=0; s2=2*Vv/(3*xr2); comp=Math.min(1,3*xr2/B); }
+    return {Hh,Vv,Mr,Mo,FSv,FSd,xR,ecc,s1,s2,comp,Pr};
+  }
+  o.S=stab(false); o.E=stab(true);
+  o.mu=mu; o.Hin=Hin; o.Min=Min;
+  design(p,o);
+  checks(p,o);
+  return o;
+}
+
+function asReq(Mu,dmm,fc,fy){
+  const b=1000, M=Mu*1e6/0.9, k=1-2*M/(0.85*fc*b*dmm*dmm);
+  if(k<0) return Infinity;
+  return 0.85*fc*b*dmm/fy*(1-Math.sqrt(k));
+}
+function phiMn(As,dmm,fc,fy){ const a=As*fy/(0.85*fc*1000); return 0.9*As*fy*(dmm-a/2)/1e6; }
+function design(p,o){
+  const {H,a,b,c,d,e,B}=p, cd=Math.cos(o.delta), Kh=o.Ka*cd, dKh=o.dK*cd, kh=o.kh;
+  const stemAt=(z,seis)=>{
+    const t=e+(c-e)*z/H;
+    let V=p.gH*0.5*p.g1*Kh*z*z+p.gL*p.q*Kh*z;
+    let M=p.gH*p.g1*Kh*z*z*z/6+p.gL*p.q*Kh*z*z/2;
+    if(seis){
+      const dV=0.5*p.g1*dKh*z*z, dM=dV*p.rae*z;
+      const Wi=p.gc*(e*z+(c-e)*z*z/(2*H)), Mi=p.gc*(e*z*z/2+(c-e)*z*z*z/(6*H));
+      V+=p.gE*(dV+kh*Wi+p.q*dKh*z); M+=p.gE*(dM+kh*Mi+p.q*dKh*z*z/2);
+    }
+    return {z,t,V,M};
+  };
+  const prof=[]; for(let i=0;i<=40;i++){ const z=H*i/40; const s=stemAt(z,false), q=stemAt(z,true); prof.push({z,t:s.t,Ms:s.M,Me:q.M,Vs:s.V,Ve:q.V}); }
+  o.prof=prof;
+  const fac=(seis)=>{
+    const gWall=p.gD, Wf=o.W.reduce((s,w)=>s+w.W*gWall,0), Wfx=o.W.reduce((s,w)=>s+w.W*gWall*w.x,0);
+    const Pa=o.F.Pa*p.gH, Pq=o.F.Pq*p.gL;
+    let Hh=(Pa+Pq)*cd, Vv=Wf+(Pa+Pq)*Math.sin(o.delta), Mr=Wfx+(Pa+Pq)*Math.sin(o.delta)*B, Mo=Pa*cd*o.Hp/3+Pq*cd*o.Hp/2;
+    if(seis){ const dP=o.F.dPae*p.gE, dQ=o.F.dPq*p.gE; Hh+=(dP+dQ)*cd+o.Hin*p.gE; Vv+=(dP+dQ)*Math.sin(o.delta); Mr+=(dP+dQ)*Math.sin(o.delta)*B; Mo+=dP*cd*p.rae*o.Hp+dQ*cd*o.Hp/2+o.Min*p.gE; }
+    const xR=(Mr-Mo)/Vv, ecc=B/2-xR;
+    const sig=x=>{
+      if(xR<=0) return 0;
+      if(Math.abs(ecc)<=B/6){ const s1=Vv/B*(1+6*ecc/B), s2=Vv/B*(1-6*ecc/B); return s1+(s2-s1)*x/B; }
+      if(ecc>0){ const Lc=3*xR, s1=2*Vv/Lc; return x<Lc?s1*(1-x/Lc):0; }
+      const Lc=3*(B-xR), s2=2*Vv/Lc, x2=B-x; return x2<Lc?s2*(1-x2/Lc):0;
+    };
+    const N=200;
+    let Mt=0,Vt=0; const xf=b;
+    for(let i=0;i<N;i++){ const x=(i+0.5)*xf/N, dx=xf/N, w=sig(x)-p.gD*(p.gc*a+(p.h>0?p.g2*p.h:0)); Mt+=w*dx*(xf-x); Vt+=w*dx; }
+    let Mh=0,Vh=0; const x0=b+c, tb=Math.tan(p.beta*D2R);
+    for(let i=0;i<N;i++){ const dx=d/N, x=x0+(i+0.5)*dx, hs=H+(x-x0)*tb; const w=p.gD*(p.gc*a+p.g1*hs)+p.gL*p.q-sig(x); Mh+=w*dx*(x-x0); Vh+=w*dx; }
+    const Pv=(Pa+Pq+(seis?(o.F.dPae+o.F.dPq)*p.gE:0))*Math.sin(o.delta);
+    Mh+=Pv*d; Vh+=Pv;
+    return {Mt,Vt,Mh,Vh,xR,ecc,Vv,sig};
+  };
+  o.fS=fac(false); o.fE=fac(true);
+  const base=prof[prof.length-1];
+  const mk=(name,Mu,Vu,tmm,db,s)=>{
+    const dmm=tmm-p.cov-db/2, As=asReq(Math.max(Mu,0),dmm,p.fc,p.fy), Asmin=p.rmin*1000*tmm, Asr=Math.max(As,Asmin);
+    const Ab=Math.PI*db*db/4, sreq=Asr>0?Math.floor(1000*Ab/Asr/25)*25:Infinity, Asp=1000*Ab/s;
+    const pM=phiMn(Asp,dmm,p.fc,p.fy), pV=p.phv*0.17*Math.sqrt(p.fc)*1000*dmm/1e3;
+    return {name,Mu,Vu,t:tmm,dmm,As,Asmin,Asr,sreq,db,s,Asp,pM,pV,okM:Mu<=pM&&Asp>=Asmin-1e-6,okV:Math.abs(Vu)<=pV};
+  };
+  const tS=c*1000, tF=a*1000;
+  o.des=[
+    mk('Muro, base (estático)',base.Ms,base.Vs,tS,p.dbS,p.sS),
+    mk('Muro, base (sísmico)',base.Me,base.Ve,tS,p.dbS,p.sS),
+    mk('Punta (estático)',o.fS.Mt,o.fS.Vt,tF,p.dbT,p.sT),
+    mk('Punta (sísmico)',o.fE.Mt,o.fE.Vt,tF,p.dbT,p.sT),
+    mk('Talón (estático)',o.fS.Mh,o.fS.Vh,tF,p.dbH,p.sH),
+    mk('Talón (sísmico)',o.fE.Mh,o.fE.Vh,tF,p.dbH,p.sH),
+  ];
+}
+function checks(p,o){
+  const C=[];
+  const add=(n,v,l,ok,u)=>C.push({n,v,l,ok,u:u||''});
+  add('Deslizamiento estático, FS',o.S.FSd,p.fsDs,o.S.FSd>=p.fsDs);
+  add('Deslizamiento sísmico, FS',o.E.FSd,p.fsDe,o.E.FSd>=p.fsDe);
+  add('Volcamiento estático, FS',o.S.FSv,p.fsVs,o.S.FSv>=p.fsVs);
+  add('Volcamiento sísmico, FS',o.E.FSv,p.fsVe,o.E.FSv>=p.fsVe);
+  add('σ máx. estático',Math.max(o.S.s1,o.S.s2),p.sadm,Math.max(o.S.s1,o.S.s2)<=p.sadm,'kPa');
+  add('σ máx. sísmico',Math.max(o.E.s1,o.E.s2),p.sadm*p.fsad,Math.max(o.E.s1,o.E.s2)<=p.sadm*p.fsad,'kPa');
+  add('Área comprimida estática',o.S.comp*100,p.cmS,o.S.comp*100>=p.cmS-1e-6,'%');
+  add('Área comprimida sísmica',o.E.comp*100,p.cmE,o.E.comp*100>=p.cmE-1e-6,'%');
+  o.des.forEach(d=>{ add(`${d.name}, Mu / φMn`,d.Mu/d.pM,1,d.okM); add(`${d.name}, Vu / φVc`,Math.abs(d.Vu)/d.pV,1,d.okV); });
+  o.chk=C;
+}
+
+function wallSVG(svg,o){
+  const p=o.p; svg.innerHTML='';
+  const W=760,Hs=520; svg.setAttribute('viewBox',`0 0 ${W} ${Hs}`);
+  const tb=Math.tan(p.beta*D2R), top=p.a+p.H+p.d*tb;
+  const xmin=-0.6, xmax=p.B+1.2, ymin=-Math.max(p.ht,0)-1.0, ymax=top+0.6;
+  const sc=Math.min((W-120)/(xmax-xmin),(Hs-40)/(ymax-ymin));
+  const X=x=>60+(x-xmin)*sc, Y=y=>Hs-20-(y-ymin)*sc;
+  const g=el('g',{});
+  const {a,b,c,d,e,H,B}=p;
+  g.appendChild(el('polygon',{points:[[b+c,a+H],[B,a+H+d*tb],[B+1,a+H+(d+1)*tb],[B+1,a],[b+c,a]].map(q=>`${X(q[0])},${Y(q[1])}`).join(' '),fill:'#efe9dc',stroke:'none'}));
+  if(p.h>0) g.appendChild(el('rect',{x:X(-0.5),y:Y(a+p.h),width:(b+0.5)*sc,height:p.h*sc,fill:'#efe9dc'}));
+  const conc=[[0,0],[B,0],[B,a],[b+c,a],[b+c,a+H],[b+c-e,a+H],[b,a],[0,a]];
+  g.appendChild(el('polygon',{points:conc.map(q=>`${X(q[0])},${Y(q[1])}`).join(' '),fill:'#c0c0c0',stroke:'#000','stroke-width':1.2}));
+  if(p.ht>0&&p.bt>0) g.appendChild(el('rect',{x:X(p.xt),y:Y(0),width:p.bt*sc,height:p.ht*sc,fill:'#c0c0c0',stroke:'#000','stroke-width':1.2}));
+  g.appendChild(el('line',{x1:X(b+c),y1:Y(a+H),x2:X(B+1),y2:Y(a+H+(d+1)*tb),stroke:'#000','stroke-width':1.2}));
+  if(p.h>0) g.appendChild(el('line',{x1:X(-0.5),y1:Y(a+p.h),x2:X(b+(c-e)*p.h/H),y2:Y(a+p.h),stroke:'#000','stroke-width':1}));
+  g.appendChild(el('line',{x1:X(B),y1:Y(0),x2:X(B),y2:Y(top),stroke:'#000','stroke-width':0.8,'stroke-dasharray':'4,3'}));
+  const pmax=p.q*o.Ka+p.g1*o.Ka*o.Hp;
+  const psc=0.9/Math.max(pmax,1);
+  const pr=[[B,top],[B+p.q*o.Ka*psc,top],[B+(p.q*o.Ka+p.g1*o.Ka*o.Hp)*psc,0],[B,0]];
+  g.appendChild(el('polygon',{points:pr.map(q=>`${X(q[0])},${Y(q[1])}`).join(' '),fill:'none',stroke:'#000','stroke-width':1}));
+  g.appendChild(tx(X(B+(p.q*o.Ka+p.g1*o.Ka*o.Hp)*psc)+4,Y(0)-4,`${f1(p.q*o.Ka+p.g1*o.Ka*o.Hp,1)} kPa`,{'text-anchor':'start','font-size':10.5}));
+  const S=o.S, smax=Math.max(S.s1,S.s2,1), ss=0.6/smax;
+  const sp=[[0,0],[0,-S.s1*ss]];
+  const Lc=S.comp*B;
+  if(S.comp>=1) sp.push([B,-S.s2*ss]); else if(S.ecc>0) sp.push([Lc,0]); else { sp.length=0; sp.push([B-Lc,0],[B,-S.s2*ss]); }
+  sp.push([B,0]);
+  g.appendChild(el('polygon',{points:sp.map(q=>`${X(q[0])},${Y(q[1]-Math.max(p.ht,0)-0.05)}`).join(' '),fill:'none',stroke:'#000','stroke-width':1}));
+  g.appendChild(tx(X(0),Y(-S.s1*ss-Math.max(p.ht,0)-0.05)+13,`${f1(S.s1,0)} kPa`,{'text-anchor':'start','font-size':10.5}));
+  if(S.s2>0) g.appendChild(tx(X(B),Y(-S.s2*ss-Math.max(p.ht,0)-0.05)+13,`${f1(S.s2,0)} kPa`,{'text-anchor':'end','font-size':10.5}));
+  const dim=(x1,y1,x2,y2,t,off,vert)=>{
+    if(vert){ g.appendChild(el('line',{x1:X(x1)+off,x2:X(x1)+off,y1:Y(y1),y2:Y(y2),stroke:'#000','stroke-width':0.7})); g.appendChild(tx(X(x1)+off-4,(Y(y1)+Y(y2))/2+4,t,{'text-anchor':'end','font-size':11})); }
+    else{ g.appendChild(el('line',{x1:X(x1),x2:X(x2),y1:Y(y1)+off,y2:Y(y1)+off,stroke:'#000','stroke-width':0.7})); g.appendChild(tx((X(x1)+X(x2))/2,Y(y1)+off-3,t,{'font-size':11})); }
+  };
+  dim(0,0,b,0,`b = ${b}`,-6,false); dim(b,0,b+c,0,`c = ${c}`,-6,false); dim(b+c,0,B,0,`d = ${d}`,-6,false);
+  dim(b+c-e,a+H,b+c,a+H,`e = ${e}`,-8,false);
+  dim(b+c-c-0.25,a,b+c-c-0.25,a+H,`H = ${H}`,0,true);
+  dim(0,0,0,a,`a = ${a}`,-6,true);
+  g.appendChild(tx(X(b+c+d/2),Y(a+H*0.55),`φ1 = ${p.phi1}°, γ1 = ${p.g1}`,{'font-size':11}));
+  if(p.h>0) g.appendChild(tx(X(-0.3),Y(a+p.h)-6,`h = ${p.h}`,{'font-size':11}));
+  svg.appendChild(g);
+}
+function renderAll(o,T,svgs){
+  const p=o.p;
+  wallSVG(svgs.wall,o);
+  T.stab.innerHTML=`<thead><tr><th>Verificación</th><th class="num">Estático</th><th class="num">Sísmico</th></tr></thead><tbody>
+    <tr><td>Fuerza horizontal H [kN/m]</td><td class="num">${f1(o.S.Hh,2)}</td><td class="num">${f1(o.E.Hh,2)}</td></tr>
+    <tr><td>Fuerza vertical V [kN/m]</td><td class="num">${f1(o.S.Vv,2)}</td><td class="num">${f1(o.E.Vv,2)}</td></tr>
+    <tr><td>Momento resistente en la punta [kN·m/m]</td><td class="num">${f1(o.S.Mr,2)}</td><td class="num">${f1(o.E.Mr,2)}</td></tr>
+    <tr><td>Momento volcante en la punta [kN·m/m]</td><td class="num">${f1(o.S.Mo,2)}</td><td class="num">${f1(o.E.Mo,2)}</td></tr>
+    <tr><td>Pasivo considerado [kN/m]</td><td class="num">${f1(o.S.Pr,2)}</td><td class="num">${f1(o.E.Pr,2)}</td></tr>
+    <tr><td>Resultante desde la punta xR [m] / excentricidad e [m]</td><td class="num">${f1(o.S.xR,3)} / ${f1(o.S.ecc,3)}</td><td class="num">${f1(o.E.xR,3)} / ${f1(o.E.ecc,3)}</td></tr>
+    <tr><td>σ punta / σ talón [kPa]</td><td class="num">${f1(o.S.s1,1)} / ${f1(o.S.s2,1)}</td><td class="num">${f1(o.E.s1,1)} / ${f1(o.E.s2,1)}</td></tr>
+    ${o.chk.slice(0,8).map(c=>'').join('')}
+    </tbody>`;
+  const ck=o.chk;
+  T.stab.insertAdjacentHTML('beforeend',`<tbody>${[[0,1,'FS deslizamiento',p.fsDs,p.fsDe],[2,3,'FS volcamiento',p.fsVs,p.fsVe],[4,5,'σ máx. / admisible [kPa]',p.sadm,p.sadm*p.fsad],[6,7,'Área comprimida [%]',p.cmS,p.cmE]].map(r=>{
+    const a=ck[r[0]], b=ck[r[1]];
+    return `<tr class="${a.ok&&b.ok?'':'fail'}"><td>${r[2]} (requerido ${f1(r[3],2)} / ${f1(r[4],2)})</td><td class="num">${f1(a.v,2)} ${a.ok?'Cumple':'No cumple'}</td><td class="num">${f1(b.v,2)} ${b.ok?'Cumple':'No cumple'}</td></tr>`; }).join('')}</tbody>`);
+  T.k.innerHTML=`<tbody>
+    <tr><td>Ka ${p.pmeth==='rank'?'(Rankine)':'(Coulomb)'}</td><td class="num">${f1(o.Ka,4)}</td><td>δ = ${f1(o.delta/D2R,1)}°</td></tr>
+    <tr><td>Kae (Mononobe-Okabe)</td><td class="num">${f1(o.Kae,4)}</td><td>kh = ${f1(o.kh,3)}, kv = ${f1(o.kv,3)}, ψ = ${f1(o.psi/D2R,2)}°</td></tr>
+    <tr><td>ΔK = (1 − kv)Kae − Ka</td><td class="num">${f1(o.dK,4)}</td><td>ΔPae aplicado a ${f1(p.rae,3)}H'</td></tr>
+    <tr><td>Kp / Kpe</td><td class="num">${f1(o.Kp,3)} / ${f1(o.Kpe,3)}</td><td>δp = ${f1(p.dpr*p.phi2,1)}°, profundidad ${f1(o.Df,2)} m</td></tr>
+    <tr><td>H' plano virtual</td><td class="num">${f1(o.Hp,3)} m</td><td>μ base = tan(${f1(p.dbr*p.phi2,1)}°) = ${f1(o.mu,3)}</td></tr></tbody>`;
+  const cd=Math.cos(o.delta), sd=Math.sin(o.delta);
+  const rows=o.W.map(w=>[w.n,w.W,0,w.x,w.y,w.W*w.x]);
+  rows.push(['Empuje activo Pa',o.F.Pa*sd,o.F.Pa*cd,p.B,o.Hp/3,o.F.Pa*sd*p.B]);
+  rows.push(['Empuje por sobrecarga Pq',o.F.Pq*sd,o.F.Pq*cd,p.B,o.Hp/2,o.F.Pq*sd*p.B]);
+  rows.push(['Incremento sísmico ΔPae',o.F.dPae*sd,o.F.dPae*cd,p.B,p.rae*o.Hp,o.F.dPae*sd*p.B]);
+  rows.push(['Incremento sísmico sobrecarga',o.F.dPq*sd,o.F.dPq*cd,p.B,o.Hp/2,o.F.dPq*sd*p.B]);
+  rows.push(['Inercia del muro'+(p.soilInert?' y relleno':''),0,o.Hin,NaN,o.Hin>0?o.Min/o.Hin:NaN,0]);
+  rows.push(['Pasivo estático / sísmico',NaN,-o.Pp,NaN,NaN,NaN]);
+  T.loads.innerHTML=`<thead><tr><th>Componente</th><th class="num">V [kN/m]</th><th class="num">H [kN/m]</th><th class="num">x [m]</th><th class="num">y [m]</th><th class="num">V·x [kN·m/m]</th></tr></thead><tbody>${
+    rows.map(r=>`<tr><td>${r[0]}</td><td class="num">${f1(r[1],2)}</td><td class="num">${r[0].startsWith('Pasivo')?f1(o.Pp,2)+' / '+f1(o.Ppe,2):f1(r[2],2)}</td><td class="num">${f1(r[3],3)}</td><td class="num">${f1(r[4],3)}</td><td class="num">${f1(r[5],2)}</td></tr>`).join('')}</tbody>`;
+  T.des.innerHTML=`<thead><tr><th>Sección</th><th class="num">Mu [kN·m/m]</th><th class="num">Vu [kN/m]</th><th class="num">t / d [mm]</th><th class="num">As req. [mm²/m]</th><th class="num">As mín. [mm²/m]</th><th class="num">s req. Ø</th><th class="num">Adoptado</th><th class="num">φMn [kN·m/m]</th><th class="num">φVc [kN/m]</th></tr></thead><tbody>${
+    o.des.map(d=>`<tr class="${d.okM&&d.okV?'':'fail'}"><td>${d.name}</td><td class="num">${f1(d.Mu,2)}</td><td class="num">${f1(d.Vu,2)}</td><td class="num">${f1(d.t,0)} / ${f1(d.dmm,0)}</td><td class="num">${isFinite(d.As)?f1(d.As,0):'Sección insuficiente'}</td><td class="num">${f1(d.Asmin,0)}</td><td class="num">Ø${d.db}@${isFinite(d.sreq)?d.sreq:'-'}</td><td class="num">Ø${d.db}@${d.s} (${f1(d.Asp,0)})</td><td class="num">${f1(d.pM,2)}</td><td class="num">${f1(d.pV,2)}</td></tr>`).join('')}</tbody>`;
+  const Ab=Math.PI*p.dbS*p.dbS/4, Asp=1000*Ab/p.sS;
+  chart(svgs.stem,{H:380,xlabel:'M [kN·m/m]',ylabel:'Profundidad desde el coronamiento [m]',zeroX:true,legendRight:true,series:[
+    {name:'Mu estático',pts:o.prof.map(r=>[r.Ms,-r.z]),w:1.6,dash:'6,4'},
+    {name:'Mu sísmico',pts:o.prof.map(r=>[r.Me,-r.z]),w:1.8},
+    {name:`φMn Ø${p.dbS}@${p.sS}`,pts:o.prof.map(r=>{ const t=r.t*1000; return [phiMn(Math.max(Asp,0),t-p.cov-p.dbS/2,p.fc,p.fy),-r.z]; }),w:1,dash:'2,3'}]});
+}
+function renderStats(o){
+  const n=o.chk.filter(c=>!c.ok).length;
+  const st=[{k:'FS desliz. est. / sís.',v:`${f1(o.S.FSd,2)} / ${f1(o.E.FSd,2)}`},{k:'FS volc. est. / sís.',v:`${f1(o.S.FSv,2)} / ${f1(o.E.FSv,2)}`},
+    {k:'σ máx. est. / sís.',v:`${f1(Math.max(o.S.s1,o.S.s2),0)} / ${f1(Math.max(o.E.s1,o.E.s2),0)} kPa`},{k:'Verificaciones',v:n?`${n} no cumple${n>1?'n':''}`:'Todas cumplen'}];
+  $('stats').innerHTML=st.map(s=>`<div class="stat"><div class="k">${s.k}</div><div class="v">${s.v}</div></div>`).join('');
+}
+function notesHtml(p){
+  return `Análisis por metro de muro. Empuje sobre el plano vertical que pasa por el extremo del talón, con altura H' = a + H + d·tanβ. ${p.pmeth==='rank'?'Rankine con empuje paralelo al relleno.':'Coulomb con δ = '+p.dr+'φ1.'}<br>
+  Sismo: Mononobe-Okabe con kh = ${p.fh}·A0 y kv = ${p.fv}·A0, incremento ΔPae aplicado a ${p.rae}H', inercia kh·W del muro${p.soilInert?' y del relleno sobre el talón':''}.<br>
+  Volcamiento respecto de la punta. Deslizamiento con μ = tan(δb) y pasivo frente a la zapata${p.ht>0?' y el diente':''}. Sobrecarga q excluida de las fuerzas resistentes.<br>
+  Diseño: combinación estática ${p.gD}D + ${p.gH}H + ${p.gL}L y sísmica agregando ${p.gE}E. Presión del suelo mayorada lineal o triangular. φ = 0,9 en flexión, φ = ${p.phv} en corte, φVc = φ·0,17√f'c·b·d sin estribos.`;
+}
+function run(){
+  const p=readIn();
+  try{
+    R=analyze(p);
+    $('warns').innerHTML=R.warn.map(w=>`<div class="warn">${w}</div>`).join('');
+    renderAll(R,{stab:$('tbStab'),k:$('tbK'),loads:$('tbLoads'),des:$('tbDes')},{wall:$('wallSvg'),stem:$('chStem')});
+    renderStats(R); $('notes').innerHTML=notesHtml(p); autosave();
+  }catch(e){ $('warns').innerHTML=`<div class="warn">Error: ${e.message}</div>`; console.error(e); }
+}
+let tmr=null;
+document.querySelectorAll('input,select,textarea').forEach(i=>{ if(i.type==='file') return; i.addEventListener('input',()=>{ clearTimeout(tmr); tmr=setTimeout(run,150); }); i.addEventListener('change',()=>{ clearTimeout(tmr); tmr=setTimeout(run,30); }); });
+document.querySelectorAll('#tabs button').forEach(b=>b.addEventListener('click',()=>{ document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('active',x===b)); document.querySelectorAll('.tabpane').forEach(q=>q.hidden=q.dataset.pane!==b.dataset.tab); }));
+const IDS=[...document.querySelectorAll('input,select,textarea')].filter(e=>e.id&&e.type!=='file').map(e=>e.id);
+function projectData(){ const d={}; IDS.forEach(id=>{ const e=$(id); d[id]=e.type==='checkbox'?e.checked:e.value; }); return {app:'fddlebel-muros',v:1,inputs:d}; }
+function loadProject(d){ if(!d||!d.inputs) return false; Object.entries(d.inputs).forEach(([id,v])=>{ const e=$(id); if(!e) return; if(e.type==='checkbox') e.checked=!!v; else e.value=v; }); return true; }
+function autosave(){ try{ localStorage.setItem('fdd_muros_v1',JSON.stringify(projectData())); }catch(e){} }
+function download(name,text,type){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text],{type:type||'text/plain'})); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500); }
+function baseName(){ return ($('proj').value.trim().replace(/[^\w\-]+/g,'_'))||'muro_contencion'; }
+$('saveBtn').addEventListener('click',()=>download(baseName()+'.json',JSON.stringify(projectData()),'application/json'));
+$('loadBtn').addEventListener('click',()=>$('loadFile').click());
+$('loadFile').addEventListener('change',ev=>{ const f=ev.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ if(loadProject(JSON.parse(r.result))) run(); }catch(e){ $('warns').innerHTML='<div class="warn">El archivo no es un proyecto válido.</div>'; } }; r.readAsText(f); ev.target.value=''; });
+function buildReport(){
+  const p=R.p, ct=$('printReport'); ct.innerHTML='';
+  const hd=document.createElement('div'); hd.className='rpt-header';
+  hd.innerHTML=`<h1>Muro de contención en voladizo</h1><div class="rpt-sub">${p.proj?p.proj+', ':''}${new Date().toLocaleDateString('es-CL')}</div>`; ct.appendChild(hd);
+  const pt=document.createElement('table'); pt.className='rpt-params';
+  pt.innerHTML=`<tr><td class="k">H / a / h</td><td>${p.H} / ${p.a} / ${p.h} m</td><td class="k">b / c / d / e</td><td>${p.b} / ${p.c} / ${p.d} / ${p.e} m</td></tr>
+   <tr><td class="k">Diente</td><td>${p.ht>0?`${p.bt} × ${p.ht} m a ${p.xt} m de la punta`:'Sin diente'}</td><td class="k">β / q</td><td>${p.beta}° / ${p.q} kPa</td></tr>
+   <tr><td class="k">Relleno</td><td>φ1 = ${p.phi1}°, γ1 = ${p.g1} kN/m³</td><td class="k">Fundación</td><td>φ2 = ${p.phi2}°, γ2 = ${p.g2} kN/m³, σadm = ${p.sadm} kPa</td></tr>
+   <tr><td class="k">Sismo</td><td>A0 = ${p.A0}g, kh = ${f1(R.kh,3)}, kv = ${f1(R.kv,3)}</td><td class="k">Hormigón</td><td>f'c = ${p.fc} MPa, fy = ${p.fy} MPa, rec. ${p.cov} mm</td></tr>`;
+  ct.appendChild(pt);
+  const addSec=(t,n)=>{ const s=document.createElement('div'); s.className='rpt-section'; s.innerHTML=`<h2>${t}</h2>`; if(n) s.appendChild(n); ct.appendChild(s); return s; };
+  const mk=()=>el('svg',{width:'100%',style:'max-width:620px;height:auto;display:block;margin:0 auto;'});
+  const T={}; ['stab','k','loads','des'].forEach(k=>{ T[k]=document.createElement('table'); T[k].className='rpt-small'; });
+  const sv={wall:mk(),stem:mk()};
+  renderAll(R,T,sv);
+  addSec('Geometría y presiones de servicio',sv.wall);
+  addSec('Coeficientes de empuje',T.k);
+  addSec('Pesos y empujes',T.loads);
+  addSec('Estabilidad',T.stab);
+  addSec('Momento en el muro',sv.stem);
+  addSec('Diseño a flexión y corte',T.des);
+  const ft=document.createElement('div'); ft.className='rpt-foot'; ft.innerHTML=notesHtml(p); ct.appendChild(ft);
+}
+$('pdfBtn').addEventListener('click',()=>{ if(!R) return; buildReport(); window.print(); });
+(function init(){ try{ const d=JSON.parse(localStorage.getItem('fdd_muros_v1')||'null'); if(d) loadProject(d); }catch(e){} run(); })();
+</script></body></html>

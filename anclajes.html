@@ -1,0 +1,848 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Anclajes en hormigón | fddlebel</title>
+<style>
+:root{
+  --paper:#ffffff;--panel:#ffffff;--ink:#000000;--line:#9a9a9a;--line-strong:#7a7a7a;
+  --accent:#000000;--accent-soft:#e9e9e9;--grid:#d9d9d9;--conc:#c0c0c0;--conc-dark:#a8a8a8;
+  --fail:#b3261e;--focus:#4a4d24;
+  --sans:'Arial Narrow',Arial,Helvetica,sans-serif;
+}
+*{box-sizing:border-box;}
+[hidden]{display:none!important;}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);padding-block:20px 48px;padding-inline:max(16px,calc((100vw - 1400px)/2));}
+h1{font-size:22px;font-weight:700;margin:0;}
+.app-header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+.clause{font-size:12px;}
+.btn{font-family:var(--sans);font-weight:700;font-size:13px;color:#fff;background:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:7px 14px;cursor:pointer;}
+.btn.sec{background:var(--panel);color:var(--ink);border-color:var(--line-strong);}
+.grid{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;align-items:start;}
+@media (max-width:900px){.grid{grid-template-columns:1fr;}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:14px;}
+.panel+.panel{margin-top:12px;}
+.section-title{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:0 0 10px;}
+.field{margin-bottom:9px;min-width:0;}
+.field label{display:block;font-size:12px;margin-bottom:3px;}
+.unit{opacity:.75;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+input[type=number],input[type=text],select,textarea{width:100%;font-family:var(--sans);font-size:13px;color:var(--ink);background:#fff;border:1px solid var(--line-strong);border-radius:4px;padding:6px 7px;font-variant-numeric:tabular-nums;}
+textarea{font-size:12px;resize:vertical;}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--focus);outline-offset:1px;}
+details summary{cursor:pointer;font-size:13px;font-weight:700;margin-top:4px;user-select:none;}
+details[open] summary{margin-bottom:8px;}
+.chk{display:flex;align-items:center;gap:6px;font-size:12px;}
+.chk input{width:auto;margin:0;}
+.toolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px;}
+.tool{font-family:var(--sans);font-size:12.5px;font-weight:700;background:var(--panel);color:var(--ink);border:1px solid var(--line-strong);border-radius:4px;padding:6px 10px;cursor:pointer;}
+.tool.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.toolbar select{width:auto;}
+.toolbar .sep{width:1px;height:24px;background:var(--line);margin:0 4px;}
+#gridWrap{position:relative;border:1px solid var(--line);border-radius:4px;overflow:auto;max-height:560px;background:#fff;}
+#gridCanvas{display:block;cursor:crosshair;touch-action:none;}
+#gridInfo{font-size:12px;margin-top:6px;min-height:16px;}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 10px;}
+.tabs button{font-family:var(--sans);font-weight:700;font-size:13px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:7px 14px;cursor:pointer;}
+.tabs button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:12px;}
+.stat{border:1px solid var(--line);border-radius:4px;padding:8px 10px;}
+.stat .k{font-size:11px;text-transform:uppercase;letter-spacing:.04em;}
+.stat .v{font-size:16px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th,td{text-align:left;padding:5px 8px;border:1px solid var(--line);font-variant-numeric:tabular-nums;}
+th{font-size:11px;font-weight:700;background:var(--accent-soft);}
+td.num,th.num{text-align:right;}
+tr.fail td{color:var(--fail);font-weight:700;}
+.tablewrap{overflow-x:auto;}
+.chartwrap{border:1px solid var(--line);border-radius:4px;padding:10px;margin-bottom:12px;}
+.ctrls{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-bottom:10px;}
+.ctrls .field{margin:0;width:150px;}
+#glWrap{position:relative;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:#fff;}
+#glCanvas{display:block;width:100%;height:560px;cursor:grab;touch-action:none;}
+#glLabels{position:absolute;inset:0;pointer-events:none;font-size:11px;}
+#glLabels span{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;}
+.note{font-size:11.5px;line-height:1.5;}
+.warn{background:var(--accent-soft);border:1px solid var(--line-strong);border-radius:4px;padding:7px 10px;font-size:12px;margin-bottom:10px;}
+#busy{font-size:12px;margin-left:8px;}
+svg text{font-family:var(--sans);}
+#printReport{display:none;}
+.rpt-header{margin-bottom:12px;}
+.rpt-header h1{font-size:20px;}
+.rpt-sub{font-size:11.5px;margin-top:2px;}
+.rpt-params{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:11px;}
+.rpt-params td{border:1px solid var(--line);padding:4px 7px;}
+.rpt-params td.k{font-weight:700;width:22%;background:var(--accent-soft);}
+.rpt-section{margin-bottom:16px;page-break-inside:avoid;break-inside:avoid;}
+.rpt-section h2{font-size:14px;font-weight:700;margin:0 0 8px;border-bottom:1px solid var(--line);padding-bottom:4px;break-after:avoid;}
+.rpt-section.allow-break{page-break-inside:auto;break-inside:auto;}
+.rpt-foot{font-size:10px;margin-top:14px;border-top:1px solid var(--line);padding-top:6px;}
+.rpt-small{font-size:10px;}
+.rpt-small td,.rpt-small th{padding:2px 5px;}
+@media print{
+  body *{visibility:hidden;}
+  #printReport,#printReport *{visibility:visible;}
+  #printReport{display:block;position:absolute;left:0;top:0;width:100%;}
+  @page{margin:12mm;}
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1><a href="index.html" style="color:inherit;text-decoration:none;font-weight:400;">fddlebel</a> / Anclajes en hormigón</h1>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+    <div class="clause">ACI 318-25, capítulo 17</div>
+    <button class="btn sec" id="saveBtn">Guardar proyecto</button>
+    <button class="btn sec" id="loadBtn">Abrir proyecto</button>
+    <input type="file" id="loadFile" accept=".json" hidden>
+    <button class="btn" id="pdfBtn">Exportar PDF</button>
+  </div>
+</div>
+
+<div id="printReport"></div>
+
+<div class="grid">
+  <div>
+    <div class="panel">
+      <div class="field"><label>Proyecto / elemento</label><input type="text" id="proj" value=""></div>
+
+      <div class="section-title" style="margin-top:12px">Anclaje</div>
+      <div class="row2">
+        <div class="field"><label>Instalación</label><select id="inst"><option value="cast" selected>Preinstalado</option><option value="adh">Postinstalado adhesivo</option></select></div>
+        <div class="field"><label>Cabeza</label><select id="head"><option value="hex" selected>Tuerca hexagonal pesada</option><option value="plate">Placa de extracción</option><option value="J">Perno J</option></select></div>
+      </div>
+      <div class="row3">
+        <div class="field"><label>da <span class="unit">[in]</span></label><select id="dain">
+          <option>0.375</option><option>0.5</option><option>0.625</option><option selected>0.75</option><option>0.875</option><option>1</option><option>1.125</option><option>1.25</option><option>1.5</option><option>1.75</option><option>2</option></select></div>
+        <div class="field"><label>fya <span class="unit">[MPa]</span></label><input type="number" id="fya" value="250" step="10"></div>
+        <div class="field"><label>futa <span class="unit">[MPa]</span></label><input type="number" id="futa" value="400" step="10"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>hef <span class="unit">[mm]</span></label><input type="number" id="hef" value="500" step="10"></div>
+        <div class="field"><label>ha espesor elemento <span class="unit">[mm]</span></label><input type="number" id="ha" value="1300" step="10"></div>
+      </div>
+      <label class="chk"><input type="checkbox" id="duct" checked> Acero dúctil</label>
+      <label class="chk"><input type="checkbox" id="grout" checked> Mortero de nivelación bajo la placa</label>
+      <div id="plateBox"><div class="row2">
+        <div class="field"><label>Bp placa <span class="unit">[mm]</span></label><input type="number" id="Bp" value="100" step="5"></div>
+        <div class="field"><label>Lp placa <span class="unit">[mm]</span></label><input type="number" id="Lp" value="100" step="5"></div>
+      </div><div class="row2">
+        <div class="field"><label>tp placa <span class="unit">[mm]</span></label><input type="number" id="tp" value="22" step="1"></div>
+        <div class="field"><label>fy placa <span class="unit">[MPa]</span></label><input type="number" id="fyp" value="250" step="10"></div>
+      </div></div>
+      <div class="field" id="jBox"><label>eh gancho J <span class="unit">[mm]</span></label><input type="number" id="eh" value="100" step="5"></div>
+      <div class="row3" id="adhBox">
+        <div class="field"><label>τcr <span class="unit">[MPa]</span></label><input type="number" id="tcr" value="9.33" step="0.1"></div>
+        <div class="field"><label>τuncr <span class="unit">[MPa]</span></label><input type="number" id="tunc" value="18.01" step="0.1"></div>
+        <div class="field"><label>Categoría</label><select id="cat"><option value="1" selected>1</option><option value="2">2</option><option value="3">3</option></select></div>
+      </div>
+      <div class="row2" id="cacBox">
+        <div class="field"><label>cac <span class="unit">[mm, 0 = 2hef]</span></label><input type="number" id="cac" value="0" step="10"></div>
+        <div class="field"><label>Nua,s sostenida <span class="unit">[kN/anclaje]</span></label><input type="number" id="Nus" value="0" step="1"></div>
+      </div>
+
+      <div class="section-title" style="margin-top:12px">Grupo y bordes <span class="unit">[mm]</span></div>
+      <div class="row2">
+        <div class="field"><label>n en x / sx</label><div class="row2"><input type="number" id="nx" value="2" step="1" min="1"><input type="number" id="sx" value="200" step="10"></div></div>
+        <div class="field"><label>n en y / sy</label><div class="row2"><input type="number" id="ny" value="2" step="1" min="1"><input type="number" id="sy" value="200" step="10"></div></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Borde −x / +x <span class="unit">[0 = sin borde]</span></label><div class="row2"><input type="number" id="cxm" value="225" step="5"><input type="number" id="cxp" value="225" step="5"></div></div>
+        <div class="field"><label>Borde −y / +y <span class="unit">[0 = sin borde]</span></label><div class="row2"><input type="number" id="cym" value="225" step="5"><input type="number" id="cyp" value="225" step="5"></div></div>
+      </div>
+
+      <div class="row3">
+        <div class="field"><label>Placa base x</label><input type="number" id="Bbp" value="500" step="10"></div>
+        <div class="field"><label>Placa base y</label><input type="number" id="Lbp" value="500" step="10"></div>
+        <div class="field"><label>t placa / mortero</label><div class="row2"><input type="number" id="tbp" value="32" step="2"><input type="number" id="gbp" value="50" step="5"></div></div>
+      </div>
+
+      <div class="section-title" style="margin-top:12px">Hormigón</div>
+      <div class="row3">
+        <div class="field"><label>f'c <span class="unit">[MPa]</span></label><input type="number" id="fc" value="25" step="1"></div>
+        <div class="field"><label>λa</label><input type="number" id="lam" value="1" step="0.05"></div>
+        <div class="field"><label>z para ψcm,N <span class="unit">[mm]</span></label><input type="number" id="zcm" value="0" step="10"></div>
+      </div>
+      <label class="chk"><input type="checkbox" id="crk" checked> Hormigón fisurado</label>
+      <label class="chk"><input type="checkbox" id="seis"> Sísmico, CDS C a F, 0,75 en modos de hormigón en tracción</label>
+      <div class="row2">
+        <div class="field"><label>Condición tracción</label><select id="condT"><option value="A">A, con refuerzo suplementario</option><option value="B" selected>B, sin refuerzo suplementario</option></select></div>
+        <div class="field"><label>Condición corte</label><select id="condV"><option value="A">A, con refuerzo suplementario</option><option value="B" selected>B, sin refuerzo suplementario</option></select></div>
+      </div>
+      <div class="field"><label>ψc,V</label><select id="psicV"><option value="1" selected>1,0 sin refuerzo de borde</option><option value="1.2">1,2 barra de borde ≥ Ø12</option><option value="1.4">1,4 barra de borde y estribos @ ≤ 100</option></select></div>
+
+      <div class="section-title" style="margin-top:12px">Factores φ y ψa, Tablas 21.2.1 y 17.5.4.1</div>
+      <div class="row3">
+        <div class="field"><label>Redundante</label><select id="red"><option value="1" selected>Sí, φ = 0,75</option><option value="0">No, φ = 0,65</option></select></div>
+        <div class="field"><label>ψa tracción <span class="unit">[0 = tabla]</span></label><input type="number" id="psaT" value="0" step="0.01"></div>
+        <div class="field"><label>ψa corte <span class="unit">[0 = tabla]</span></label><input type="number" id="psaV" value="0" step="0.01"></div>
+      </div>
+
+      <div class="section-title" style="margin-top:12px">Solicitaciones</div>
+      <div class="field"><label>Diseño</label><select id="dmode"><option value="res" selected>Resistencia, Nua y Vua</option><option value="cap">Capacidad, Nsa y Vsa del perno</option></select></div>
+      <div class="row3">
+        <div class="field"><label>Nua grupo <span class="unit">[kN]</span></label><input type="number" id="Nua" value="40" step="1"></div>
+        <div class="field"><label>e'N,x <span class="unit">[mm]</span></label><input type="number" id="eNx" value="0" step="5"></div>
+        <div class="field"><label>e'N,y <span class="unit">[mm]</span></label><input type="number" id="eNy" value="0" step="5"></div>
+      </div>
+      <div class="row3">
+        <div class="field"><label>Vua grupo <span class="unit">[kN]</span></label><input type="number" id="Vua" value="20" step="1"></div>
+        <div class="field"><label>Dirección</label><select id="vdir"><option value="px" selected>+x</option><option value="mx">−x</option><option value="py">+y</option><option value="my">−y</option></select></div>
+        <div class="field"><label>e'V <span class="unit">[mm]</span></label><input type="number" id="eV" value="0" step="5"></div>
+      </div>
+      <div class="field"><label>Distribución del corte</label><select id="vcase"><option value="std" selected>Agujeros normales, casos 1, 2 o 3</option><option value="weld">Pernos soldados a la placa, caso 2</option></select></div>
+
+      <div class="section-title" style="margin-top:12px">Armadura de anclaje</div>
+      <label class="chk"><input type="checkbox" id="arT"> En tracción</label>
+      <div id="arTBox">
+        <div class="row3">
+          <div class="field"><label>N° barras</label><input type="number" id="nbT" value="4" step="1"></div>
+          <div class="field"><label>Ø <span class="unit">[mm]</span></label><input type="number" id="dbT" value="16" step="2"></div>
+          <div class="field"><label>fy <span class="unit">[MPa]</span></label><input type="number" id="fyr" value="420" step="10"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Tipo</label><select id="btype"><option value="hook" selected>Con gancho</option><option value="str">Recta</option></select></div>
+          <div class="field"><label>Rec. superior <span class="unit">[mm]</span></label><input type="number" id="rtop" value="50" step="5"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Lx perno a barra</label><input type="number" id="Lx" value="50" step="5"></div>
+          <div class="field"><label>Ly perno a barra</label><input type="number" id="Ly" value="100" step="5"></div>
+        </div>
+      </div>
+      <label class="chk"><input type="checkbox" id="arV"> En corte</label>
+      <div class="row3" id="arVBox">
+        <div class="field"><label>N° ramas</label><input type="number" id="nbV" value="4" step="1"></div>
+        <div class="field"><label>Ø <span class="unit">[mm]</span></label><input type="number" id="dbV" value="10" step="2"></div>
+        <div class="field"><label>fy <span class="unit">[MPa]</span></label><input type="number" id="fyv" value="420" step="10"></div>
+      </div>
+
+      <div class="section-title" style="margin-top:12px">Llave de corte</div>
+      <label class="chk"><input type="checkbox" id="lug"> Incluir llave de corte</label>
+      <div id="lugBox">
+        <div class="field"><label>Diseño de la llave</label><select id="lmode"><option value="cap" selected>Capacidad de la placa</option><option value="res">Resistencia, Vua</option></select></div>
+        <div class="row3">
+          <div class="field"><label>bsl</label><input type="number" id="bsl" value="150" step="10"></div>
+          <div class="field"><label>H total</label><input type="number" id="Hsl" value="200" step="10"></div>
+          <div class="field"><label>t</label><input type="number" id="tsl" value="28" step="1"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>fy <span class="unit">[MPa]</span></label><input type="number" id="fysl" value="250" step="10"></div>
+          <div class="field"><label>Pu <span class="unit">[kN, + comp.]</span></label><input type="number" id="Pu" value="1060" step="10"></div>
+        </div>
+                
+        <div class="row3">
+          <div class="field"><label>Estribos, ramas</label><input type="number" id="nbl" value="12" step="1"></div>
+          <div class="field"><label>Ø <span class="unit">[mm]</span></label><input type="number" id="dbl" value="12" step="2"></div>
+          <div class="field"><label>fy <span class="unit">[MPa]</span></label><input type="number" id="fyl" value="420" step="10"></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="section-title">Notas</div>
+      <div class="note" id="notes"></div>
+    </div>
+  </div>
+
+  <div style="min-width:0;">
+    <div class="stat-row" id="stats"></div>
+    <div id="warns"></div>
+    <div class="chartwrap"><svg id="planSvg" viewBox="0 0 760 460" width="100%" style="display:block;height:auto"></svg></div>
+    <div class="chartwrap"><svg id="sideSvg" viewBox="0 0 760 460" width="100%" style="display:block;height:auto"></svg></div>
+    <div class="tabs" id="tabs">
+      <button data-tab="rs" class="active">Resumen</button>
+      <button data-tab="tn">Tracción</button>
+      <button data-tab="sh">Corte</button>
+      <button data-tab="lg">Llave de corte</button>
+    </div>
+    <div class="tabpane" data-pane="rs">
+      <div class="panel"><div class="section-title">Modos de falla</div><div class="tablewrap"><table id="tbSum"></table></div></div>
+      <div class="panel"><div class="section-title">Interacción tracción y corte, 17.8</div><div class="tablewrap"><table id="tbInt"></table></div></div>
+    </div>
+    <div class="tabpane" data-pane="tn" hidden><div class="panel"><div class="tablewrap"><table id="tbTen"></table></div></div></div>
+    <div class="tabpane" data-pane="sh" hidden><div class="panel"><div class="tablewrap"><table id="tbShr"></table></div></div></div>
+    <div class="tabpane" data-pane="lg" hidden><div class="panel"><div class="tablewrap"><table id="tbLug"></table></div></div></div>
+  </div>
+</div>
+<script>
+const svgNS='http://www.w3.org/2000/svg';
+function el(tag,attrs){ const n=document.createElementNS(svgNS,tag); for(const k in attrs) n.setAttribute(k,attrs[k]); return n; }
+function tx(x,y,s,o){ const t=el('text',Object.assign({x,y,'font-size':11,'text-anchor':'middle',fill:'#000'},o||{})); t.textContent=s; return t; }
+function niceStep(range,count){ const raw=Math.max(range,1e-12)/count, m=Math.pow(10,Math.floor(Math.log10(raw))), f=raw/m; return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*m; }
+function fmtTick(v,st){ const d=st>=1?0:Math.min(6,Math.ceil(-Math.log10(st))); return (Math.abs(v)<st*1e-6?0:v).toFixed(d); }
+const fmt=(x,d)=>isFinite(x)?x.toFixed(d):'-';
+const fmtk=x=>isFinite(x)?String(Math.round(x)):'-';
+const FAIL='#b3261e';
+
+function chart(svg,cfg){
+  svg.innerHTML='';
+  const W=760,H=cfg.H||420,L=70,R=18,T=16,B=46;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const xs=[],ys=[];
+  cfg.series.forEach(s=>s.pts.forEach(p=>{ if(isFinite(p[0])&&isFinite(p[1])){ xs.push(p[0]); ys.push(p[1]); } }));
+  (cfg.points||[]).forEach(p=>{ xs.push(p.x); ys.push(p.y); });
+  if(!xs.length){ svg.appendChild(tx(W/2,H/2,'Sin datos')); return; }
+  let x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+  if(cfg.zeroX){ x0=Math.min(x0,0); x1=Math.max(x1,0); } if(cfg.zeroY){ y0=Math.min(y0,0); y1=Math.max(y1,0); }
+  if(cfg.equal){ const c=(x0+x1)/2, d=(y0+y1)/2, h=Math.max(x1-x0,(y1-y0)*(W-L-R)/(H-T-B))/2; x0=c-h; x1=c+h; const hv=h*(H-T-B)/(W-L-R); y0=d-hv; y1=d+hv; }
+  const px=(x1-x0)*0.06||1, py=(y1-y0)*0.08||1; x0-=px; x1+=px; y0-=py; y1+=py;
+  const sx=niceStep(x1-x0,8), sy=niceStep(y1-y0,7);
+  x0=Math.floor(x0/sx)*sx; x1=Math.ceil(x1/sx)*sx; y0=Math.floor(y0/sy)*sy; y1=Math.ceil(y1/sy)*sy;
+  if(cfg.xfix){ x0=cfg.xfix[0]; x1=cfg.xfix[1]; }
+  const X=x=>L+(x-x0)/(x1-x0)*(W-L-R), Y=y=>H-B-(y-y0)/(y1-y0)*(H-T-B);
+  const g=el('g',{});
+  for(let y=y0;y<=y1+sy*1e-6;y+=sy){ g.appendChild(el('line',{x1:L,x2:W-R,y1:Y(y),y2:Y(y),stroke:'#dcdcdc','stroke-width':0.6})); g.appendChild(tx(L-6,Y(y)+4,fmtTick(y,sy),{'text-anchor':'end'})); }
+  for(let x=x0;x<=x1+sx*1e-6;x+=sx){ g.appendChild(el('line',{x1:X(x),x2:X(x),y1:T,y2:H-B,stroke:'#dcdcdc','stroke-width':0.6})); g.appendChild(tx(X(x),H-B+15,fmtTick(x,sx))); }
+  svg.appendChild(g);
+  if(x0<0&&x1>0) svg.appendChild(el('line',{x1:X(0),x2:X(0),y1:T,y2:H-B,stroke:'#555','stroke-width':0.9}));
+  if(y0<0&&y1>0) svg.appendChild(el('line',{x1:L,x2:W-R,y1:Y(0),y2:Y(0),stroke:'#555','stroke-width':0.9}));
+  svg.appendChild(el('rect',{x:L,y:T,width:W-L-R,height:H-T-B,fill:'none',stroke:'#7a7a7a','stroke-width':1}));
+  svg.appendChild(tx((L+W-R)/2,H-8,cfg.xlabel,{'font-weight':700}));
+  const yl=tx(14,(T+H-B)/2,cfg.ylabel,{'font-weight':700}); yl.setAttribute('transform',`rotate(-90 14 ${(T+H-B)/2})`); svg.appendChild(yl);
+  const clipId='c'+Math.random().toString(36).slice(2);
+  const cp=el('clipPath',{id:clipId}); cp.appendChild(el('rect',{x:L,y:T,width:W-L-R,height:H-T-B})); svg.appendChild(cp);
+  const gc=el('g',{'clip-path':`url(#${clipId})`});
+  cfg.series.forEach(s=>{
+    const d=s.pts.filter(p=>isFinite(p[0])&&isFinite(p[1])).map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)).join(' ')+(s.close?'Z':'');
+    gc.appendChild(el('path',{d,fill:'none',stroke:s.color||'#000','stroke-width':s.w||1.4,'stroke-dasharray':s.dash||'none','stroke-linejoin':'round'}));
+  });
+  (cfg.points||[]).forEach(p=>{
+    const col=p.fail?FAIL:'#000';
+    if(p.ring) gc.appendChild(el('circle',{cx:X(p.x),cy:Y(p.y),r:3.5,fill:'#fff',stroke:col,'stroke-width':1.4}));
+    else gc.appendChild(el('circle',{cx:X(p.x),cy:Y(p.y),r:3.2,fill:col}));
+    if(p.label) gc.appendChild(tx(X(p.x)+6,Y(p.y)-6,p.label,{'text-anchor':'start','font-size':10.5,'font-weight':700,fill:col}));
+  });
+  svg.appendChild(gc);
+  const named=cfg.series.filter(s=>s.name);
+  if(named.length){
+    const lx=cfg.legendRight?W-R-220:L+12; let ly=T+16;
+    svg.appendChild(el('rect',{x:lx-6,y:T+4,width:214,height:named.length*16+6,fill:'#fff',stroke:'#cfcfcf','stroke-width':0.6}));
+    named.forEach(s=>{
+      svg.appendChild(el('line',{x1:lx,x2:lx+28,y1:ly-4,y2:ly-4,stroke:s.color||'#000','stroke-width':s.w||1.4,'stroke-dasharray':s.dash||'none'}));
+      svg.appendChild(tx(lx+36,ly,s.name,{'text-anchor':'start','font-size':11}));
+      ly+=16;
+    });
+  }
+}
+
+const $=id=>document.getElementById(id);
+function num(id,def){ const x=parseFloat($(id).value); return isFinite(x)?x:def; }
+const clamp=(x,a,b)=>x<a?a:x>b?b:x;
+const f1=(x,d)=>isFinite(x)?x.toFixed(d):'-';
+let R=null;
+const BOLTS={'0.375':[16,16.669,142.511],'0.5':[13,22.225,303.225],'0.625':[11,26.987,432.257],'0.75':[10,31.75,587.096],'0.875':[9,36.525,767.74],'1':[8,41.275,967.74],'1.125':[7,46.037,1193.546],'1.25':[7,50.8,1445.158],'1.5':[6,60.325,2012.899],'1.75':[5,69.85,2670.962],'2':[4.5,79.375,3432.251]};
+const PSAT={cast:[0.95,1.0],adh:[[0.85,1.0],[0.75,0.85],[0.60,0.75]]};
+
+function readIn(){
+  const p={};
+  ['fya','futa','hef','ha','Bp','Lp','tp','fyp','eh','tcr','tunc','cac','nx','sx','ny','sy','cxm','cxp','cym','cyp','fc','lam','zcm','Nus','psaT','psaV','Nua','eNx','eNy','Vua','eV','nbT','dbT','fyr','rtop','Lx','Ly','nbV','dbV','fyv','bsl','Hsl','tsl','fysl','Pu','Bbp','Lbp','tbp','gbp','nbl','dbl','fyl'].forEach(k=>p[k]=num(k,0));
+  ['inst','head','dain','cat','condT','condV','psicV','red','dmode','vdir','vcase','btype','lmode'].forEach(k=>p[k]=$(k).value);
+  ['duct','grout','crk','seis','arT','arV','lug'].forEach(k=>p[k]=$(k).checked);
+  p.proj=$('proj').value.trim();
+  p.nx=Math.max(1,Math.round(p.nx)); p.ny=Math.max(1,Math.round(p.ny)); p.cat=+p.cat; p.psicV=+p.psicV;
+  if(p.inst==='adh') p.head='none';
+  return p;
+}
+
+function devLen(p){
+  const sq=Math.min(Math.sqrt(p.fc),8.3), db=p.dbT, lam=p.lam||1;
+  const pss=db<=29?1:db<=36?1.15:db<=43?1.3:1.5;
+  if(p.btype==='hook') return {l:Math.max(pss*p.fyr*db/(21*lam*sq),8*db,150),name:'ℓdh',pss};
+  const psg=p.fyr<=420?1:p.fyr<=550?1.15:1.3;
+  return {l:Math.max(p.fyr*psg*db/((db<=19?2.1:1.7)*lam*sq),300),name:'ℓd'};
+}
+
+function vcbCalc(p,da,ca1,c2a,c2b,Wg,nrow,sper,ecc,parallel){
+  if(!isFinite(ca1)) return null;
+  const lam=p.lam, sfc=Math.sqrt(p.fc), ha=p.ha;
+  let c1=ca1;
+  if(c2a<1.5*ca1&&c2b<1.5*ca1&&ha<1.5*ca1) c1=Math.min(ca1,Math.max(Math.max(c2a,c2b)/1.5,ha/1.5,nrow>1?sper/3:0));
+  const AVc=Math.min((Math.min(c2a,1.5*c1)+Wg+Math.min(c2b,1.5*c1))*Math.min(1.5*c1,ha),nrow*4.5*c1*c1), AVco=4.5*c1*c1;
+  const c2min=Math.min(c2a,c2b);
+  const psiec=1/(1+Math.abs(ecc)/(1.5*c1));
+  const psied=parallel?1:(c2min>=1.5*c1?1:0.7+0.3*c2min/(1.5*c1));
+  const psic=p.crk?p.psicV:1.4;
+  const psih=Math.max(1,Math.sqrt(1.5*c1/ha));
+  const le=Math.min(p.hef,8*da);
+  const Vb1=0.6*Math.pow(le/da,0.2)*Math.sqrt(da)*lam*sfc*Math.pow(c1,1.5), Vb2=3.7*lam*sfc*Math.pow(c1,1.5);
+  const Vb=Math.min(Vb1,Vb2)/1000;
+  const Vcb=(parallel?2:1)*AVc/AVco*psiec*psied*psic*psih*Vb;
+  return {ca1,c1,AVc,AVco,psiec,psied,psic,psih,le,Vb,Vcb};
+}
+
+function analyze(p){
+  const o={p,warn:[],rows:[]};
+  const b=BOLTS[p.dain]||BOLTS['0.75'];
+  const da=+p.dain*25.4, ntm=b[0]/25.4, F=b[1];
+  const Ase=Math.PI/4*Math.pow(da-0.9743/ntm,2);
+  const futa=Math.min(p.futa,1.9*p.fya,860);
+  const cast=p.inst==='cast';
+  const E=v=>v>0?v:Infinity;
+  const cx=[E(p.cxm),E(p.cxp)], cy=[E(p.cym),E(p.cyp)];
+  const nx=p.nx, ny=p.ny, n=nx*ny, sx=nx>1?p.sx:0, sy=ny>1?p.sy:0, Xg=(nx-1)*sx, Yg=(ny-1)*sy;
+  const pts=[]; for(let i=0;i<nx;i++) for(let j=0;j<ny;j++) pts.push({x:i*sx-Xg/2,y:j*sy-Yg/2});
+  const sfc=Math.sqrt(p.fc), lam=p.lam;
+  Object.assign(o,{da,F,Ase,futa,cast,cx,cy,n,nx,ny,sx,sy,Xg,Yg,pts,ntm});
+
+  const Nsa=Ase*futa/1000, Vsa=0.6*Ase*futa/1000*(p.grout?0.8:1);
+  o.Nsa=Nsa; o.Vsa=Vsa;
+  let Ng=Math.max(p.Nua,0), Vg=Math.max(p.Vua,0), eNx=p.eNx, eNy=p.eNy;
+  if(p.dmode==='cap'){ if(Ng>0){ Ng=n*Nsa; eNx=0; eNy=0; } if(Vg>0) Vg=n*Vsa; }
+  const Sxx=pts.reduce((s,q)=>s+q.x*q.x,0), Syy=pts.reduce((s,q)=>s+q.y*q.y,0);
+  pts.forEach(q=>{ q.N=Ng/n+(Sxx>0?Ng*eNx*q.x/Sxx:0)+(Syy>0?Ng*eNy*q.y/Syy:0); });
+  const Nmax=Math.max(0,...pts.map(q=>q.N));
+  const nt=pts.filter(q=>q.N>1e-9).length;
+  o.Ng=Ng; o.Vg=Vg; o.Nmax=Nmax; o.nt=nt; o.eNx=eNx; o.eNy=eNy;
+  if(pts.some(q=>q.N<-1e-9)) o.warn.push('La excentricidad genera compresión en algunos anclajes. Se usa la tracción del anclaje más solicitado.');
+
+  const iA=c=>c==='A'?0:1;
+  const supT=p.condT==='A', supV=p.condV==='A';
+  const tT=cast?PSAT.cast[supT?1:0]:PSAT.adh[p.cat-1][supT?1:0];
+  o.psa={T:p.psaT>0?p.psaT:tT,V:p.psaV>0?p.psaV:(supV?1.0:0.95)};
+  const pc=p.red==='1'?0.75:0.65, pv=0.75, par=0.90;
+  o.pc=pc; o.pv=pv; o.par=par;
+  const fs=p.seis?0.75:1;
+  const phS=p.duct?[0.75,0.65]:[0.65,0.60];
+
+  const add=(grp,name,Nn,phi,psi,f,dem,det)=>{ const des=Nn*phi*psi*f; const r={grp,name,Nn,phi,psi,f,des,dem,ratio:dem>0?dem/des:0,det:det||{}}; r.ok=r.ratio<=1+1e-9; o.rows.push(r); return r; };
+
+  add('T','Acero en tracción, Nsa',Nsa,phS[0],1,1,Nmax,{Ase,futa});
+
+  const h0=p.hef, near=[...cx,...cy].filter(c=>c<1.5*h0);
+  let hp=h0;
+  if(near.length>=3) hp=Math.min(h0,Math.max(Math.max(...near)/1.5,Math.max(sx,sy)/3));
+  const camin=Math.min(...cx,...cy);
+  const ANco=9*hp*hp;
+  const ANc=Math.min((Math.min(cx[0],1.5*hp)+Xg+Math.min(cx[1],1.5*hp))*(Math.min(cy[0],1.5*hp)+Yg+Math.min(cy[1],1.5*hp)),n*ANco);
+  const psiecN=1/(1+Math.abs(eNx)/(1.5*hp))/(1+Math.abs(eNy)/(1.5*hp));
+  const psiedN=camin>=1.5*hp?1:0.7+0.3*camin/(1.5*hp);
+  const psicN=p.crk?1:(cast?1.25:1.4);
+  const cac=p.cac>0?p.cac:2*p.hef;
+  const psicpN=(!cast&&!p.crk&&p.condT==='B'&&camin<cac)?Math.max(camin/cac,1.5*hp/cac):1;
+  const kc=cast?10:7;
+  const alt=cast&&hp>=280&&hp<=635;
+  const Nb=(alt?3.9*lam*sfc*Math.pow(hp,5/3):kc*lam*sfc*Math.pow(hp,1.5))/1000;
+  const psicm=(p.zcm>0&&camin>=1.5*p.hef)?Math.max(1,2-p.zcm/(1.5*p.hef)):1;
+  const Ncbg=ANc/ANco*psiecN*psiedN*psicN*psicpN*psicm*Nb;
+  const Ncb0=ANc/ANco*psiedN*psicN*psicpN*Nb;
+  o.tb={hp,camin,ANc,ANco,psiecN,psiedN,psicN,psicpN,psicm,kc,alt,Nb,Ncbg,cac};
+  const rCb=add('T','Arrancamiento del hormigón, Ncbg',Ncbg,pc,o.psa.T,fs,Ng,o.tb);
+
+  if(p.arT){
+    const As=p.nbT*Math.PI*p.dbT*p.dbT/4, dl=devLen(p);
+    const bp=p.head==='plate'?Math.min(F+2*p.tp,p.Bp):p.head==='J'?da:F;
+    const Ldis=p.hef-(Math.hypot(p.Lx,p.Ly)-0.5*bp)/1.5-p.rtop;
+    o.ar={As,dl,bp,Ldis,okL:Ldis>=dl.l};
+    const r=add('T','Armadura de anclaje en tracción',As*p.fyr/1000,par,1,1,Ng,o.ar);
+    if(!o.ar.okL){ r.ok=false; r.note='Largo disponible insuficiente'; }
+    rCb.alt=r;
+  }
+
+  if(cast){
+    let Abrg, Np, pl=null;
+    if(p.head==='J'){
+      const ehp=clamp(p.eh,3*da,4.5*da); Np=0.9*p.fc*ehp*da/1000; o.po={ehp};
+    }else{
+      if(p.head==='plate'){
+        const bef=Math.min(F+2*p.tp,p.Bp), lef=Math.min(F+2*p.tp,p.Lp);
+        Abrg=bef*lef-Math.PI/4*da*da;
+        const sig=Nmax*1000/Abrg, a=Math.max((bef-F)/2,0), M=sig*a*a/2, treq=Math.sqrt(4*M/(0.9*p.fyp));
+        pl={bef,lef,sig,a,M,treq,ok:p.tp>=treq};
+      }else Abrg=b[2];
+      Np=8*Abrg*p.fc/1000; o.po={Abrg,pl};
+    }
+    const psicP=p.crk?1:1.4;
+    o.po.psicP=psicP; o.po.Np=Np;
+    add('T','Extracción por deslizamiento, Npn',psicP*Np,pc,o.psa.T,fs,Nmax,o.po);
+    if(pl){ const r={grp:'T',name:'Flexión placa de extracción',Nn:NaN,phi:0.9,psi:1,f:1,des:p.tp,dem:pl.treq,ratio:pl.treq/p.tp,det:pl,unit:'mm'}; r.ok=pl.ok; o.rows.push(r); }
+    if(p.head!=='J'){
+      const Ab=o.po.Abrg; let best=null;
+      const edges=[{c:cx[0],c2:Math.min(...cy),nrow:ny,s:Yg,row:pts.filter(q=>Math.abs(q.x+Xg/2)<1e-6)},{c:cx[1],c2:Math.min(...cy),nrow:ny,s:Yg,row:pts.filter(q=>Math.abs(q.x-Xg/2)<1e-6)},
+        {c:cy[0],c2:Math.min(...cx),nrow:nx,s:Xg,row:pts.filter(q=>Math.abs(q.y+Yg/2)<1e-6)},{c:cy[1],c2:Math.min(...cx),nrow:nx,s:Xg,row:pts.filter(q=>Math.abs(q.y-Yg/2)<1e-6)}];
+      edges.forEach(e=>{
+        if(!isFinite(e.c)||p.hef<=2.5*e.c) return;
+        let Nsb=13*e.c*Math.sqrt(Ab)*lam*sfc/1000;
+        const fc2=e.c2<3*e.c?clamp((1+e.c2/e.c)/4,0.5,1):1;
+        Nsb*=fc2;
+        let Nn,dem,grpF=1;
+        if(e.nrow>1&&e.s<6*e.c){ grpF=1+e.s/(6*e.c); Nn=grpF*Nsb; dem=e.row.reduce((s,q)=>s+Math.max(q.N,0),0); }
+        else{ Nn=Nsb; dem=Math.max(0,...e.row.map(q=>q.N)); }
+        const r=dem/(Nn*pc*o.psa.T*fs);
+        if(!best||r>best.r) best={r,Nn,dem,ca1:e.c,ca2:e.c2,fc2,grpF,Nsb};
+      });
+      o.sb=best;
+      if(best) add('T','Desprendimiento lateral, Nsb',best.Nn,pc,o.psa.T,fs,best.dem,best);
+    }
+  }else{
+    const tau=p.crk?p.tcr:p.tunc;
+    const cNa=10*da*Math.sqrt(p.tunc/7.6);
+    const ANao=4*cNa*cNa;
+    const ANa=Math.min((Math.min(cx[0],cNa)+Xg+Math.min(cx[1],cNa))*(Math.min(cy[0],cNa)+Yg+Math.min(cy[1],cNa)),n*ANao);
+    const psiec=1/(1+Math.abs(eNx)/cNa)/(1+Math.abs(eNy)/cNa);
+    const psied=camin>=cNa?1:0.7+0.3*camin/cNa;
+    const psicp=(!p.crk&&p.condT==='B'&&camin<cac)?Math.max(camin/cac,cNa/cac):1;
+    const Nba=lam*tau*Math.PI*da*p.hef/1000;
+    const Nag=ANa/ANao*psiec*psied*psicp*Nba;
+    o.bd={tau,cNa,ANa,ANao,psiec,psied,psicp,Nba,Nag,Nag0:ANa/ANao*psied*psicp*Nba};
+    add('T','Adherencia, Nag',Nag,pc,o.psa.T,fs,Ng,o.bd);
+    if(p.Nus>0){ const r=add('T','Tracción sostenida, 0,55ψaφNba',Nba,pc,o.psa.T,0.55,p.Nus,{}); }
+  }
+
+  add('V','Acero en corte, Vsa',Vsa,phS[1],1,1,Vg/n,{});
+
+  const dir=p.vdir;
+  let G;
+  if(dir==='px') G={front:cx[1],depth:Xg,c2a:cy[0],c2b:cy[1],Wg:Yg,nrow:ny,nrows:nx,sper:sy,side:Math.min(...cy),sideW:Xg,sideN:nx,sideS:sx,sc2a:cx[0],sc2b:cx[1]};
+  else if(dir==='mx') G={front:cx[0],depth:Xg,c2a:cy[0],c2b:cy[1],Wg:Yg,nrow:ny,nrows:nx,sper:sy,side:Math.min(...cy),sideW:Xg,sideN:nx,sideS:sx,sc2a:cx[0],sc2b:cx[1]};
+  else if(dir==='py') G={front:cy[1],depth:Yg,c2a:cx[0],c2b:cx[1],Wg:Xg,nrow:nx,nrows:ny,sper:sx,side:Math.min(...cx),sideW:Yg,sideN:ny,sideS:sy,sc2a:cy[0],sc2b:cy[1]};
+  else G={front:cy[0],depth:Yg,c2a:cx[0],c2b:cx[1],Wg:Xg,nrow:nx,nrows:ny,sper:sx,side:Math.min(...cx),sideW:Yg,sideN:ny,sideS:sy,sc2a:cy[0],sc2b:cy[1]};
+  o.G=G;
+  const cases=[];
+  if(isFinite(G.front)){
+    const srow=G.nrows>1?G.depth/(G.nrows-1):0;
+    if(G.nrows===1) cases.push({k:'Fila única',row:'f',v:vcbCalc(p,da,G.front,G.c2a,G.c2b,G.Wg,G.nrow,G.sper,p.eV),dem:Vg});
+    else if(p.vcase!=='weld'&&srow<G.front) cases.push({k:'Caso 3, fila frontal',row:'f',v:vcbCalc(p,da,G.front,G.c2a,G.c2b,G.Wg,G.nrow,G.sper,p.eV),dem:Vg});
+    else{
+      if(p.vcase!=='weld') cases.push({k:'Caso 1, fila frontal',row:'f',v:vcbCalc(p,da,G.front,G.c2a,G.c2b,G.Wg,G.nrow,G.sper,p.eV),dem:Vg/G.nrows});
+      cases.push({k:'Caso 2, fila posterior',row:'b',v:vcbCalc(p,da,G.front+G.depth,G.c2a,G.c2b,G.Wg,G.nrow,G.sper,p.eV),dem:Vg});
+    }
+  }
+  cases.forEach(c=>c.ratio=c.dem/(c.v.Vcb*pv*o.psa.V));
+  o.vc=cases;
+  let rVb=null;
+  if(cases.length){
+    const g=cases.reduce((a,c)=>c.ratio>a.ratio?c:a);
+    rVb=add('V','Arrancamiento por corte, Vcbg ('+g.k.toLowerCase()+')',g.v.Vcb,pv,o.psa.V,1,g.dem,g.v); o.vgov=g;
+  }
+  if(isFinite(G.side)){
+    const v=vcbCalc(p,da,G.side,G.sc2a,G.sc2b,G.sideW,G.sideN,G.sideS,0,true);
+    o.vpar=v;
+    add('V','Arrancamiento, corte paralelo al borde',v.Vcb,pv,o.psa.V,1,Vg,v);
+  }
+  if(p.arV){
+    const As=p.nbV*Math.PI*p.dbV*p.dbV/4;
+    const r=add('V','Armadura de anclaje en corte',As*p.fyv/1000,par,1,1,Vg,{As});
+    if(rVb) rVb.alt=r;
+  }
+  const kcp=p.hef<65?1:2;
+  const Ncp=cast?Ncb0:Math.min(Ncb0,o.bd.Nag0);
+  o.cp={kcp,Ncp};
+  add('V','Desprendimiento por palanca, Vcpg',kcp*Ncp,pv,o.psa.T,1,Vg,o.cp);
+
+  const single=n===1;
+  const find=pre=>o.rows.find(x=>x.name.startsWith(pre));
+  const eff=r=>!r?0:(r.alt&&r.alt.ok?Math.min(r.ratio,r.alt.ratio):r.ratio);
+  const tn=['Arrancamiento del hormigón','Adherencia','Desprendimiento lateral'].concat(single?['Extracción']:[]);
+  const vn=['Arrancamiento por corte','Desprendimiento por palanca','Arrancamiento, corte paralelo'];
+  const rNc=Math.max(0,...tn.map(k=>eff(find(k)))), rVc=Math.max(0,...vn.map(k=>eff(find(k))));
+  const rs1=find('Acero en tracción'), rs2=find('Acero en corte');
+  o.inter={single,rNc,rVc,ic:Math.pow(rNc,5/3)+Math.pow(rVc,5/3),rNs:rs1.ratio,rVs:rs2.ratio,is:rs1.ratio*rs1.ratio+rs2.ratio*rs2.ratio};
+  o.inter.okc=o.inter.ic<=1+1e-9; o.inter.oks=o.inter.is<=1+1e-9;
+
+  if(p.lug){
+    const hsl=p.Hsl-p.gbp;
+    const Vn1=0.6*p.fysl*p.tsl*p.bsl/1000, Mn=p.fysl*p.bsl*p.tsl*p.tsl/4/1e6, Vn2=Mn/((p.gbp+hsl/2)/1000), Vsl=Math.min(Vn1,Vn2);
+    const Vd=p.lmode==='cap'?Vsl:Math.max(p.Vua,0);
+    const Aef=p.bsl*Math.min(2*p.tsl,hsl), Abp=p.Bbp*p.Lbp;
+    let psib=1;
+    if(p.Pu>0) psib=Math.min(1+4*p.Pu*1000/(Abp*p.fc),2);
+    else if(p.Pu<0) psib=Math.max(0,1+p.Pu/(Math.max(nt,1)*Nsa));
+    const Vbrg=1.7*p.fc*Aef*psib/1000;
+    const ca1=G.front+G.depth/2-p.tsl/2, c2a=G.c2a+G.Wg/2-p.bsl/2, c2b=G.c2b+G.Wg/2-p.bsl/2, ca2=Math.min(c2a,c2b);
+    const hc=Math.min(hsl+1.5*ca1,p.ha), wid=p.bsl+Math.min(1.5*ca1,c2a)+Math.min(1.5*ca1,c2b);
+    const AVc=Math.max(hc*wid-p.bsl*hsl,0), AVco=4.5*ca1*ca1;
+    const psied=ca2>=1.5*ca1?1:0.7+0.3*ca2/(1.5*ca1), psic=p.crk?p.psicV:1.4, psih=Math.max(1,Math.sqrt(1.5*ca1/p.ha));
+    const Vb=3.7*lam*sfc*Math.pow(ca1,1.5)/1000;
+    const Vcb=isFinite(ca1)?AVc/AVco*psied*psic*psih*Vb:Infinity;
+    const Asl=p.nbl*Math.PI*p.dbl*p.dbl/4;
+    const csl=(dir==='px'||dir==='mx')?Xg/2:Yg/2;
+    o.lug={hsl,Vn1,Mn,Vn2,Vsl,Vd,Aef,Abp,psib,Vbrg,ca1,ca2,hc,wid,AVc,AVco,psied,psic,psih,Vb,Vcb,Asl,csl,
+      rStl:p.lmode==='res'?Vd/(0.9*Vsl):NaN,
+      rBrg:Vd/(0.65*Vbrg),
+      rCb:Vd/(0.65*o.psa.V*Vcb),
+      rAs:Asl>0?Vd/(par*Asl*p.fyl/1000):Infinity,
+      geo1:csl>0?p.hef/csl:Infinity, geo2:p.hef/hsl};
+    o.lug.okGeo=o.lug.geo1>=2.5&&o.lug.geo2>=2.5;
+  }
+
+  if(p.lug&&n<4) o.warn.push('La llave de corte exige al menos 4 anclajes, 17.11.1.1.2.');
+  if(n>1&&Math.min(nx>1?sx:Infinity,ny>1?sy:Infinity)<4*da) o.warn.push(`Separación menor que 4da = ${f1(4*da,0)} mm, 17.9.1.`);
+  if(camin<6*da) o.warn.push(`Distancia al borde menor que 6da = ${f1(6*da,0)} mm, exigida si el anclaje se aprieta, 17.9.2.`);
+  if(p.hef>p.ha) o.warn.push('hef mayor que el espesor del elemento.');
+  if(!cast&&p.ha<p.hef+Math.max(2*da,100)) o.warn.push('Espesor ha insuficiente para anclaje adhesivo, 17.9.4.');
+  return o;
+}
+function sideSVG(svg,o){
+  const W=760,H=460; svg.innerHTML=''; svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const p=o.p, G=o.G, hef=p.hef, da=o.da, F=o.F;
+  const vx=p.vdir==='px'||p.vdir==='mx';
+  const back={px:o.cx[0],mx:o.cx[1],py:o.cy[0],my:o.cy[1]}[p.vdir];
+  const nr=G.nrows, dep=G.depth, us=[]; for(let i=0;i<nr;i++) us.push(-dep/2+(nr>1?i*dep/(nr-1):0));
+  const nv=G.nrow, vs=[]; for(let i=0;i<nv;i++) vs.push(-G.Wg/2+(nv>1?i*G.Wg/(nv-1):0));
+  const vg=o.vgov, c1=vg?vg.v.c1:NaN, hv=vg?Math.min(1.5*c1,p.ha):0;
+  const hp=o.tb.hp;
+  const hw=p.inst!=='cast'?da/2:p.head==='plate'?Math.min(F+2*p.tp,p.Bp)/2:p.head==='J'?da/2:F/2;
+  const pad=Math.max(1.5*hef,isFinite(c1)?1.5*c1:0)*0.75+60;
+  const uF=isFinite(G.front)?dep/2+G.front:dep/2+pad, uB=isFinite(back)?-dep/2-back:-dep/2-pad;
+  const pad2=(isFinite(c1)?1.5*c1:1.5*hef)+60;
+  const vL=isFinite(G.c2a)?-G.Wg/2-G.c2a:-G.Wg/2-pad2, vR=isFinite(G.c2b)?G.Wg/2+G.c2b:G.Wg/2+pad2;
+  const need=Math.max(hef+da,hv)+80, zB=Math.min(p.ha,need*1.2), trunc=p.ha>zB+1e-6;
+  const plT=p.gbp+p.tbp, top=plT+1.2*da;
+  const sc=Math.min(420/(uF-uB),215/(vR-vL),(H-150)/(zB+top));
+  const y0=70+top*sc;
+  const X=u=>40+(450-(uF-uB)*sc)/2+(u-uB)*sc, Y=z=>y0-z*sc;
+  const X2=v=>505+(240-(vR-vL)*sc)/2+(v-vL)*sc;
+  const hid='h'+Math.random().toString(36).slice(2,8);
+  const defs=el('defs',{}); const pat=el('pattern',{id:hid,patternUnits:'userSpaceOnUse',width:6,height:6,patternTransform:'rotate(45)'});
+  pat.appendChild(el('line',{x1:0,y1:0,x2:0,y2:6,stroke:'#000','stroke-width':0.7})); defs.appendChild(pat); svg.appendChild(defs);
+  const A=(n,a)=>svg.appendChild(el(n,a));
+  const TH=(x,y,t,o)=>tx(x,y,t,Object.assign({stroke:'#fff','stroke-width':3,'paint-order':'stroke','stroke-linejoin':'round'},o||{}));
+  const poly=(pts,a,XF)=>A('polygon',Object.assign({points:pts.map(q=>`${(XF||X)(q[0])},${Y(q[1])}`).join(' ')},a));
+  const zig=(x1,y1,x2,y2)=>{ const n=6, d=[]; for(let i=0;i<=n;i++){ const t=i/n, x=x1+(x2-x1)*t, y=y1+(y2-y1)*t, off=(i%2?1:-1)*4*(i>0&&i<n?1:0); d.push(`${x1===x2?x+off:x},${y1===y2?y+off:y}`); } A('polyline',{points:d.join(' '),fill:'none',stroke:'#000','stroke-width':0.8}); };
+  const edge=(x1,y1,x2,y2,solid)=>{ if(solid) A('line',{x1,y1,x2,y2,stroke:'#000','stroke-width':1.4}); else zig(x1,y1,x2,y2); };
+  const dimH=(xa,xb,y,t)=>{ if(Math.abs(xb-xa)<2) return; A('line',{x1:xa,x2:xb,y1:y,y2:y,stroke:'#000','stroke-width':0.6}); [xa,xb].forEach(x=>A('line',{x1:x,x2:x,y1:y-4,y2:y+4,stroke:'#000','stroke-width':0.6})); svg.appendChild(TH((xa+xb)/2,y-3,t,{'font-size':10})); };
+  const dimV=(x,ya,yb,t,left)=>{ A('line',{x1:x,x2:x,y1:ya,y2:yb,stroke:'#000','stroke-width':0.6}); [ya,yb].forEach(y=>A('line',{x1:x-4,x2:x+4,y1:y,y2:y,stroke:'#000','stroke-width':0.6})); svg.appendChild(TH(x+(left?-4:4),(ya+yb)/2+4,t,{'font-size':10,'text-anchor':left?'end':'start'})); };
+  const arrowV=(x,y1,y2)=>{ A('line',{x1:x,x2:x,y1,y2,stroke:'#000','stroke-width':1.8}); const s=y2<y1?1:-1; A('polygon',{points:`${x},${y2} ${x-4},${y2+s*9} ${x+4},${y2+s*9}`,fill:'#000'}); };
+  const arrowH=(x1,x2,y)=>{ A('line',{x1,x2,y1:y,y2:y,stroke:'#000','stroke-width':1.8}); const s=x2>x1?-1:1; A('polygon',{points:`${x2},${y} ${x2+s*9},${y-4} ${x2+s*9},${y+4}`,fill:'#000'}); };
+
+  svg.appendChild(TH(40,20,'Sección en la dirección del corte',{'font-size':11.5,'text-anchor':'start','font-weight':'bold'}));
+  svg.appendChild(TH(505,20,'Vista de la cara del borde',{'font-size':11.5,'text-anchor':'start','font-weight':'bold'}));
+
+  A('rect',{x:X(uB),y:Y(0),width:(uF-uB)*sc,height:zB*sc,fill:'#efe9dc'});
+  if(o.Ng>0){
+    const ul=us[0]-hw, ur=us[nr-1]+hw, pts=[];
+    const sL=ul-1.5*hef, sR=ur+1.5*hef;
+    if(sL>=uB) pts.push([sL,0]); else { pts.push([uB,0]); pts.push([uB,-hef+(ul-uB)/1.5]); }
+    pts.push([ul,-hef]); pts.push([ur,-hef]);
+    if(sR<=uF) pts.push([sR,0]); else { pts.push([uF,-hef+(uF-ur)/1.5]); pts.push([uF,0]); }
+    poly(pts,{fill:'#bdbdbd',stroke:'#000','stroke-width':0.8,'stroke-dasharray':'5,3'});
+    svg.appendChild(TH(X(ur)+28,Y(-hef)-4,'≈ 35°',{'font-size':10,'text-anchor':'start'}));
+    const yd=Y(-zB)+(trunc?30:18);
+    if(sL>=uB) dimH(X(sL),X(ul),yd+16,'1,5hef');
+    if(sR<=uF) dimH(X(ur),X(sR),yd+16,'1,5hef');
+  }
+  if(vg&&o.Vg>0&&isFinite(G.front)){
+    const ur=vg.row==='b'?us[0]:us[nr-1];
+    poly([[ur,0],[uF,0],[uF,-hv]],{fill:`url(#${hid})`,stroke:'#000','stroke-width':1});
+    dimV(X(uF)+12,Y(0),Y(-hv),hv<1.5*c1-1e-6?'ha':'1,5ca1');
+  }
+  edge(X(uB),Y(0),X(uF),Y(0),true);
+  edge(X(uF),Y(0),X(uF),Y(-zB),isFinite(G.front)); edge(X(uB),Y(0),X(uB),Y(-zB),isFinite(back));
+  edge(X(uB),Y(-zB),X(uF),Y(-zB),!trunc);
+  const bpu=vx?p.Bbp:p.Lbp;
+  if(p.gbp>0) A('rect',{x:X(-bpu/2),y:Y(p.gbp),width:bpu*sc,height:p.gbp*sc,fill:'#d6d6d6',stroke:'#000','stroke-width':0.6});
+  A('rect',{x:X(-bpu/2),y:Y(plT),width:bpu*sc,height:p.tbp*sc,fill:'#8c8c8c',stroke:'#000','stroke-width':1});
+  if(p.lug){ const tsl=vx?p.tsl:p.bsl; A('rect',{x:X(-p.tsl/2),y:Y(p.gbp),width:p.tsl*sc,height:p.Hsl*sc,fill:'#8c8c8c',stroke:'#000','stroke-width':1}); }
+  const drawAnchor=(x,XF)=>{
+    const w=Math.max(da*sc,2);
+    if(p.inst!=='cast') A('rect',{x:XF(x)-w*0.8,y:Y(0),width:w*1.6,height:hef*sc,fill:'#e0e0e0',stroke:'#000','stroke-width':0.5,'stroke-dasharray':'2,2'});
+    A('rect',{x:XF(x)-w/2,y:Y(plT+0.9*da),width:w,height:(plT+0.9*da+hef)*sc,fill:'#fff',stroke:'#000','stroke-width':0.9});
+    A('rect',{x:XF(x)-F*sc/2,y:Y(plT+0.9*da),width:F*sc,height:0.9*da*sc,fill:'#555',stroke:'#000','stroke-width':0.6});
+    if(p.inst==='cast'){
+      if(p.head==='J'){ const eh=clamp(p.eh,3*da,4.5*da); A('polyline',{points:`${XF(x)},${Y(-hef)} ${XF(x)},${Y(-hef-da)} ${XF(x+eh)},${Y(-hef-da)} ${XF(x+eh)},${Y(-hef+2*da)}`,fill:'none',stroke:'#000','stroke-width':Math.max(w,2)}); }
+      else if(p.head==='plate'){ const b=Math.min(F+2*p.tp,p.Bp); A('rect',{x:XF(x)-b*sc/2,y:Y(-hef),width:b*sc,height:Math.max(p.tp*sc,2),fill:'#555',stroke:'#000','stroke-width':0.6}); A('rect',{x:XF(x)-F*sc/2,y:Y(-hef-p.tp),width:F*sc,height:Math.max(0.9*da*sc,2),fill:'#555'}); }
+      else A('rect',{x:XF(x)-F*sc/2,y:Y(-hef),width:F*sc,height:Math.max(0.9*da*sc,2),fill:'#555',stroke:'#000','stroke-width':0.6});
+    }
+  };
+  us.forEach(u=>drawAnchor(u,X));
+  dimV(X(uB)-12,Y(0),Y(-hef),`hef = ${f1(hef,0)}`,true);
+  if(!trunc) dimV(X(uB)-12-(isFinite(back)?0:0)-62,Y(0),Y(-p.ha),`ha = ${f1(p.ha,0)}`,true);
+  const yd=Y(-zB)+(trunc?30:18);
+  if(isFinite(back)) dimH(X(uB),X(us[0]),yd,f1(back,0));
+  if(nr>1) dimH(X(us[0]),X(us[nr-1]),yd,`${nr-1}×${f1(dep/(nr-1),0)}`);
+  if(isFinite(G.front)) dimH(X(us[nr-1]),X(uF),yd,f1(G.front,0));
+  if(hp<hef-1e-6) svg.appendChild(TH(X(uB)+6,Y(-zB)-6,`hef' = ${f1(hp,0)} mm`,{'font-size':10,'text-anchor':'start'}));
+  if(o.Ng>0){ arrowV(X(0)-14,Y(plT)-8,Y(plT)-48); svg.appendChild(TH(X(0)-18,Y(plT)-38,`Nua = ${f1(o.Ng,1)} kN`,{'font-size':10.5,'text-anchor':'end'})); }
+  if(o.Vg>0){ arrowH(X(bpu/2)+4,X(bpu/2)+52,Y(plT-p.tbp/2)); svg.appendChild(TH(X(bpu/2)+8,Y(plT)-14,`Vua = ${f1(o.Vg,1)} kN`,{'font-size':10.5,'text-anchor':'start'})); }
+
+  A('rect',{x:X2(vL),y:Y(0),width:(vR-vL)*sc,height:zB*sc,fill:'#efe9dc'});
+  if(vg&&o.Vg>0&&isFinite(G.front)){
+    const a=-G.Wg/2-Math.min(G.c2a,1.5*c1), b=G.Wg/2+Math.min(G.c2b,1.5*c1);
+    poly([[a,0],[b,0],[b,-hv],[a,-hv]],{fill:`url(#${hid})`,stroke:'#000','stroke-width':1},X2);
+    svg.appendChild(TH(X2((vL+vR)/2),Y(-zB)+(trunc?30:18)+30,`AVc = ${f1(vg.v.AVc,0)} mm²`,{'font-size':10.5}));
+    dimV(X2(vL)-10,Y(0),Y(-hv),hv<1.5*c1-1e-6?'ha':'1,5ca1',true);
+    if(a>vL+1) dimH(X2(a),X2(-G.Wg/2),Y(-hv)-6,isFinite(G.c2a)&&G.c2a<1.5*c1?'ca2':'1,5ca1');
+    if(b<vR-1) dimH(X2(G.Wg/2),X2(b),Y(-hv)-6,isFinite(G.c2b)&&G.c2b<1.5*c1?'ca2':'1,5ca1');
+  }else svg.appendChild(TH(X2((vL+vR)/2),Y(-zB/2),isFinite(G.front)?'Sin corte':'Sin borde hacia el corte',{'font-size':10.5}));
+  edge(X2(vL),Y(0),X2(vR),Y(0),true);
+  edge(X2(vL),Y(0),X2(vL),Y(-zB),isFinite(G.c2a)); edge(X2(vR),Y(0),X2(vR),Y(-zB),isFinite(G.c2b));
+  edge(X2(vL),Y(-zB),X2(vR),Y(-zB),!trunc);
+  const bpv=vx?p.Lbp:p.Bbp;
+  if(p.gbp>0) A('rect',{x:X2(-bpv/2),y:Y(p.gbp),width:bpv*sc,height:p.gbp*sc,fill:'#d6d6d6',stroke:'#000','stroke-width':0.6});
+  A('rect',{x:X2(-bpv/2),y:Y(plT),width:bpv*sc,height:p.tbp*sc,fill:'#8c8c8c',stroke:'#000','stroke-width':1});
+  if(p.lug) A('rect',{x:X2(-p.bsl/2),y:Y(p.gbp),width:p.bsl*sc,height:p.Hsl*sc,fill:'#8c8c8c',stroke:'#000','stroke-width':1});
+  vs.forEach(v=>drawAnchor(v,X2));
+  const yd2=Y(-zB)+(trunc?30:18);
+  if(isFinite(G.c2a)) dimH(X2(vL),X2(vs[0]),yd2,f1(G.c2a,0));
+  if(nv>1) dimH(X2(vs[0]),X2(vs[nv-1]),yd2,`${nv-1}×${f1(G.Wg/(nv-1),0)}`);
+  if(isFinite(G.c2b)) dimH(X2(vs[nv-1]),X2(vR),yd2,f1(G.c2b,0));
+  if(trunc){ svg.appendChild(TH(X(uF),Y(-zB)+14,`ha = ${f1(p.ha,0)} mm`,{'font-size':10,'text-anchor':'end'})); }
+}
+function planSVG(svg,o){
+  svg.innerHTML=''; svg.setAttribute('viewBox','0 0 760 460');
+  const p=o.p, hp=o.tb.hp, pad=1.5*hp+60;
+  const ex=[isFinite(o.cx[0])?o.cx[0]:pad, isFinite(o.cx[1])?o.cx[1]:pad, isFinite(o.cy[0])?o.cy[0]:pad, isFinite(o.cy[1])?o.cy[1]:pad];
+  const X0=-o.Xg/2-ex[0], X1=o.Xg/2+ex[1], Y0=-o.Yg/2-ex[2], Y1=o.Yg/2+ex[3];
+  const W=760,H=460,m=56, sc=Math.min((W-2*m)/(X1-X0),(H-2*m)/(Y1-Y0));
+  const ox=W/2-(X0+X1)/2*sc, oy=H/2+(Y0+Y1)/2*sc;
+  const X=x=>ox+x*sc, Y=y=>oy-y*sc;
+  svg.appendChild(el('rect',{x:X(X0),y:Y(Y1),width:(X1-X0)*sc,height:(Y1-Y0)*sc,fill:'#efe9dc',stroke:'none'}));
+  const fin=[isFinite(o.cx[0]),isFinite(o.cx[1]),isFinite(o.cy[0]),isFinite(o.cy[1])];
+  const ln=(x1,y1,x2,y2,solid)=>svg.appendChild(el('line',{x1:X(x1),y1:Y(y1),x2:X(x2),y2:Y(y2),stroke:'#000','stroke-width':solid?1.6:0.8,'stroke-dasharray':solid?'none':'5,4'}));
+  ln(X0,Y0,X0,Y1,fin[0]); ln(X1,Y0,X1,Y1,fin[1]); ln(X0,Y0,X1,Y0,fin[2]); ln(X0,Y1,X1,Y1,fin[3]);
+  const a0=-o.Xg/2-Math.min(o.cx[0],1.5*hp), a1=o.Xg/2+Math.min(o.cx[1],1.5*hp), b0=-o.Yg/2-Math.min(o.cy[0],1.5*hp), b1=o.Yg/2+Math.min(o.cy[1],1.5*hp);
+  svg.appendChild(el('rect',{x:X(a0),y:Y(b1),width:(a1-a0)*sc,height:(b1-b0)*sc,fill:'none',stroke:'#000','stroke-width':0.8,'stroke-dasharray':'2,3'}));
+  svg.appendChild(tx(X(a0)+4,Y(b1)+13,`ANc = ${f1(o.tb.ANc/1e6,4)} m²`,{'text-anchor':'start','font-size':10.5}));
+  if(p.lug){
+    const vx=p.vdir==='px'||p.vdir==='mx';
+    const w=vx?p.tsl:p.bsl, h=vx?p.bsl:p.tsl;
+    svg.appendChild(el('rect',{x:X(-w/2),y:Y(h/2),width:w*sc,height:h*sc,fill:'#888',stroke:'#000','stroke-width':0.8}));
+  }
+  const r=Math.max(o.da/2*sc,3);
+  o.pts.forEach(q=>{
+    svg.appendChild(el('circle',{cx:X(q.x),cy:Y(q.y),r,fill:'#fff',stroke:'#000','stroke-width':1.4}));
+    if(o.Ng>0) svg.appendChild(tx(X(q.x),Y(q.y)-r-4,f1(q.N,1),{'font-size':10}));
+  });
+  const dim=(x1,y1,x2,y2,t,vert)=>{
+    svg.appendChild(el('line',{x1:X(x1),y1:Y(y1),x2:X(x2),y2:Y(y2),stroke:'#000','stroke-width':0.6}));
+    svg.appendChild(tx((X(x1)+X(x2))/2+(vert?-4:0),(Y(y1)+Y(y2))/2+(vert?4:-4),t,{'font-size':10.5,'text-anchor':vert?'end':'middle'}));
+  };
+  const yl=Y0-22/sc, xl=X0-22/sc;
+  if(fin[0]) dim(X0,yl,-o.Xg/2,yl,`${f1(o.cx[0],0)}`);
+  if(fin[1]) dim(o.Xg/2,yl,X1,yl,`${f1(o.cx[1],0)}`);
+  if(o.nx>1) dim(-o.Xg/2,yl,o.Xg/2,yl,`${o.nx-1}×${f1(o.sx,0)}`);
+  if(fin[2]) dim(xl,Y0,xl,-o.Yg/2,`${f1(o.cy[0],0)}`,true);
+  if(fin[3]) dim(xl,o.Yg/2,xl,Y1,`${f1(o.cy[1],0)}`,true);
+  if(o.ny>1) dim(xl,-o.Yg/2,xl,o.Yg/2,`${o.ny-1}×${f1(o.sy,0)}`,true);
+  if(o.Vg>0){
+    const L=Math.min(X1-X0,Y1-Y0)*0.22, d={px:[1,0],mx:[-1,0],py:[0,1],my:[0,-1]}[p.vdir];
+    const x2=X(d[0]*L), y2=Y(d[1]*L);
+    svg.appendChild(el('line',{x1:X(0),y1:Y(0),x2,y2,stroke:'#000','stroke-width':2}));
+    const ang=Math.atan2(y2-Y(0),x2-X(0));
+    const hd=[[x2,y2],[x2-10*Math.cos(ang-0.4),y2-10*Math.sin(ang-0.4)],[x2-10*Math.cos(ang+0.4),y2-10*Math.sin(ang+0.4)]];
+    svg.appendChild(el('polygon',{points:hd.map(q=>q.join(',')).join(' '),fill:'#000'}));
+    svg.appendChild(tx(x2+d[0]*8,y2-d[1]*8+(d[1]?(d[1]>0?-4:12):-6),`Vua = ${f1(o.Vg,1)} kN`,{'font-size':11,'text-anchor':d[0]>0?'start':d[0]<0?'end':'middle'}));
+  }
+  svg.appendChild(tx(W-14,H-14,'x →',{'font-size':10.5,'text-anchor':'end'}));
+  svg.appendChild(tx(14,m-14,'↑ y',{'font-size':10.5,'text-anchor':'start'}));
+}
+
+const OKS=ok=>ok?'Cumple':'No cumple';
+function sumRows(o){
+  return o.rows.map(r=>{
+    if(r.unit==='mm') return `<tr class="${r.ok?'':'fail'}"><td>${r.name}</td><td class="num">-</td><td class="num">0.90</td><td class="num">-</td><td class="num">-</td><td class="num">tp ${f1(r.des,0)} mm</td><td class="num">treq ${f1(r.dem,0)} mm</td><td class="num">${f1(r.ratio,3)}</td><td class="num">${OKS(r.ok)}</td></tr>`;
+    return `<tr class="${r.ok?'':'fail'}"><td>${r.name}${r.note?', '+r.note.toLowerCase():''}</td><td class="num">${f1(r.Nn,2)}</td><td class="num">${f1(r.phi,2)}</td><td class="num">${f1(r.psi,3)}</td><td class="num">${f1(r.f,2)}</td><td class="num">${f1(r.des,2)}</td><td class="num">${f1(r.dem,2)}</td><td class="num">${f1(r.ratio,3)}</td><td class="num">${OKS(r.ok)}</td></tr>`;
+  }).join('');
+}
+function kv(rows){ return '<tbody>'+rows.map(r=>r[0]===null?`<tr><th colspan="3" style="text-align:left">${r[1]}</th></tr>`:`<tr><td>${r[0]}</td><td class="num">${r[1]}</td><td>${r[2]||''}</td></tr>`).join('')+'</tbody>'; }
+
+function renderAll(o,T,svgs){
+  const p=o.p;
+  planSVG(svgs.plan,o); sideSVG(svgs.side,o);
+  T.sum.innerHTML=`<thead><tr><th>Modo</th><th class="num">Nn, Vn [kN]</th><th class="num">φ</th><th class="num">ψa</th><th class="num">Factor</th><th class="num">Diseño [kN]</th><th class="num">Demanda [kN]</th><th class="num">Razón</th><th class="num">Estado</th></tr></thead><tbody>${sumRows(o)}</tbody>`;
+  const I=o.inter;
+  T.int.innerHTML=`<thead><tr><th>Interacción</th><th class="num">Tracción</th><th class="num">Corte</th><th class="num">Valor</th><th class="num">Estado</th></tr></thead><tbody>
+    <tr class="${I.okc?'':'fail'}"><td>Hormigón, ${I.single?'anclaje único, Ec. 17.8.2':'grupo, Ec. 17.8.3'}: (Nua/φNn,c)^5/3 + (Vua/φVn,c)^5/3 ≤ 1</td><td class="num">${f1(I.rNc,3)}</td><td class="num">${f1(I.rVc,3)}</td><td class="num">${f1(I.ic,3)}</td><td class="num">${OKS(I.okc)}</td></tr>
+    <tr class="${I.oks?'':'fail'}"><td>Acero, anclaje más solicitado, Ec. 17.8.4: (Nua/φNsa)² + (Vua/φVsa)² ≤ 1</td><td class="num">${f1(I.rNs,3)}</td><td class="num">${f1(I.rVs,3)}</td><td class="num">${f1(I.is,3)}</td><td class="num">${OKS(I.oks)}</td></tr></tbody>`;
+  const t=o.tb, rows=[[null,'Perno'],
+    ['da',f1(o.da,2)+' mm',`${p.dain} in, ${f1(o.ntm*25.4,1)} hilos/in`],['Ase,N',f1(o.Ase,1)+' mm²','π/4·(da − 0,9743/nt)²'],['futa',f1(o.futa,0)+' MPa','≤ 1,9fya y 860 MPa'],
+    ['Nsa / Vsa',`${f1(o.Nsa,2)} / ${f1(o.Vsa,2)} kN`,p.grout?'Vsa = 0,6·Ase·futa·0,8 por mortero':'Vsa = 0,6·Ase·futa'],
+    ['Nua grupo / anclaje máx.',`${f1(o.Ng,2)} / ${f1(o.Nmax,2)} kN`,`${o.nt} de ${o.n} anclajes en tracción`],
+    [null,'Arrancamiento del hormigón en tracción, 17.6.2'],
+    ['hef / hef\'',`${f1(p.hef,0)} / ${f1(t.hp,1)} mm`,t.hp<p.hef?'reducido por 3 o más bordes, 17.6.2.1.2':''],
+    ['ANc / ANco',`${f1(t.ANc,0)} / ${f1(t.ANco,0)} mm²`],['ψec,N',f1(t.psiecN,3),`e'N = ${f1(o.eNx,0)}, ${f1(o.eNy,0)} mm`],['ψed,N',f1(t.psiedN,3),`ca,min = ${isFinite(t.camin)?f1(t.camin,0)+' mm':'sin borde'}`],
+    ['ψc,N',f1(t.psicN,2),p.crk?'fisurado':'no fisurado'],['ψcp,N',f1(t.psicpN,3),o.cast?'':'cac = '+f1(t.cac,0)+' mm'],['ψcm,N',f1(t.psicm,3),p.zcm>0?(t.camin>=1.5*p.hef?`2 − z/(1,5hef), z = ${p.zcm} mm, C/T > 0,8`:'no aplica, borde a menos de 1,5hef'):'1,0'],
+    ['Nb',f1(t.Nb,2)+' kN',t.alt?'3,9·λa·√f\'c·hef\'^5/3':`${t.kc}·λa·√f'c·hef'^1,5`],['Ncbg',f1(t.Ncbg,2)+' kN']];
+  if(o.ar) rows.push([null,'Armadura de anclaje en tracción, 17.5.2.1'],['As',f1(o.ar.As,0)+' mm²',`${p.nbT}Ø${p.dbT}`],[o.ar.dl.name,f1(o.ar.dl.l,0)+' mm',p.btype==='hook'?`fy·ψs·db/(21λ√f'c), ψs = ${o.ar.dl.pss}, 25.4.3.1`:'Tabla 25.4.2.3'],['ℓ disponible',f1(o.ar.Ldis,0)+' mm',`hef − (√(Lx² + Ly²) − bp/2)/1,5 − rec., bp = ${f1(o.ar.bp,1)} mm`]);
+  if(o.po){ rows.push([null,'Extracción por deslizamiento, 17.6.3']);
+    if(p.head==='J') rows.push(['eh\'',f1(o.po.ehp,1)+' mm','3da ≤ eh ≤ 4,5da'],['Np',f1(o.po.Np,2)+' kN','0,9·f\'c·eh·da']);
+    else rows.push(['Abrg',f1(o.po.Abrg,0)+' mm²',p.head==='plate'?'placa efectiva menos perforación':'tuerca hexagonal pesada'],['Np',f1(o.po.Np,2)+' kN','8·Abrg·f\'c']);
+    rows.push(['ψc,P',f1(o.po.psicP,2)]);
+    if(o.po.pl) rows.push(['Placa: bef × Lef',`${f1(o.po.pl.bef,1)} × ${f1(o.po.pl.lef,1)} mm`],['σ / voladizo a',`${f1(o.po.pl.sig,2)} MPa / ${f1(o.po.pl.a,1)} mm`],['treq',f1(o.po.pl.treq,1)+' mm','√(4M/(0,9·fy))']);
+  }
+  if(o.sb) rows.push([null,'Desprendimiento lateral, 17.6.4'],['ca1 / ca2',`${f1(o.sb.ca1,0)} / ${isFinite(o.sb.ca2)?f1(o.sb.ca2,0):'∞'} mm`],['Nsb',f1(o.sb.Nsb,2)+' kN',`13·ca1·√Abrg·λa·√f'c × ${f1(o.sb.fc2,3)}`],['Factor de grupo',f1(o.sb.grpF,3),'1 + s/(6ca1)']);
+  else if(o.cast&&p.head!=='J') rows.push([null,'Desprendimiento lateral no aplica, hef ≤ 2,5ca1']);
+  if(o.bd) rows.push([null,'Adherencia, 17.6.5'],['τ',f1(o.bd.tau,2)+' MPa'],['cNa',f1(o.bd.cNa,1)+' mm','10·da·√(τuncr/7,6)'],['ANa / ANao',`${f1(o.bd.ANa,0)} / ${f1(o.bd.ANao,0)} mm²`],['ψec,Na / ψed,Na / ψcp,Na',`${f1(o.bd.psiec,3)} / ${f1(o.bd.psied,3)} / ${f1(o.bd.psicp,3)}`],['Nba',f1(o.bd.Nba,2)+' kN','λa·τ·π·da·hef'],['Nag',f1(o.bd.Nag,2)+' kN']);
+  T.ten.innerHTML=kv(rows);
+  const sr=[[null,'Arrancamiento por corte, 17.7.2']];
+  o.vc.forEach(c=>{ const v=c.v; sr.push([null,c.k],['ca1 / ca1 usado',`${f1(v.ca1,0)} / ${f1(v.c1,1)} mm`],['AVc / AVco',`${f1(v.AVc,0)} / ${f1(v.AVco,0)} mm²`],['ψec,V / ψed,V / ψc,V / ψh,V',`${f1(v.psiec,3)} / ${f1(v.psied,3)} / ${f1(v.psic,2)} / ${f1(v.psih,3)}`],['ℓe',f1(v.le,1)+' mm'],['Vb',f1(v.Vb,2)+' kN'],['Vcbg',f1(v.Vcb,2)+' kN'],['Demanda',f1(c.dem,2)+' kN'],['Razón',f1(c.ratio,3)]); });
+  if(!o.vc.length) sr.push(['Sin borde en la dirección del corte','-']);
+  if(o.vpar) sr.push([null,'Corte paralelo al borde lateral, 17.7.2.1(c)'],['ca1',f1(o.vpar.ca1,0)+' mm'],['Vcbg',f1(o.vpar.Vcb,2)+' kN','2 × perpendicular con ψed,V = 1']);
+  sr.push([null,'Desprendimiento por palanca, 17.7.3'],['kcp',o.cp.kcp],['Ncpg',f1(o.cp.Ncp,2)+' kN',o.cast?'Ncbg sin excentricidad':'mín. entre Nag y Ncbg'],['Vcpg',f1(o.cp.kcp*o.cp.Ncp,2)+' kN']);
+  T.shr.innerHTML=kv(sr);
+  if(o.lug){ const L=o.lug;
+    T.lug.innerHTML=`<thead><tr><th>Parámetro</th><th class="num">Valor</th><th>Detalle</th></tr></thead>`+kv([[null,'Placa de la llave'],['hsl embebida',f1(L.hsl,0)+' mm'],['Vn1 fluencia por corte',f1(L.Vn1,2)+' kN','0,6·fy·t·bsl'],['Mn',f1(L.Mn,2)+' kN·m','fy·bsl·t²/4'],['Vn2 flexión',f1(L.Vn2,2)+' kN','Mn/(mortero + hsl/2)'],['V diseño',f1(L.Vd,2)+' kN',p.lmode==='cap'?'capacidad de la placa':'Vua'],
+      ...(p.lmode==='res'?[['Razón placa, φ = 0,9',f1(L.rStl,3),OKS(L.rStl<=1)]]:[]),
+      [null,'Aplastamiento, 17.11.2'],['Aef,sl',f1(L.Aef,0)+' mm²','bsl·mín.(2tsl, hsl), 17.11.2.1.1'],['ψbrg,sl',f1(L.psib,3),p.Pu>0?'1 + 4Pu/(Abp·f\'c) ≤ 2':p.Pu<0?'1 + Pu/(n·Nsa)':'Pu = 0'],['Vbrg,sl',f1(L.Vbrg,2)+' kN','1,7·f\'c·Aef,sl·ψbrg,sl'],['φVbrg,sl, φ = 0,65',f1(0.65*L.Vbrg,2)+' kN'],['Razón',f1(L.rBrg,3),OKS(L.rBrg<=1)],
+      [null,'Arrancamiento, 17.11.3'],['ca1 / ca2',`${f1(L.ca1,0)} / ${f1(L.ca2,0)} mm`],['AVc / AVco',`${f1(L.AVc,0)} / ${f1(L.AVco,0)} mm²`,`altura ${f1(L.hc,0)} mm, ancho ${f1(L.wid,0)} mm`],['ψed,V / ψc,V / ψh,V',`${f1(L.psied,3)} / ${f1(L.psic,2)} / ${f1(L.psih,3)}`],['Vb',f1(L.Vb,2)+' kN','3,7·λa·√f\'c·ca1^1,5'],['Vcb,sl',f1(L.Vcb,2)+' kN'],['φψaVcb,sl, φ = 0,65',f1(0.65*o.psa.V*L.Vcb,2)+' kN'],['Razón',f1(L.rCb,3),OKS(L.rCb<=1)],
+      [null,'Estribos que cruzan la falla'],['As',f1(L.Asl,0)+' mm²',`${p.nbl}Ø${p.dbl}`],['φAs·fy, φ = 0,90',f1(0.9*L.Asl*p.fyl/1000,2)+' kN'],['Razón',f1(L.rAs,3),OKS(L.rAs<=1)],
+      [null,'Relación con anclajes en tracción'],['hef/csl ≥ 2,5',f1(L.geo1,2)],['hef/hsl ≥ 2,5',f1(L.geo2,2)],['Estado','',OKS(L.okGeo)]]);
+  }else T.lug.innerHTML='<tbody><tr><td>Sin llave de corte</td></tr></tbody>';
+}
+function lugOk(o){ if(!o.lug) return []; const L=o.lug; return [L.rBrg<=1,Math.min(L.rCb,L.rAs)<=1,L.okGeo,!(L.rStl>1)]; }
+function renderStats(o){
+  const tr=o.rows.filter(r=>r.grp==='T'), sh=o.rows.filter(r=>r.grp==='V');
+  const mx=a=>Math.max(0,...a.map(r=>r.ratio).filter(isFinite));
+  const bad=o.rows.filter(r=>!r.ok&&!(r.alt&&r.alt.ok)).length+(o.inter.okc?0:1)+(o.inter.oks?0:1)+lugOk(o).filter(x=>!x).length;
+  const st=[{k:'Razón máx. tracción',v:f1(mx(tr),3)},{k:'Razón máx. corte',v:f1(mx(sh),3)},{k:'Interacción hormigón',v:f1(o.inter.ic,3)},{k:'Verificaciones',v:bad?`${bad} no cumple${bad>1?'n':''}`:'Todas cumplen'}];
+  $('stats').innerHTML=st.map(s=>`<div class="stat"><div class="k">${s.k}</div><div class="v">${s.v}</div></div>`).join('');
+}
+function notesHtml(o){
+  const p=o.p;
+  return `Unidades kN y mm. Grupo rectangular de ${o.nx}×${o.ny} anclajes, distribución elástica de la tracción con e'N. Borde 0 indica sin borde.<br>
+  Tabla 21.2.1: hormigón en tracción φ = ${f1(o.pc,2)} (${p.red==='1'?'redundante':'no redundante'}), hormigón en corte φ = 0,75, acero φ = ${p.duct?'0,75 / 0,65':'0,65 / 0,60'}, armadura de anclaje φ = 0,90. Tabla 17.5.4.1: ψa tracción = ${f1(o.psa.T,2)}, ψa corte = ${f1(o.psa.V,2)}.${p.seis?' Modos de hormigón en tracción por 0,75, 17.10.5.4.':''}<br>
+  Corte en grupos según Fig. R17.7.2.1b: casos 1 y 2 si s ≥ ca1,1, caso 3 si s < ca1,1. Llave de corte con φ = 0,65 en aplastamiento y arrancamiento, 17.11.1.1.`;
+}
+function run(){
+  const p=readIn();
+  $('plateBox').hidden=!(p.inst==='cast'&&p.head==='plate'); $('jBox').hidden=!(p.inst==='cast'&&p.head==='J');
+  $('adhBox').hidden=p.inst!=='adh'; $('cacBox').hidden=p.inst!=='adh'; $('head').disabled=p.inst!=='cast';
+  $('arTBox').hidden=!p.arT; $('arVBox').hidden=!p.arV; $('lugBox').hidden=!p.lug;
+  try{
+    R=analyze(p);
+    $('warns').innerHTML=R.warn.map(w=>`<div class="warn">${w}</div>`).join('');
+    renderAll(R,{sum:$('tbSum'),int:$('tbInt'),ten:$('tbTen'),shr:$('tbShr'),lug:$('tbLug')},{plan:$('planSvg'),side:$('sideSvg')});
+    renderStats(R); $('notes').innerHTML=notesHtml(R); autosave();
+  }catch(e){ $('warns').innerHTML=`<div class="warn">Error: ${e.message}</div>`; console.error(e); }
+}
+let tmr=null;
+document.querySelectorAll('input,select,textarea').forEach(i=>{ if(i.type==='file') return; i.addEventListener('input',()=>{ clearTimeout(tmr); tmr=setTimeout(run,150); }); i.addEventListener('change',()=>{ clearTimeout(tmr); tmr=setTimeout(run,30); }); });
+document.querySelectorAll('#tabs button').forEach(b=>b.addEventListener('click',()=>{ document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('active',x===b)); document.querySelectorAll('.tabpane').forEach(q=>q.hidden=q.dataset.pane!==b.dataset.tab); }));
+const IDS=[...document.querySelectorAll('input,select,textarea')].filter(e=>e.id&&e.type!=='file').map(e=>e.id);
+const SKEY='fdd_anclajes_v1';
+function projectData(){ const d={}; IDS.forEach(id=>{ const e=$(id); d[id]=e.type==='checkbox'?e.checked:e.value; }); return {app:'fddlebel-anclajes',v:1,inputs:d}; }
+function loadProject(d){ if(!d||!d.inputs) return false; Object.entries(d.inputs).forEach(([id,v])=>{ const e=$(id); if(!e) return; if(e.type==='checkbox') e.checked=!!v; else e.value=v; }); return true; }
+function autosave(){ try{ localStorage.setItem(SKEY,JSON.stringify(projectData())); }catch(e){} }
+function download(name,text,type){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text],{type:type||'text/plain'})); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500); }
+function baseName(){ return ($('proj').value.trim().replace(/[^\w\-]+/g,'_'))||'anclajes'; }
+$('saveBtn').addEventListener('click',()=>download(baseName()+'.json',JSON.stringify(projectData()),'application/json'));
+$('loadBtn').addEventListener('click',()=>$('loadFile').click());
+$('loadFile').addEventListener('change',ev=>{ const f=ev.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ if(loadProject(JSON.parse(r.result))) run(); }catch(e){ $('warns').innerHTML='<div class="warn">El archivo no es un proyecto válido.</div>'; } }; r.readAsText(f); ev.target.value=''; });
+function buildReport(){
+  const p=R.p, ct=$('printReport'); ct.innerHTML='';
+  const hd=document.createElement('div'); hd.className='rpt-header';
+  hd.innerHTML=`<h1>Anclajes en hormigón</h1><div class="rpt-sub">${p.proj?p.proj+', ':''}ACI 318-25, ${new Date().toLocaleDateString('es-CL')}</div>`; ct.appendChild(hd);
+  const pt=document.createElement('table'); pt.className='rpt-params';
+  pt.innerHTML=`<tr><td class="k">Anclaje</td><td>${p.inst==='cast'?'Preinstalado, '+({hex:'tuerca hexagonal pesada',plate:'placa de extracción',J:'perno J'}[p.head]):'Adhesivo, categoría '+p.cat}, da = ${p.dain} in</td><td class="k">Acero</td><td>fya = ${p.fya} MPa, futa = ${p.futa} MPa, ${p.duct?'dúctil':'frágil'}</td></tr>
+   <tr><td class="k">Grupo</td><td>${R.nx}×${R.ny}, sx = ${R.sx} mm, sy = ${R.sy} mm, hef = ${p.hef} mm</td><td class="k">Bordes</td><td>${[p.cxm,p.cxp,p.cym,p.cyp].map(v=>v>0?v:'∞').join(' / ')} mm</td></tr>
+   <tr><td class="k">Hormigón</td><td>f'c = ${p.fc} MPa, ${p.crk?'fisurado':'no fisurado'}, ha = ${p.ha} mm</td><td class="k">Condición</td><td>Tracción ${p.condT}, corte ${p.condV}, ${p.red==='1'?'redundante':'no redundante'}${p.seis?', sísmico':''}</td></tr>
+   <tr><td class="k">Solicitaciones</td><td>Nua = ${f1(R.Ng,2)} kN, Vua = ${f1(R.Vg,2)} kN</td><td class="k">Diseño</td><td>${p.dmode==='cap'?'Por capacidad del perno':'Por resistencia'}</td></tr>`;
+  ct.appendChild(pt);
+  const addSec=(t,n)=>{ const s=document.createElement('div'); s.className='rpt-section'; s.innerHTML=`<h2>${t}</h2>`; if(n) s.appendChild(n); ct.appendChild(s); return s; };
+  const T={}; ['sum','int','ten','shr','lug'].forEach(k=>{ T[k]=document.createElement('table'); T[k].className='rpt-small'; });
+  const sv={plan:el('svg',{width:'100%',style:'max-width:560px;height:auto;display:block;margin:0 auto;'}),side:el('svg',{width:'100%',style:'max-width:680px;height:auto;display:block;margin:0 auto;'})};
+  renderAll(R,T,sv);
+  addSec('Planta',sv.plan);
+  addSec('Vista lateral',sv.side);
+  addSec('Modos de falla',T.sum);
+  addSec('Interacción',T.int);
+  addSec('Tracción',T.ten);
+  addSec('Corte',T.shr);
+  if(p.lug) addSec('Llave de corte',T.lug);
+  const ft=document.createElement('div'); ft.className='rpt-foot'; ft.innerHTML=notesHtml(R); ct.appendChild(ft);
+}
+$('pdfBtn').addEventListener('click',()=>{ if(!R) return; buildReport(); window.print(); });
+(function init(){ try{ const d=JSON.parse(localStorage.getItem(SKEY)||'null'); if(d) loadProject(d); }catch(e){} run(); })();
+</script></body></html>

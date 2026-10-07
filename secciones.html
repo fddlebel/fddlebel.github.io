@@ -224,6 +224,12 @@ svg text{font-family:var(--sans);}
         </select>
         <button class="tool" id="pasteBtn">Pegar grilla</button>
         <button class="tool" id="clearBtn">Limpiar</button>
+        <span class="sep"></span>
+        <button class="tool" id="zoomOut" title="Alejar">−</button>
+        <span id="zoomLbl" style="font-size:12px;min-width:38px;text-align:center;">100%</span>
+        <button class="tool" id="zoomIn" title="Acercar">+</button>
+        <button class="tool" id="zoomFit">Ajustar</button>
+        <label class="chk"><input type="checkbox" id="showDiam" checked> Mostrar Ø</label>
       </div>
       <div id="tplBox" class="ctrls" hidden>
         <div class="field"><label>Largo alma <span class="unit">[mm]</span></label><input type="number" id="tLw" value="2000" step="50"></div>
@@ -603,7 +609,7 @@ function mcRun(F,m,alpha,Pt){
   return out;
 }
 const cv=$('gridCanvas'), cx2=cv.getContext('2d');
-const ED={tool:'conc',scale:1,cw:10,ch:10,drag:null,hover:null,undo:[],F:null};
+const ED={zoom:1,tool:'conc',scale:1,cw:10,ch:10,drag:null,hover:null,undo:[],F:null};
 
 function snapshot(){ ED.undo.push({nx:S.nx,ny:S.ny,dx:S.dx,dy:S.dy,conc:S.conc.slice(),bars:S.bars.slice()}); if(ED.undo.length>60) ED.undo.shift(); }
 function undo(){ const u=ED.undo.pop(); if(!u) return; S=u; $('nx').value=S.nx; $('ny').value=S.ny; $('dx').value=S.dx; $('dy').value=S.dy; layoutGrid(); changed('geom'); }
@@ -620,8 +626,9 @@ function resizeGrid(nx,ny){
 function layoutGrid(){
   const wrapW=Math.max($('gridWrap').clientWidth-2,200);
   const sc=Math.min(wrapW/(S.nx*S.dx),520/(S.ny*S.dy));
-  const minCell=8/Math.min(S.dx,S.dy);
-  ED.scale=Math.max(sc,minCell);
+  const minCell=4/Math.min(S.dx,S.dy);
+  ED.scale=Math.max(sc*ED.zoom,minCell);
+  $('zoomLbl').textContent=Math.round(ED.zoom*100)+'%';
   ED.cw=S.dx*ED.scale; ED.ch=S.dy*ED.scale;
   const dpr=window.devicePixelRatio||1;
   const W=Math.ceil(S.nx*ED.cw)+1, H=Math.ceil(S.ny*ED.ch)+1;
@@ -641,12 +648,21 @@ function drawGrid(){
   if(cw>=4){ for(let i=0;i<=S.nx;i++){ cx2.moveTo(i*cw+0.25,0); cx2.lineTo(i*cw+0.25,H); } }
   if(ch>=4){ for(let j=0;j<=S.ny;j++){ cx2.moveTo(0,j*ch+0.25); cx2.lineTo(W,j*ch+0.25); } }
   cx2.stroke();
-  const big=Math.min(cw,ch)>=18;
+  const showD=$('showDiam').checked, cmin=Math.min(cw,ch);
+  const fs=clamp(cmin*0.6,9,13);
+  const labels=[];
   for(let j=0;j<S.ny;j++) for(let i=0;i<S.nx;i++){
     const d=S.bars[j*S.nx+i]; if(!(d>0)) continue;
-    const r=Math.max(2.5,Math.min(d*ED.scale/2,Math.min(cw,ch)*0.45));
-    cx2.fillStyle='#000'; cx2.beginPath(); cx2.arc((i+0.5)*cw,(j+0.5)*ch,r,0,2*Math.PI); cx2.fill();
-    if(big&&r<Math.min(cw,ch)*0.3){ cx2.font='bold 9px Arial Narrow, Arial'; cx2.textAlign='center'; cx2.fillText(String(d),(i+0.5)*cw,(j+0.5)*ch-r-2); }
+    const r=Math.max(2,Math.min(d*ED.scale/2,cmin*0.42));
+    const x=(i+0.5)*cw, y=(j+0.5)*ch;
+    cx2.fillStyle='#000'; cx2.beginPath(); cx2.arc(x,y,r,0,2*Math.PI); cx2.fill();
+    if(showD) labels.push([x,y,r,String(d)]);
+  }
+  if(labels.length){
+    cx2.font=`bold ${fs}px Arial Narrow, Arial`; cx2.textAlign='center'; cx2.textBaseline='bottom';
+    cx2.lineJoin='round'; cx2.lineWidth=3; cx2.strokeStyle='rgba(255,255,255,0.9)'; cx2.fillStyle='#000';
+    labels.forEach(([x,y,r,t])=>{ const ty=y-r-1; cx2.strokeText(t,x,ty); cx2.fillText(t,x,ty); });
+    cx2.textBaseline='alphabetic';
   }
   if(ED.F&&ED.F.Ac>0){
     const F=ED.F, px=F.rx*ED.scale, py=H-F.ry*ED.scale;
@@ -735,6 +751,20 @@ document.addEventListener('keydown',ev=>{ if((ev.ctrlKey||ev.metaKey)&&ev.key.to
 $('clearBtn').addEventListener('click',()=>{ snapshot(); S.conc.fill(0); S.bars.fill(0); drawGrid(); changed('geom'); });
 ['nx','ny'].forEach(id=>$(id).addEventListener('change',()=>{ resizeGrid(num('nx',S.nx),num('ny',S.ny)); layoutGrid(); changed('geom'); }));
 ['dx','dy'].forEach(id=>$(id).addEventListener('change',()=>{ snapshot(); S.dx=Math.max(num('dx',40),1); S.dy=Math.max(num('dy',40),1); layoutGrid(); changed('geom'); }));
+function setZoom(z){ ED.zoom=clamp(z,0.25,8); layoutGrid(); }
+$('zoomIn').addEventListener('click',()=>setZoom(ED.zoom*1.25));
+$('zoomOut').addEventListener('click',()=>setZoom(ED.zoom/1.25));
+$('zoomFit').addEventListener('click',()=>setZoom(1));
+$('showDiam').addEventListener('change',drawGrid);
+cv.addEventListener('wheel',ev=>{
+  if(!(ev.ctrlKey||ev.metaKey)) return;
+  ev.preventDefault();
+  const wrap=$('gridWrap'), r=cv.getBoundingClientRect(), fx=(ev.clientX-r.left)/r.width, fy=(ev.clientY-r.top)/r.height;
+  setZoom(ED.zoom*(ev.deltaY<0?1.15:1/1.15));
+  const r2=cv.getBoundingClientRect();
+  wrap.scrollLeft+=fx*r2.width-(ev.clientX-r.left);
+  wrap.scrollTop+=fy*r2.height-(ev.clientY-r.top);
+},{passive:false});
 window.addEventListener('resize',()=>{ clearTimeout(ED.rt); ED.rt=setTimeout(layoutGrid,150); });
 
 $('tpl').addEventListener('change',()=>{ $('tplBox').hidden=!$('tpl').value; });
