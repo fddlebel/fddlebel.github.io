@@ -139,8 +139,8 @@ svg text{font-family:var(--sans);}
         <div class="field"><label>Derecho</label><select id="endR"><option value="pin" selected>Apoyo simple</option><option value="fix">Empotrado</option></select></div>
       </div>
       <div class="row2">
-        <div class="field"><label>Voladizo izq. <span class="unit">[m]</span></label><input type="number" id="cL" value="0" step="0.1"></div>
-        <div class="field"><label>Voladizo der. <span class="unit">[m]</span></label><input type="number" id="cR" value="0" step="0.1"></div>
+        <div class="field"><label>Voladizo izq. <span class="unit">[mm]</span></label><input type="number" id="cL" value="0" step="100"></div>
+        <div class="field"><label>Voladizo der. <span class="unit">[mm]</span></label><input type="number" id="cR" value="0" step="100"></div>
       </div>
 
       <div class="section-title" style="margin-top:12px">Armadura longitudinal</div>
@@ -290,16 +290,17 @@ const clamp=(x,a,b)=>x<a?a:x>b?b:x;
 const Abar=d=>Math.PI*d*d/4;
 const ceil05=x=>Math.ceil(x/0.05-1e-9)*0.05;
 let R=null;
-let GEO={spans:[{L:6,nb:'',db:20},{L:7,nb:'',db:20},{L:6,nb:'',db:20}],sup:[{w:400,nt:'',dt:20},{w:400,nt:'',dt:20},{w:400,nt:'',dt:20},{w:400,nt:'',dt:20}]};
-let LOADS=[{el:'all',cs:'D',t:'u',w:20,a:0,b:0},{el:'all',cs:'L',t:'u',w:12,a:0,b:0},{el:'1',cs:'D',t:'P',w:40,a:3.5,b:0}];
+let GEO={spans:[{L:6000,nb:'',db:20},{L:7000,nb:'',db:20},{L:6000,nb:'',db:20}],sup:[{w:400,nt:'',dt:20},{w:400,nt:'',dt:20},{w:400,nt:'',dt:20},{w:400,nt:'',dt:20}]};
+let LOADS=[{el:'all',cs:'D',t:'u',w:20,a:0,b:0},{el:'all',cs:'L',t:'u',w:12,a:0,b:0},{el:'1',cs:'D',t:'P',w:40,a:3500,b:0}];
 let COMBOS=[{n:'1,4D',D:1.4,L:0},{n:'1,2D + 1,6L',D:1.2,L:1.6}];
 
 function readIn(){
   const p={};
   ['b','h','cov','fc','fy','fyt','gc','lam','dagg','cL','cR','ntc','dtc','nbc','dbc','dst','legs','smaxu','ccol','pse'].forEach(k=>p[k]=num(k,0));
   p.endL=$('endL').value; p.endR=$('endR').value; p.pscc=$('pscc').checked; p.psr=$('psr').checked; p.patt=$('patt').checked; p.proj=$('proj').value.trim();
-  p.spans=GEO.spans.map(s=>Object.assign({},s)); p.sup=GEO.sup.map(s=>Object.assign({},s));
-  p.loads=LOADS.map(l=>Object.assign({},l)); p.combos=COMBOS.map(c=>Object.assign({},c));
+  p.cL/=1000; p.cR/=1000;
+  p.spans=GEO.spans.map(s=>Object.assign({},s,{L:s.L/1000})); p.sup=GEO.sup.map(s=>Object.assign({},s));
+  p.loads=LOADS.map(l=>Object.assign({},l,{a:l.a/1000,b:l.b/1000})); p.combos=COMBOS.map(c=>Object.assign({},c));
   if(p.cL>0) p.endL='pin'; if(p.cR>0) p.endR='pin';
   return p;
 }
@@ -585,7 +586,7 @@ function analyze(p){
   o.stir.forEach(s=>add(`${s.name}: corte, φVn ≥ Vu`,s.over?'Vs > 0,66√f\'c·bw·d':`Vu máx. ${f1(s.Vmax,1)} kN`,s.ok));
   [...o.sups,...o.bots].forEach(s=>{ [s.xa,s.xb].forEach(xc=>{ if(xc<=1e-9||xc>=mdl.Ltot-1e-9) return; const q=st.reduce((a,b)=>Math.abs(b.x-xc)<Math.abs(a.x-xc)?b:a); const V=Math.max(Math.abs(q.Vmax),Math.abs(q.Vmin)); const tr=s.k===undefined?q.neg>1e-6:q.pos>1e-6;
     const sr=o.stir[q.ie], cp=sr.cap.reduce((a,b)=>Math.abs(b.xl-q.xl)<Math.abs(a.xl-q.xl)?b:a);
-    if(tr&&V>2/3*cp.pVn+1e-6) o.warn.push(`Corte de barra en zona traccionada en x = ${f1(xc,2)} m con Vu > 2/3 φVn, revisar 9.7.3.5.`); }); });
+    if(tr&&V>2/3*cp.pVn+1e-6) o.warn.push(`Corte de barra en zona traccionada en x = ${f1(xc*1000,0)} mm con Vu > 2/3 φVn, revisar 9.7.3.5.`); }); });
   o.hmin=mdl.els.map(e=>{ const fyf=0.4+p.fy/700; let k,div;
     if(e.k!=='sp'){ div=8; k='Voladizo'; }
     else{ const cl=e.jL>0||p.cL>0||p.endL==='fix', cr=e.jR<mdl.n||p.cR>0||p.endR==='fix'; div=cl&&cr?21:(cl||cr)?18.5:16; k=cl&&cr?'Ambos extremos continuos':(cl||cr)?'Un extremo continuo':'Simplemente apoyado'; }
@@ -594,6 +595,7 @@ function analyze(p){
   o.hooks.forEach(h=>add(`Apoyo ${h.j+1}: ℓdh Ø${h.db} ${h.pos.toLowerCase()} ≤ ancho − rec.`,`${f1(h.l,0)} ≤ ${f1(h.av,0)} mm`,h.ok));
   return o;
 }
+const mm=x=>f1(x*1000,0);
 let tmr=null;
 const schedule=(t)=>{ clearTimeout(tmr); tmr=setTimeout(run,t||150); };
 const OKS=ok=>ok?'Cumple':'No cumple';
@@ -606,11 +608,11 @@ function bindTab(t,arr,onDel){
   t.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>{ onDel(+b.dataset.del); }));
 }
 function buildGeoTable(){
-  const t=$('gTab'), n=GEO.spans.length; let h='<thead><tr><th>Elemento</th><th class="num">L [m] / ancho [mm]</th><th class="num">Suple n</th><th class="num">Suple Ø [mm]</th></tr></thead><tbody>';
+  const t=$('gTab'), n=GEO.spans.length; let h='<thead><tr><th>Elemento</th><th class="num">L / ancho [mm]</th><th class="num">Suple n</th><th class="num">Suple Ø [mm]</th></tr></thead><tbody>';
   for(let j=0;j<=n;j++){
     const s=GEO.sup[j];
     h+=`<tr data-i="${j}" data-k="s"><td>Apoyo ${j+1}, suple superior</td><td><input type="number" data-f="w" value="${s.w}" step="50"></td><td><input type="number" data-raw="1" data-f="nt" value="${s.nt}" placeholder="auto" step="1"></td><td><input type="number" data-f="dt" value="${s.dt}" step="2"></td></tr>`;
-    if(j<n){ const sp=GEO.spans[j]; h+=`<tr data-i="${j}" data-k="p"><td>Tramo ${j+1}, suple inferior</td><td><input type="number" data-f="L" value="${sp.L}" step="0.1"></td><td><input type="number" data-raw="1" data-f="nb" value="${sp.nb}" placeholder="auto" step="1"></td><td><input type="number" data-f="db" value="${sp.db}" step="2"></td></tr>`; }
+    if(j<n){ const sp=GEO.spans[j]; h+=`<tr data-i="${j}" data-k="p"><td>Tramo ${j+1}, suple inferior</td><td><input type="number" data-f="L" value="${sp.L}" step="100"></td><td><input type="number" data-raw="1" data-f="nb" value="${sp.nb}" placeholder="auto" step="1"></td><td><input type="number" data-f="db" value="${sp.db}" step="2"></td></tr>`; }
   }
   t.innerHTML=h+'</tbody>';
   t.querySelectorAll('input').forEach(inp=>{
@@ -627,11 +629,11 @@ function elOptions(sel){
 }
 function buildLoadTable(){
   const t=$('lTab');
-  t.innerHTML=`<thead><tr><th>Elemento</th><th>Caso</th><th>Tipo</th><th class="num">w [kN/m] o P [kN]</th><th class="num">a [m]</th><th class="num">b [m]</th><th></th></tr></thead><tbody>${LOADS.map((l,i)=>`<tr data-i="${i}">
+  t.innerHTML=`<thead><tr><th>Elemento</th><th>Caso</th><th>Tipo</th><th class="num">w [kN/m] o P [kN]</th><th class="num">a [mm]</th><th class="num">b [mm]</th><th></th></tr></thead><tbody>${LOADS.map((l,i)=>`<tr data-i="${i}">
     <td><select data-f="el">${elOptions(String(l.el))}</select></td>
     <td><select data-f="cs"><option value="D"${l.cs==='D'?' selected':''}>D</option><option value="L"${l.cs==='L'?' selected':''}>L</option></select></td>
     <td><select data-f="t"><option value="u"${l.t==='u'?' selected':''}>Uniforme</option><option value="p"${l.t==='p'?' selected':''}>Uniforme parcial</option><option value="P"${l.t==='P'?' selected':''}>Puntual</option></select></td>
-    <td><input type="number" data-f="w" value="${l.w}" step="1"></td><td><input type="number" data-f="a" value="${l.a}" step="0.1"></td><td><input type="number" data-f="b" value="${l.b}" step="0.1"></td>
+    <td><input type="number" data-f="w" value="${l.w}" step="1"></td><td><input type="number" data-f="a" value="${l.a}" step="100"></td><td><input type="number" data-f="b" value="${l.b}" step="100"></td>
     <td><button class="xb" data-del="${i}">×</button></td></tr>`).join('')}</tbody>`;
   bindTab(t,()=>LOADS,i=>{ LOADS.splice(i,1); buildLoadTable(); run(); });
 }
@@ -656,14 +658,14 @@ function elevSVG(svg,o){
   T((X(0)+X(m.Ltot))/2,t1-6,`${p.ntc}Ø${p.dtc} continua`);
   T((X(0)+X(m.Ltot))/2,b1+15,`${p.nbc}Ø${p.dbc} continua`);
   o.sups.forEach((s,k)=>{ if(s.n<=0) return; const xa=s.hookL?endX('L'):s.xa, xb=s.hookR?endX('R'):s.xb; bar(xa,xb,t2,1.6,s.hookL,s.hookR,1);
-    const cx=(X(xa)+X(xb))/2; T(cx,yT-60-(k%2)*12,`${s.n}Ø${s.ds} L = ${f1(s.xb-s.xa,2)} (${f1(s.La,2)} + ${f1(s.Lb,2)})`); A('line',{x1:cx,y1:yT-56-(k%2)*12,x2:cx,y2:t2,stroke:'#000','stroke-width':0.4}); });
+    const cx=(X(xa)+X(xb))/2; T(cx,yT-60-(k%2)*12,`${s.n}Ø${s.ds} L = ${mm(s.xb-s.xa)} (${mm(s.La)} + ${mm(s.Lb)})`); A('line',{x1:cx,y1:yT-56-(k%2)*12,x2:cx,y2:t2,stroke:'#000','stroke-width':0.4}); });
   o.bots.forEach((s,k)=>{ if(s.n<=0) return; bar(s.xa,s.xb,b2,1.6,false,false,-1);
-    const cx=(X(s.xa)+X(s.xb))/2; T(cx,yB+92+(k%2)*12,`${s.n}Ø${s.ds} L = ${f1(s.len,2)}`); A('line',{x1:cx,y1:yB+82+(k%2)*12,x2:cx,y2:b2,stroke:'#000','stroke-width':0.4}); });
+    const cx=(X(s.xa)+X(s.xb))/2; T(cx,yB+92+(k%2)*12,`${s.n}Ø${s.ds} L = ${mm(s.len)}`); A('line',{x1:cx,y1:yB+82+(k%2)*12,x2:cx,y2:b2,stroke:'#000','stroke-width':0.4}); });
   const yD=yB+130;
   m.els.forEach((e,ie)=>{ const x1=X(e.x0), x2=X(e.x0+e.L);
     A('line',{x1,x2,y1:yD,y2:yD,stroke:'#000','stroke-width':0.6}); [x1,x2].forEach(x=>A('line',{x1:x,x2:x,y1:yD-4,y2:yD+4,stroke:'#000','stroke-width':0.6}));
-    T((x1+x2)/2,yD-4,`${e.name}, ${f1(e.L,2)} m`);
-    const s=o.stir[ie]; T((x1+x2)/2,yD+16,s.sEnd<s.sMid?`EØ${p.dst}@${s.sEnd} en ${f1(s.zL,2)} / ${f1(s.zR,2)}, @${s.sMid} resto`:`EØ${p.dst}@${s.sMid}`,{'font-size':10});
+    T((x1+x2)/2,yD-4,`${e.name}, ${mm(e.L)}`);
+    const s=o.stir[ie]; T((x1+x2)/2,yD+16,s.sEnd<s.sMid?`EØ${p.dst}@${s.sEnd} en ${mm(s.zL)} / ${mm(s.zR)}, @${s.sMid} resto`:`EØ${p.dst}@${s.sMid}`,{'font-size':10});
   });
   let yl=28; m.els.forEach(e=>{
     const sw=o.swt; let qD=sw, qL=0; p.loads.forEach(q=>{ if(q.t!=='u') return; const on=q.el==='all'||(q.el==='cl'&&e.k==='cl')||(q.el==='cr'&&e.k==='cr')||(e.k==='sp'&&String(e.i)===q.el); if(on){ if(q.cs==='D') qD+=q.w; else qL+=q.w; } });
@@ -676,14 +678,14 @@ function elevSVG(svg,o){
 
 function charts(o){
   const st=o.st;
-  chart($('chM'),{H:360,xlabel:'x [m]',ylabel:'M [kN·m]',zeroY:true,legendRight:true,series:[
-    {name:'Mu+ máx.',pts:st.map(s=>[s.x,s.Mmax]),w:1.6},
-    {name:'Mu− mín.',pts:st.map(s=>[s.x,s.Mmin]),w:1.6,dash:'6,3'},
-    {name:'φMn+',pts:st.map(s=>[s.x,s.pMb]),w:1,dash:'2,3'},
-    {name:'−φMn−',pts:st.map(s=>[s.x,-s.pMt]),w:1,dash:'2,3'}]});
-  const cap=[]; o.stir.forEach(sr=>{ const e=o.mdl.els[sr.ie]; sr.cap.forEach(c=>cap.push([e.x0+c.xl,c.pVn])); cap.push([NaN,NaN]); });
-  chart($('chV'),{H:340,xlabel:'x [m]',ylabel:'V [kN]',zeroY:true,legendRight:true,series:[
-    {name:'Vu máx.',pts:st.map(s=>[s.x,s.Vmax]),w:1.6},{name:'Vu mín.',pts:st.map(s=>[s.x,s.Vmin]),w:1.6,dash:'6,3'},
+  chart($('chM'),{H:360,xlabel:'x [mm]',ylabel:'M [kN·m]',zeroY:true,legendRight:true,series:[
+    {name:'Mu+ máx.',pts:st.map(s=>[s.x*1000,s.Mmax]),w:1.6},
+    {name:'Mu− mín.',pts:st.map(s=>[s.x*1000,s.Mmin]),w:1.6,dash:'6,3'},
+    {name:'φMn+',pts:st.map(s=>[s.x*1000,s.pMb]),w:1,dash:'2,3'},
+    {name:'−φMn−',pts:st.map(s=>[s.x*1000,-s.pMt]),w:1,dash:'2,3'}]});
+  const cap=[]; o.stir.forEach(sr=>{ const e=o.mdl.els[sr.ie]; sr.cap.forEach(c=>cap.push([(e.x0+c.xl)*1000,c.pVn])); cap.push([NaN,NaN]); });
+  chart($('chV'),{H:340,xlabel:'x [mm]',ylabel:'V [kN]',zeroY:true,legendRight:true,series:[
+    {name:'Vu máx.',pts:st.map(s=>[s.x*1000,s.Vmax]),w:1.6},{name:'Vu mín.',pts:st.map(s=>[s.x*1000,s.Vmin]),w:1.6,dash:'6,3'},
     {name:'±φVn',pts:cap,w:1,dash:'2,3'},{name:'',pts:cap.map(c=>[c[0],-c[1]]),w:1,dash:'2,3'}]});
 }
 
@@ -765,11 +767,11 @@ function renderAll(o,T,S){
     const bo=o.bots.find(q=>q.k===ie&&q.n>0), L=bo?bo.L:o.Lb, F=bo?bo.F:o.Fb;
     rows.push({n:e.name+', positivo',Mu,ref:bo?`${p.nbc}Ø${p.dbc} + ${bo.n}Ø${bo.ds}`:`${p.nbc}Ø${p.dbc}`,As:L.As,req:asReq(p,Mu,L.d),d:L.d,pM:F.pMn,et:F.et}); });
   T.fl.innerHTML=`<thead><tr><th>Sección</th><th class="num">Mu [kN·m]</th><th class="num">As req. [mm²]</th><th>Refuerzo</th><th class="num">As [mm²]</th><th class="num">d [mm]</th><th class="num">φMn [kN·m]</th><th class="num">εt</th><th class="num">Razón</th></tr></thead><tbody>${rows.map(r=>{ const ok=r.Mu<=r.pM+1e-6; return `<tr class="${ok?'':'fail'}"><td>${r.n}</td><td class="num">${f1(r.Mu,1)}</td><td class="num">${isFinite(r.req)?f1(r.req,0):'Sección insuficiente'}</td><td>${r.ref}</td><td class="num">${f1(r.As,0)}</td><td class="num">${f1(r.d,0)}</td><td class="num">${f1(r.pM,1)}</td><td class="num">${f1(r.et,4)}</td><td class="num">${f1(r.Mu/(r.pM||1e-9),3)}</td></tr>`; }).join('')}</tbody>`;
-  const su=[...o.sups.filter(s=>s.n>0).map(s=>({n:`Apoyo ${s.j+1}, superior`,ref:`${s.n}Ø${s.ds}${s.auto?' (auto)':''}`,x1:s.xa,x2:s.xb,len:s.xb-s.xa,det:`${f1(s.La,2)} izq. + ${f1(s.Lb,2)} der.${s.hookL||s.hookR?', con gancho en el extremo':''}`,ld:s.ld,ext:s.dext,th:`${f1(s.x1,2)} a ${f1(s.x2,2)}`})),
-    ...o.bots.filter(s=>s.n>0).map(s=>({n:`${m.els[s.k].name}, inferior`,ref:`${s.n}Ø${s.ds}${s.auto?' (auto)':''}`,x1:s.xa,x2:s.xb,len:s.len,det:s.clipped?'limitado a las caras de apoyo':'',ld:s.ld,ext:s.dext,th:`${f1(s.x1,2)} a ${f1(s.x2,2)}`}))];
-  T.su.innerHTML=`<thead><tr><th>Suple</th><th>Barras</th><th class="num">Requerido teórico [m]</th><th class="num">Desde [m]</th><th class="num">Hasta [m]</th><th class="num">Largo [m]</th><th class="num">ℓd [m]</th><th class="num">máx.(d, 12db) [m]</th><th>Detalle</th></tr></thead><tbody>${su.map(r=>`<tr><td>${r.n}</td><td>${r.ref}</td><td class="num">${r.th}</td><td class="num">${f1(r.x1,2)}</td><td class="num">${f1(r.x2,2)}</td><td class="num">${f1(r.len,2)}</td><td class="num">${f1(r.ld,2)}</td><td class="num">${f1(r.ext,2)}</td><td>${r.det}</td></tr>`).join('')||'<tr><td colspan="9">Las barras continuas cubren toda la demanda</td></tr>'}</tbody>`;
+  const su=[...o.sups.filter(s=>s.n>0).map(s=>({n:`Apoyo ${s.j+1}, superior`,ref:`${s.n}Ø${s.ds}${s.auto?' (auto)':''}`,x1:s.xa,x2:s.xb,len:s.xb-s.xa,det:`${mm(s.La)} izq. + ${mm(s.Lb)} der.${s.hookL||s.hookR?', con gancho en el extremo':''}`,ld:s.ld,ext:s.dext,th:`${mm(s.x1)} a ${mm(s.x2)}`})),
+    ...o.bots.filter(s=>s.n>0).map(s=>({n:`${m.els[s.k].name}, inferior`,ref:`${s.n}Ø${s.ds}${s.auto?' (auto)':''}`,x1:s.xa,x2:s.xb,len:s.len,det:s.clipped?'limitado a las caras de apoyo':'',ld:s.ld,ext:s.dext,th:`${mm(s.x1)} a ${mm(s.x2)}`}))];
+  T.su.innerHTML=`<thead><tr><th>Suple</th><th>Barras</th><th class="num">Requerido teórico [mm]</th><th class="num">Desde [mm]</th><th class="num">Hasta [mm]</th><th class="num">Largo [mm]</th><th class="num">ℓd [mm]</th><th class="num">máx.(d, 12db) [mm]</th><th>Detalle</th></tr></thead><tbody>${su.map(r=>`<tr><td>${r.n}</td><td>${r.ref}</td><td class="num">${r.th}</td><td class="num">${mm(r.x1)}</td><td class="num">${mm(r.x2)}</td><td class="num">${mm(r.len)}</td><td class="num">${mm(r.ld)}</td><td class="num">${mm(r.ext)}</td><td>${r.det}</td></tr>`).join('')||'<tr><td colspan="9">Las barras continuas cubren toda la demanda</td></tr>'}</tbody>`;
   const sh=o.shr;
-  T.sh.innerHTML=`<thead><tr><th>Elemento</th><th class="num">Vu a d de la cara izq. / der. [kN]</th><th class="num">φVc [kN]</th><th class="num">s extremos [mm]</th><th class="num">Zona izq. / der. [m]</th><th class="num">s centro [mm]</th><th class="num">Estado</th></tr></thead><tbody>${o.stir.map(s=>`<tr class="${s.ok?'':'fail'}"><td>${s.name}</td><td class="num">${f1(s.VcrL,1)} / ${f1(s.VcrR,1)}</td><td class="num">${f1(0.75*sh.Vc,1)}</td><td class="num">${s.sEnd}</td><td class="num">${s.sEnd<s.sMid?f1(s.zL,2)+' / '+f1(s.zR,2):'-'}</td><td class="num">${s.sMid}</td><td class="num">${OKS(s.ok)}</td></tr>`).join('')}</tbody>`;
+  T.sh.innerHTML=`<thead><tr><th>Elemento</th><th class="num">Vu a d de la cara izq. / der. [kN]</th><th class="num">φVc [kN]</th><th class="num">s extremos [mm]</th><th class="num">Zona izq. / der. [mm]</th><th class="num">s centro [mm]</th><th class="num">Estado</th></tr></thead><tbody>${o.stir.map(s=>`<tr class="${s.ok?'':'fail'}"><td>${s.name}</td><td class="num">${f1(s.VcrL,1)} / ${f1(s.VcrR,1)}</td><td class="num">${f1(0.75*sh.Vc,1)}</td><td class="num">${s.sEnd}</td><td class="num">${s.sEnd<s.sMid?mm(s.zL)+' / '+mm(s.zR):'-'}</td><td class="num">${s.sMid}</td><td class="num">${OKS(s.ok)}</td></tr>`).join('')}</tbody>`;
   T.an.innerHTML=`<thead><tr><th>Apoyo</th><th>Barra</th><th class="num">ℓdh [mm]</th><th class="num">Disponible [mm]</th><th class="num">Diámetro de doblado</th><th class="num">r [mm]</th><th class="num">ext = 12db [mm]</th><th class="num">r + db + ext [mm]</th><th class="num">ψs</th><th class="num">Estado</th></tr></thead><tbody>${o.hooks.map(h=>`<tr class="${h.ok?'':'fail'}"><td>${h.j+1}</td><td>${h.n}Ø${h.db} ${h.pos.toLowerCase()}</td><td class="num">${f1(h.l,0)}</td><td class="num">${f1(h.av,0)}</td><td class="num">${h.Dm}db</td><td class="num">${f1(h.r,0)}</td><td class="num">${f1(h.ext,0)}</td><td class="num">${f1(h.vert,0)}</td><td class="num">${h.pss}</td><td class="num">${h.ok?'Cumple':'Insuficiente'}</td></tr>`).join('')||'<tr><td colspan="10">Sin extremos con gancho</td></tr>'}</tbody>`;
   T.chk.innerHTML=`<thead><tr><th>Verificación</th><th class="num">Valor</th><th class="num">Estado</th></tr></thead><tbody>${o.chk.map(c=>`<tr class="${c.ok?'':'fail'}"><td>${c.n}</td><td class="num">${c.v}</td><td class="num">${OKS(c.ok)}</td></tr>`).join('')}</tbody>`;
   T.re.innerHTML=`<thead><tr><th>Apoyo</th><th class="num">RD [kN]</th><th class="num">RL todos [kN]</th><th class="num">RL máx. [kN]</th><th class="num">Ru máx. [kN]</th></tr></thead><tbody>${o.reac.map(r=>`<tr><td>${r.j+1}</td><td class="num">${f1(r.RD,1)}</td><td class="num">${f1(r.RL,1)}</td><td class="num">${f1(r.RLmax,1)}</td><td class="num">${f1(r.Rmax,1)}</td></tr>`).join('')}</tbody>`;
@@ -782,7 +784,7 @@ function renderStats(o){
 }
 function notesHtml(o){
   const p=o.p;
-  return `Unidades kN, m y mm. Análisis elástico lineal de viga continua con EI constante sobre apoyos simples${p.endL==='fix'||p.endR==='fix'?' y extremos empotrados':''}. Peso propio ${f1(o.swt,2)} kN/m agregado a D. a y b se miden desde el apoyo izquierdo del elemento, o desde la punta en el voladizo izquierdo.<br>
+  return `Longitudes en mm, cargas en kN/m y kN. Análisis elástico lineal de viga continua con EI constante sobre apoyos simples${p.endL==='fix'||p.endR==='fix'?' y extremos empotrados':''}. Peso propio ${f1(o.swt,2)} kN/m agregado a D. a y b se miden desde el apoyo izquierdo del elemento, o desde la punta en el voladizo izquierdo.<br>
   ${p.patt?'Sobrecarga alternada según 6.4.2: todos los tramos, tramos alternos y tramos adyacentes a cada apoyo.':'Sobrecarga en todos los tramos.'} Momentos de diseño en la cara de apoyo, 9.4.2.1, y corte a d de la cara, 9.4.3.2.<br>
   Suple cortado donde la barra continua cubre φMn, prolongado máx.(d, 12db), 9.7.3.3, y al menos ℓd desde la cara de apoyo o el punto de momento máximo, 9.7.3.2. φMn con bloque rectangular, φ según 21.2.2.<br>
   Corte: Vc = 0,17λ√f'c·bw·d con Av ≥ Av,mín, Tabla 22.5.5.1. s máx. según 9.7.6.2.2. ℓdh = fy·ψe·ψs·ψcc·ψr·db/(21λ√f'c) ≥ 8db y 150 mm, 25.4.3.1, ganchos de 90° según Tabla 25.3.1.`;
@@ -798,12 +800,12 @@ function run(){
 }
 document.querySelectorAll('.grid > div:first-child input,.grid > div:first-child select').forEach(i=>{ if(i.closest('#cTab')) return; i.addEventListener('input',()=>schedule()); i.addEventListener('change',()=>schedule(30)); });
 document.querySelectorAll('#tabs button').forEach(b=>b.addEventListener('click',()=>{ document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('active',x===b)); document.querySelectorAll('.tabpane').forEach(q=>q.hidden=q.dataset.pane!==b.dataset.tab); }));
-$('addSp').addEventListener('click',()=>{ const l=GEO.spans[GEO.spans.length-1]||{L:6,nb:'',db:20}; GEO.spans.push({L:l.L,nb:'',db:l.db}); const s=GEO.sup[GEO.sup.length-1]; GEO.sup.push({w:s.w,nt:'',dt:s.dt}); buildGeoTable(); buildLoadTable(); run(); });
+$('addSp').addEventListener('click',()=>{ const l=GEO.spans[GEO.spans.length-1]||{L:6000,nb:'',db:20}; GEO.spans.push({L:l.L,nb:'',db:l.db}); const s=GEO.sup[GEO.sup.length-1]; GEO.sup.push({w:s.w,nt:'',dt:s.dt}); buildGeoTable(); buildLoadTable(); run(); });
 $('delSp').addEventListener('click',()=>{ if(GEO.spans.length<=1) return; GEO.spans.pop(); GEO.sup.pop(); LOADS=LOADS.filter(l=>!(l.el!=='all'&&l.el!=='cl'&&l.el!=='cr'&&+l.el>=GEO.spans.length)); buildGeoTable(); buildLoadTable(); run(); });
 $('addL').addEventListener('click',()=>{ LOADS.push({el:'all',cs:'D',t:'u',w:0,a:0,b:0}); buildLoadTable(); run(); });
 $('addC').addEventListener('click',()=>{ COMBOS.push({n:'Combinación',D:1.2,L:1.0}); buildComboTable(); run(); });
 const IDS=[...document.querySelectorAll('.grid > div:first-child input,.grid > div:first-child select')].filter(e=>e.id&&e.type!=='file').map(e=>e.id);
-const SKEY='fdd_vigas_v1';
+const SKEY='fdd_vigas_v2';
 function projectData(){ const d={}; IDS.forEach(id=>{ const e=$(id); d[id]=e.type==='checkbox'?e.checked:e.value; }); return {app:'fddlebel-vigas',v:1,inputs:d,geo:GEO,loads:LOADS,combos:COMBOS}; }
 function loadProject(d){ if(!d||!d.inputs) return false; Object.entries(d.inputs).forEach(([id,v])=>{ const e=$(id); if(!e) return; if(e.type==='checkbox') e.checked=!!v; else e.value=v; });
   if(d.geo&&d.geo.spans&&d.geo.sup) GEO=d.geo; if(Array.isArray(d.loads)) LOADS=d.loads; if(Array.isArray(d.combos)) COMBOS=d.combos; buildAll(); return true; }
@@ -820,21 +822,21 @@ function buildReport(){
   hd.innerHTML=`<h1>Viga continua</h1><div class="rpt-sub">${p.proj?p.proj+', ':''}ACI 318-25, ${new Date().toLocaleDateString('es-CL')}</div>`; ct.appendChild(hd);
   const pt=document.createElement('table'); pt.className='rpt-params';
   pt.innerHTML=`<tr><td class="k">Sección</td><td>${p.b} × ${p.h} mm, rec. ${p.cov} mm</td><td class="k">Materiales</td><td>f'c = ${p.fc} MPa, fy = ${p.fy} MPa, fyt = ${p.fyt} MPa</td></tr>
-   <tr><td class="k">Tramos</td><td>${p.spans.map(s=>f1(s.L,2)).join(' + ')} m${p.cL>0?', voladizo izq. '+p.cL:''}${p.cR>0?', voladizo der. '+p.cR:''}</td><td class="k">Combinaciones</td><td>${p.combos.map(c=>c.n).join(', ')}${p.patt?', con alternancia de L':''}</td></tr>
+   <tr><td class="k">Tramos</td><td>${p.spans.map(s=>mm(s.L)).join(' + ')} mm${p.cL>0?', voladizo izq. '+mm(p.cL):''}${p.cR>0?', voladizo der. '+mm(p.cR):''}</td><td class="k">Combinaciones</td><td>${p.combos.map(c=>c.n).join(', ')}${p.patt?', con alternancia de L':''}</td></tr>
    <tr><td class="k">Continuas</td><td>Sup. ${p.ntc}Ø${p.dtc}, inf. ${p.nbc}Ø${p.dbc}</td><td class="k">Estribos</td><td>Ø${p.dst}, ${p.legs} ramas</td></tr>`;
   ct.appendChild(pt);
   const addSec=(t,n)=>{ const s=document.createElement('div'); s.className='rpt-section'; s.innerHTML=`<h2>${t}</h2>`; if(n) s.appendChild(n); ct.appendChild(s); return s; };
   const ldT=document.createElement('table'); ldT.className='rpt-small';
-  ldT.innerHTML=`<thead><tr><th>Elemento</th><th>Caso</th><th>Tipo</th><th class="num">Valor</th><th class="num">a [m]</th><th class="num">b [m]</th></tr></thead><tbody><tr><td>Todos</td><td>D</td><td>Peso propio</td><td class="num">${f1(R.swt,2)} kN/m</td><td></td><td></td></tr>${p.loads.map(l=>`<tr><td>${l.el==='all'?'Todos':l.el==='cl'?'Vol. izq.':l.el==='cr'?'Vol. der.':'Tramo '+(+l.el+1)}</td><td>${l.cs}</td><td>${{u:'Uniforme',p:'Uniforme parcial',P:'Puntual'}[l.t]}</td><td class="num">${l.w} ${l.t==='P'?'kN':'kN/m'}</td><td class="num">${l.t==='u'?'':l.a}</td><td class="num">${l.t==='p'?l.b:''}</td></tr>`).join('')}</tbody>`;
+  ldT.innerHTML=`<thead><tr><th>Elemento</th><th>Caso</th><th>Tipo</th><th class="num">Valor</th><th class="num">a [mm]</th><th class="num">b [mm]</th></tr></thead><tbody><tr><td>Todos</td><td>D</td><td>Peso propio</td><td class="num">${f1(R.swt,2)} kN/m</td><td></td><td></td></tr>${p.loads.map(l=>`<tr><td>${l.el==='all'?'Todos':l.el==='cl'?'Vol. izq.':l.el==='cr'?'Vol. der.':'Tramo '+(+l.el+1)}</td><td>${l.cs}</td><td>${{u:'Uniforme',p:'Uniforme parcial',P:'Puntual'}[l.t]}</td><td class="num">${l.w} ${l.t==='P'?'kN':'kN/m'}</td><td class="num">${l.t==='u'?'':mm(l.a)}</td><td class="num">${l.t==='p'?mm(l.b):''}</td></tr>`).join('')}</tbody>`;
   const T={}; ['fl','su','sh','an','chk','re'].forEach(k=>{ T[k]=document.createElement('table'); T[k].className='rpt-small'; });
   const mk=(st)=>el('svg',{width:'100%',style:st||'max-width:680px;height:auto;display:block;margin:0 auto;'});
   const S={el:mk(),an:mk('max-width:600px;height:auto;display:block;margin:0 auto;'),se:mk()};
   renderAll(R,T,S);
   const cm=mk(), cv=mk();
   const st=R.st;
-  chart(cm,{H:320,xlabel:'x [m]',ylabel:'M [kN·m]',zeroY:true,legendRight:true,series:[{name:'Mu+ máx.',pts:st.map(s=>[s.x,s.Mmax]),w:1.6},{name:'Mu− mín.',pts:st.map(s=>[s.x,s.Mmin]),w:1.6,dash:'6,3'},{name:'φMn+',pts:st.map(s=>[s.x,s.pMb]),w:1,dash:'2,3'},{name:'−φMn−',pts:st.map(s=>[s.x,-s.pMt]),w:1,dash:'2,3'}]});
-  const cap=[]; R.stir.forEach(sr=>{ const e=R.mdl.els[sr.ie]; sr.cap.forEach(c=>cap.push([e.x0+c.xl,c.pVn])); cap.push([NaN,NaN]); });
-  chart(cv,{H:300,xlabel:'x [m]',ylabel:'V [kN]',zeroY:true,legendRight:true,series:[{name:'Vu máx.',pts:st.map(s=>[s.x,s.Vmax]),w:1.6},{name:'Vu mín.',pts:st.map(s=>[s.x,s.Vmin]),w:1.6,dash:'6,3'},{name:'±φVn',pts:cap,w:1,dash:'2,3'},{name:'',pts:cap.map(c=>[c[0],-c[1]]),w:1,dash:'2,3'}]});
+  chart(cm,{H:320,xlabel:'x [mm]',ylabel:'M [kN·m]',zeroY:true,legendRight:true,series:[{name:'Mu+ máx.',pts:st.map(s=>[s.x*1000,s.Mmax]),w:1.6},{name:'Mu− mín.',pts:st.map(s=>[s.x*1000,s.Mmin]),w:1.6,dash:'6,3'},{name:'φMn+',pts:st.map(s=>[s.x*1000,s.pMb]),w:1,dash:'2,3'},{name:'−φMn−',pts:st.map(s=>[s.x*1000,-s.pMt]),w:1,dash:'2,3'}]});
+  const cap=[]; R.stir.forEach(sr=>{ const e=R.mdl.els[sr.ie]; sr.cap.forEach(c=>cap.push([(e.x0+c.xl)*1000,c.pVn])); cap.push([NaN,NaN]); });
+  chart(cv,{H:300,xlabel:'x [mm]',ylabel:'V [kN]',zeroY:true,legendRight:true,series:[{name:'Vu máx.',pts:st.map(s=>[s.x*1000,s.Vmax]),w:1.6},{name:'Vu mín.',pts:st.map(s=>[s.x*1000,s.Vmin]),w:1.6,dash:'6,3'},{name:'±φVn',pts:cap,w:1,dash:'2,3'},{name:'',pts:cap.map(c=>[c[0],-c[1]]),w:1,dash:'2,3'}]});
   addSec('Cargas',ldT); addSec('Elevación y armadura',S.el); addSec('Envolvente de momento',cm); addSec('Flexión',T.fl); addSec('Suples',T.su);
   addSec('Envolvente de corte',cv); addSec('Estribos',T.sh); addSec('Anclaje en extremos',S.an); S.an.parentNode.appendChild(T.an); addSec('Secciones',S.se); addSec('Verificaciones',T.chk); addSec('Reacciones',T.re);
   const ft=document.createElement('div'); ft.className='rpt-foot'; ft.innerHTML=notesHtml(R); ct.appendChild(ft);
