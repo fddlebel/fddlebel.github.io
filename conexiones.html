@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Conexiones | fddlebel</title>
+<style>
+:root{
+  --paper:#ffffff;--panel:#ffffff;--ink:#000000;--line:#9a9a9a;--line-strong:#7a7a7a;
+  --accent:#000000;--accent-soft:#e9e9e9;--grid:#d9d9d9;--conc:#c0c0c0;--conc-dark:#a8a8a8;
+  --fail:#b3261e;--focus:#4a4d24;
+  --sans:'Arial Narrow',Arial,Helvetica,sans-serif;
+}
+*{box-sizing:border-box;}
+[hidden]{display:none!important;}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);padding-block:20px 48px;padding-inline:max(16px,calc((100vw - 1400px)/2));}
+h1{font-size:22px;font-weight:700;margin:0;}
+.app-header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+.clause{font-size:12px;}
+.btn{font-family:var(--sans);font-weight:700;font-size:13px;color:#fff;background:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:7px 14px;cursor:pointer;}
+.btn.sec{background:var(--panel);color:var(--ink);border-color:var(--line-strong);}
+.grid{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;align-items:start;}
+@media (max-width:900px){.grid{grid-template-columns:1fr;}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:14px;}
+.panel+.panel{margin-top:12px;}
+.section-title{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:0 0 10px;}
+.field{margin-bottom:9px;min-width:0;}
+.field label{display:block;font-size:12px;margin-bottom:3px;}
+.unit{opacity:.75;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+input[type=number],input[type=text],select,textarea{width:100%;font-family:var(--sans);font-size:13px;color:var(--ink);background:#fff;border:1px solid var(--line-strong);border-radius:4px;padding:6px 7px;font-variant-numeric:tabular-nums;}
+textarea{font-size:12px;resize:vertical;}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--focus);outline-offset:1px;}
+details summary{cursor:pointer;font-size:13px;font-weight:700;margin-top:4px;user-select:none;}
+details[open] summary{margin-bottom:8px;}
+.chk{display:flex;align-items:center;gap:6px;font-size:12px;}
+.chk input{width:auto;margin:0;}
+.toolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px;}
+.tool{font-family:var(--sans);font-size:12.5px;font-weight:700;background:var(--panel);color:var(--ink);border:1px solid var(--line-strong);border-radius:4px;padding:6px 10px;cursor:pointer;}
+.tool.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.toolbar select{width:auto;}
+.toolbar .sep{width:1px;height:24px;background:var(--line);margin:0 4px;}
+#gridWrap{position:relative;border:1px solid var(--line);border-radius:4px;overflow:auto;max-height:560px;background:#fff;}
+#gridCanvas{display:block;cursor:crosshair;touch-action:none;}
+#gridInfo{font-size:12px;margin-top:6px;min-height:16px;}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 10px;}
+.tabs button{font-family:var(--sans);font-weight:700;font-size:13px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:7px 14px;cursor:pointer;}
+.tabs button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:12px;}
+.stat{border:1px solid var(--line);border-radius:4px;padding:8px 10px;}
+.stat .k{font-size:11px;text-transform:uppercase;letter-spacing:.04em;}
+.stat .v{font-size:16px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th,td{text-align:left;padding:5px 8px;border:1px solid var(--line);font-variant-numeric:tabular-nums;}
+th{font-size:11px;font-weight:700;background:var(--accent-soft);}
+td.num,th.num{text-align:right;}
+tr.fail td{color:var(--fail);font-weight:700;}
+.tablewrap{overflow-x:auto;}
+.chartwrap{border:1px solid var(--line);border-radius:4px;padding:10px;margin-bottom:12px;}
+.ctrls{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-bottom:10px;}
+.ctrls .field{margin:0;width:150px;}
+#glWrap{position:relative;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:#fff;}
+#glCanvas{display:block;width:100%;height:560px;cursor:grab;touch-action:none;}
+#glLabels{position:absolute;inset:0;pointer-events:none;font-size:11px;}
+#glLabels span{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;}
+.note{font-size:11.5px;line-height:1.5;}
+.warn{background:var(--accent-soft);border:1px solid var(--line-strong);border-radius:4px;padding:7px 10px;font-size:12px;margin-bottom:10px;}
+#busy{font-size:12px;margin-left:8px;}
+svg text{font-family:var(--sans);}
+#printReport{display:none;}
+.rpt-header{margin-bottom:12px;}
+.rpt-header h1{font-size:20px;}
+.rpt-sub{font-size:11.5px;margin-top:2px;}
+.rpt-params{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:11px;}
+.rpt-params td{border:1px solid var(--line);padding:4px 7px;}
+.rpt-params td.k{font-weight:700;width:22%;background:var(--accent-soft);}
+.rpt-section{margin-bottom:16px;page-break-inside:avoid;break-inside:avoid;}
+.rpt-section h2{font-size:14px;font-weight:700;margin:0 0 8px;border-bottom:1px solid var(--line);padding-bottom:4px;break-after:avoid;}
+.rpt-section.allow-break{page-break-inside:auto;break-inside:auto;}
+.rpt-foot{font-size:10px;margin-top:14px;border-top:1px solid var(--line);padding-top:6px;}
+.rpt-small{font-size:10px;}
+.rpt-small td,.rpt-small th{padding:2px 5px;}
+@media print{
+  body *{visibility:hidden;}
+  #printReport,#printReport *{visibility:visible;}
+  #printReport{display:block;position:absolute;left:0;top:0;width:100%;}
+  @page{margin:12mm;}
+}
+</style>
+</head>
+<body>
+
+<style>
+.ltab{width:100%;border-collapse:collapse;font-size:12px;}
+.ltab td,.ltab th{padding:2px 3px;}
+.ltab input[type=number]{padding:4px 3px;font-size:12px;width:54px;}
+.ltab .xb{border:1px solid var(--line-strong);background:#fff;border-radius:4px;cursor:pointer;padding:2px 7px;font-size:12px;}
+</style>
+<div class="app-header">
+  <h1><a href="index.html" style="color:inherit;text-decoration:none;font-weight:400;">fddlebel</a> / Conexiones</h1>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+    <div class="clause">AISC 360-22, capítulo J</div>
+    <button class="btn sec" id="saveBtn">Guardar proyecto</button>
+    <button class="btn sec" id="loadBtn">Abrir proyecto</button>
+    <input type="file" id="loadFile" accept=".json" hidden>
+    <button class="btn" id="pdfBtn">Exportar PDF</button>
+  </div>
+</div>
+
+<div id="printReport"></div>
+
+<div class="grid">
+  <div>
+    <div class="panel">
+      <div class="field"><label>Proyecto / conexión</label><input type="text" id="proj" value=""></div>
+      <div class="row2">
+        <div class="field"><label>Tipo</label><select id="mode"><option value="b" selected>Pernos</option><option value="w">Soldadura</option></select></div>
+        <div class="field"><label>Método</label><select id="meth"><option value="lrfd" selected>LRFD, φ</option><option value="asd">ASD, Ω</option></select></div>
+      </div>
+
+      <div id="bBox">
+        <div class="section-title" style="margin-top:12px">Pernos</div>
+        <div class="row3">
+          <div class="field"><label>Diámetro</label><select id="bd"></select></div>
+          <div class="field"><label>Grupo</label><select id="bg"><option value="A307">A307</option><option value="G120" selected>Grupo 120, A325</option><option value="G144">Grupo 144</option><option value="G150">Grupo 150, A490</option><option value="G200">Grupo 200</option><option value="TP">Barra roscada A3.4</option></select></div>
+          <div class="field"><label>Hilo</label><select id="bth"><option value="N" selected>N, incluido</option><option value="X">X, excluido</option></select></div>
+        </div>
+        <div class="row3">
+          <div class="field"><label>Planos de corte</label><input type="number" id="ns" value="1" step="1"></div>
+          <div class="field"><label>Fu barra <span class="unit">[MPa]</span></label><input type="number" id="Fur" value="400" step="10"></div>
+          <div class="field"><label>Perforación</label><select id="hole"><option value="std" selected>Estándar</option><option value="ovs">Sobremedida</option><option value="ssl">Ranura corta ⊥</option><option value="ssp">Ranura corta ∥</option><option value="lsl">Ranura larga ⊥</option><option value="lsp">Ranura larga ∥</option></select></div>
+        </div>
+        <div class="row3">
+          <div class="field"><label>Conexión</label><select id="ctype"><option value="bear" selected>Aplastamiento</option><option value="sc">Deslizamiento crítico</option></select></div>
+          <div class="field"><label>Superficie</label><select id="cls"><option value="A" selected>Clase A, μ 0,30</option><option value="B">Clase B, μ 0,50</option></select></div>
+          <div class="field"><label>Rellenos</label><select id="fill"><option value="1" selected>0 o 1</option><option value="0.85">2 o más</option></select></div>
+        </div>
+        <label class="chk"><input type="checkbox" id="defo" checked> Deformación en la perforación es consideración de diseño, J3.11a</label>
+
+        <div class="section-title" style="margin-top:12px">Disposición <span class="unit">[mm]</span></div>
+        <div class="row3">
+          <div class="field"><label>Pernos por línea</label><input type="number" id="nb" value="3" step="1"></div>
+          <div class="field"><label>Líneas</label><input type="number" id="nl" value="2" step="1"></div>
+          <div class="field"><label>Paso s</label><input type="number" id="sp" value="76" step="1"></div>
+        </div>
+        <div class="row3">
+          <div class="field"><label>Gramil g</label><input type="number" id="gg" value="76" step="1"></div>
+          <div class="field"><label>Borde extremo</label><input type="number" id="le" value="38" step="1"></div>
+          <div class="field"><label>Borde lateral</label><input type="number" id="lev" value="38" step="1"></div>
+        </div>
+
+        <div class="section-title" style="margin-top:12px">Placa conectada</div>
+        <div class="row3">
+          <div class="field"><label>t <span class="unit">[mm]</span></label><input type="number" id="tp" value="10" step="1"></div>
+          <div class="field"><label>Fy <span class="unit">[MPa]</span></label><input type="number" id="pFy" value="250" step="5"></div>
+          <div class="field"><label>Fu</label><input type="number" id="pFu" value="400" step="5"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Trabajo de la placa</label><select id="pmode"><option value="t" selected>Tracción, carga a lo largo de las líneas</option><option value="v">Corte, placa de corte</option></select></div>
+          <div class="field"><label>Ubs</label><select id="ubs"><option value="1" selected>1,0 uniforme</option><option value="0.5">0,5 no uniforme</option></select></div>
+        </div>
+
+        <div class="section-title" style="margin-top:12px">Solicitaciones <span class="unit">[kN, mm]</span></div>
+        <div class="row3">
+          <div class="field"><label>V a lo largo de las líneas</label><input type="number" id="bV" value="200" step="5"></div>
+          <div class="field"><label>Excentricidad e</label><input type="number" id="bE" value="0" step="10"></div>
+          <div class="field"><label>Tracción en pernos</label><input type="number" id="bT" value="0" step="5"></div>
+        </div>
+      </div>
+
+      <div id="wBox">
+        <div class="section-title" style="margin-top:12px">Soldadura de filete</div>
+        <div class="row3">
+          <div class="field"><label>Electrodo</label><select id="fexx"><option value="414">E60</option><option value="483" selected>E70</option><option value="552">E80</option></select></div>
+          <div class="field"><label>Pierna w <span class="unit">[mm]</span></label><input type="number" id="ww" value="6" step="1"></div>
+          <div class="field"><label>t mín. unido</label><input type="number" id="wtm" value="10" step="1"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Fy base <span class="unit">[MPa]</span></label><input type="number" id="wFy" value="250" step="5"></div>
+          <div class="field"><label>Fu base</label><input type="number" id="wFu" value="400" step="5"></div>
+        </div>
+        <div class="section-title" style="margin-top:12px">Tramos <span class="unit">[mm]</span></div>
+        <table class="ltab" id="segTab"></table>
+        <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;"><button class="btn sec" id="addSeg">Agregar tramo</button><select id="preset" style="width:auto"><option value="">Plantilla</option><option value="sq">Cuadrado</option><option value="cc">C</option><option value="pp">Dos verticales</option><option value="hh">Dos horizontales</option></select></div>
+        <div class="row2" style="margin-top:8px"><div class="field"><label>Ancho b</label><input type="number" id="pb" value="100" step="10"></div><div class="field"><label>Alto h</label><input type="number" id="ph" value="100" step="10"></div></div>
+        <div class="section-title" style="margin-top:12px">Solicitaciones en el centroide <span class="unit">[kN, kN·m]</span></div>
+        <div class="row3">
+          <div class="field"><label>Fx</label><input type="number" id="Fx" value="15.7" step="1"></div>
+          <div class="field"><label>Fy</label><input type="number" id="Fyl" value="3.5" step="1"></div>
+          <div class="field"><label>Fz normal</label><input type="number" id="Fz" value="4.35" step="1"></div>
+        </div>
+        <div class="row3">
+          <div class="field"><label>Mx</label><input type="number" id="wMx" value="0" step="0.5"></div>
+          <div class="field"><label>My</label><input type="number" id="wMy" value="0.003" step="0.5"></div>
+          <div class="field"><label>Mz torsión</label><input type="number" id="wMz" value="0.01" step="0.5"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Excentricidad ex <span class="unit">[mm]</span></label><input type="number" id="wex" value="0" step="5"></div>
+          <div class="field"><label>ey</label><input type="number" id="wey" value="0" step="5"></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="section-title">Notas</div>
+      <div class="note" id="notes"></div>
+    </div>
+  </div>
+
+  <div style="min-width:0;">
+    <div class="stat-row" id="stats"></div>
+    <div id="warns"></div>
+    <div class="chartwrap"><svg id="cxSvg" viewBox="0 0 760 360" width="100%" style="display:block;height:auto"></svg></div>
+    <div class="panel"><div class="section-title">Verificaciones</div><div class="tablewrap"><table id="tbChk"></table></div></div>
+    <div class="panel"><div class="section-title">Desarrollo</div><div class="tablewrap"><table id="tbDet"></table></div></div>
+  </div>
+</div>
+<script>
+const svgNS='http://www.w3.org/2000/svg';
+function el(tag,attrs){ const n=document.createElementNS(svgNS,tag); for(const k in attrs) n.setAttribute(k,attrs[k]); return n; }
+function tx(x,y,s,o){ const t=el('text',Object.assign({x,y,'font-size':11,'text-anchor':'middle',fill:'#000'},o||{})); t.textContent=s; return t; }
+function niceStep(range,count){ const raw=Math.max(range,1e-12)/count, m=Math.pow(10,Math.floor(Math.log10(raw))), f=raw/m; return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*m; }
+function fmtTick(v,st){ const d=st>=1?0:Math.min(6,Math.ceil(-Math.log10(st))); return (Math.abs(v)<st*1e-6?0:v).toFixed(d); }
+const fmt=(x,d)=>isFinite(x)?x.toFixed(d):'-';
+const fmtk=x=>isFinite(x)?String(Math.round(x)):'-';
+const FAIL='#b3261e';
+
+function chart(svg,cfg){
+  svg.innerHTML='';
+  const W=760,H=cfg.H||420,L=70,R=18,T=16,B=46;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const xs=[],ys=[];
+  cfg.series.forEach(s=>s.pts.forEach(p=>{ if(isFinite(p[0])&&isFinite(p[1])){ xs.push(p[0]); ys.push(p[1]); } }));
+  (cfg.points||[]).forEach(p=>{ xs.push(p.x); ys.push(p.y); });
+  if(!xs.length){ svg.appendChild(tx(W/2,H/2,'Sin datos')); return; }
+  let x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+  if(cfg.zeroX){ x0=Math.min(x0,0); x1=Math.max(x1,0); } if(cfg.zeroY){ y0=Math.min(y0,0); y1=Math.max(y1,0); }
+  if(cfg.equal){ const c=(x0+x1)/2, d=(y0+y1)/2, h=Math.max(x1-x0,(y1-y0)*(W-L-R)/(H-T-B))/2; x0=c-h; x1=c+h; const hv=h*(H-T-B)/(W-L-R); y0=d-hv; y1=d+hv; }
+  const px=(x1-x0)*0.06||1, py=(y1-y0)*0.08||1; x0-=px; x1+=px; y0-=py; y1+=py;
+  const sx=niceStep(x1-x0,8), sy=niceStep(y1-y0,7);
+  x0=Math.floor(x0/sx)*sx; x1=Math.ceil(x1/sx)*sx; y0=Math.floor(y0/sy)*sy; y1=Math.ceil(y1/sy)*sy;
+  if(cfg.xfix){ x0=cfg.xfix[0]; x1=cfg.xfix[1]; }
+  const X=x=>L+(x-x0)/(x1-x0)*(W-L-R), Y=y=>H-B-(y-y0)/(y1-y0)*(H-T-B);
+  const g=el('g',{});
+  for(let y=y0;y<=y1+sy*1e-6;y+=sy){ g.appendChild(el('line',{x1:L,x2:W-R,y1:Y(y),y2:Y(y),stroke:'#dcdcdc','stroke-width':0.6})); g.appendChild(tx(L-6,Y(y)+4,fmtTick(y,sy),{'text-anchor':'end'})); }
+  for(let x=x0;x<=x1+sx*1e-6;x+=sx){ g.appendChild(el('line',{x1:X(x),x2:X(x),y1:T,y2:H-B,stroke:'#dcdcdc','stroke-width':0.6})); g.appendChild(tx(X(x),H-B+15,fmtTick(x,sx))); }
+  svg.appendChild(g);
+  if(x0<0&&x1>0) svg.appendChild(el('line',{x1:X(0),x2:X(0),y1:T,y2:H-B,stroke:'#555','stroke-width':0.9}));
+  if(y0<0&&y1>0) svg.appendChild(el('line',{x1:L,x2:W-R,y1:Y(0),y2:Y(0),stroke:'#555','stroke-width':0.9}));
+  svg.appendChild(el('rect',{x:L,y:T,width:W-L-R,height:H-T-B,fill:'none',stroke:'#7a7a7a','stroke-width':1}));
+  svg.appendChild(tx((L+W-R)/2,H-8,cfg.xlabel,{'font-weight':700}));
+  const yl=tx(14,(T+H-B)/2,cfg.ylabel,{'font-weight':700}); yl.setAttribute('transform',`rotate(-90 14 ${(T+H-B)/2})`); svg.appendChild(yl);
+  const clipId='c'+Math.random().toString(36).slice(2);
+  const cp=el('clipPath',{id:clipId}); cp.appendChild(el('rect',{x:L,y:T,width:W-L-R,height:H-T-B})); svg.appendChild(cp);
+  const gc=el('g',{'clip-path':`url(#${clipId})`});
+  cfg.series.forEach(s=>{
+    const d=s.pts.filter(p=>isFinite(p[0])&&isFinite(p[1])).map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)).join(' ')+(s.close?'Z':'');
+    gc.appendChild(el('path',{d,fill:'none',stroke:s.color||'#000','stroke-width':s.w||1.4,'stroke-dasharray':s.dash||'none','stroke-linejoin':'round'}));
+  });
+  (cfg.points||[]).forEach(p=>{
+    const col=p.fail?FAIL:'#000';
+    if(p.ring) gc.appendChild(el('circle',{cx:X(p.x),cy:Y(p.y),r:3.5,fill:'#fff',stroke:col,'stroke-width':1.4}));
+    else gc.appendChild(el('circle',{cx:X(p.x),cy:Y(p.y),r:3.2,fill:col}));
+    if(p.label) gc.appendChild(tx(X(p.x)+6,Y(p.y)-6,p.label,{'text-anchor':'start','font-size':10.5,'font-weight':700,fill:col}));
+  });
+  svg.appendChild(gc);
+  const named=cfg.series.filter(s=>s.name);
+  if(named.length){
+    const lx=cfg.legendRight?W-R-220:L+12; let ly=T+16;
+    svg.appendChild(el('rect',{x:lx-6,y:T+4,width:214,height:named.length*16+6,fill:'#fff',stroke:'#cfcfcf','stroke-width':0.6}));
+    named.forEach(s=>{
+      svg.appendChild(el('line',{x1:lx,x2:lx+28,y1:ly-4,y2:ly-4,stroke:s.color||'#000','stroke-width':s.w||1.4,'stroke-dasharray':s.dash||'none'}));
+      svg.appendChild(tx(lx+36,ly,s.name,{'text-anchor':'start','font-size':11}));
+      ly+=16;
+    });
+  }
+}
+
+const $=id=>document.getElementById(id);
+function num(id,def){ const e=$(id); if(!e) return def; const x=parseFloat(e.value); return isFinite(x)?x:def; }
+const f1=(x,d)=>isFinite(x)?x.toFixed(d):'-';
+const OKS=ok=>ok?'Cumple':'No cumple';
+const ESTEEL=200000, GSTEEL=77200;
+let R=null;
+function kv(rows){ return '<thead><tr><th>Parámetro</th><th class="num">Valor</th><th>Referencia</th></tr></thead><tbody>'+rows.map(r=>r[0]===null?`<tr><th colspan="3" style="text-align:left">${r[1]}</th></tr>`:`<tr${r[3]===false?' class="fail"':''}><td>${r[0]}</td><td class="num">${r[1]}</td><td>${r[2]||''}</td></tr>`).join('')+'</tbody>'; }
+function tbl(head,rows,numFrom){ const nf=numFrom==null?1:numFrom; return '<thead><tr>'+head.map((h,i)=>`<th${i>=nf?' class="num"':''}>${h}</th>`).join('')+'</tr></thead><tbody>'+rows.map(r=>`<tr${r.fail?' class="fail"':''}>`+r.c.map((v,i)=>`<td${i>=nf?' class="num"':''}>${v}</td>`).join('')+'</tr>').join('')+'</tbody>'; }
+function chkTable(list){ return tbl(['Verificación','Demanda','Capacidad','Razón','Estado'],list.map(c=>({fail:!(c.r<=1+1e-9),c:[c.n,c.d,c.c,f1(c.r,3),OKS(c.r<=1+1e-9)]})),1); }
+function statsHtml(list){ return list.map(s=>`<div class="stat"><div class="k">${s[0]}</div><div class="v"${s[2]===false?` style="color:${FAIL}"`:''}>${s[1]}</div></div>`).join(''); }
+const MATS={A36:[250,400],'A572 Gr50':[345,450],A992:[345,450],'A500 Gr B rect.':[315,400],'A500 Gr B red.':[290,400],'A500 Gr C rect.':[345,425],'A500 Gr C red.':[315,425],'A53 Gr B':[240,415],A270ES:[270,410],A345ES:[345,450]};
+function fillMat(selId,fyId,fuId,def){ const s=$(selId); s.innerHTML=Object.keys(MATS).map(k=>`<option${k===def?' selected':''}>${k}</option>`).join('')+'<option value="otro">Otro</option>'; s.addEventListener('change',()=>{ const m=MATS[s.value]; if(m){ $(fyId).value=m[0]; $(fuId).value=m[1]; } }); }
+function phiOm(lrfd,phi,om){ return lrfd?phi:1/om; }
+function wireApp(cfg){
+  let tmr=null;
+  const go=()=>{ try{ cfg.run(); try{ localStorage.setItem(cfg.key,JSON.stringify(projectData())); }catch(e){} }catch(e){ $('warns').innerHTML=`<div class="warn">Error: ${e.message}</div>`; console.error(e); } };
+  const bind=root=>root.querySelectorAll('input,select,textarea').forEach(i=>{ if(i.type==='file'||i.dataset.bound) return; i.dataset.bound=1; i.addEventListener('input',()=>{ clearTimeout(tmr); tmr=setTimeout(go,150); }); i.addEventListener('change',()=>{ clearTimeout(tmr); tmr=setTimeout(go,30); }); });
+  bind(document);
+  document.querySelectorAll('#tabs button').forEach(b=>b.addEventListener('click',()=>{ document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('active',x===b)); document.querySelectorAll('.tabpane').forEach(q=>q.hidden=q.dataset.pane!==b.dataset.tab); }));
+  const ids=()=>[...document.querySelectorAll('input,select,textarea')].filter(e=>e.id&&e.type!=='file').map(e=>e.id);
+  function projectData(){ const d={}; ids().forEach(id=>{ const e=$(id); d[id]=e.type==='checkbox'?e.checked:e.value; }); return {app:cfg.app,v:1,inputs:d,extra:cfg.getExtra?cfg.getExtra():null}; }
+  function loadProject(d){ if(!d||!d.inputs) return false; if(cfg.setExtra) cfg.setExtra(d.extra); bind(document); Object.entries(d.inputs).forEach(([id,v])=>{ const e=$(id); if(!e) return; if(e.type==='checkbox') e.checked=!!v; else e.value=v; }); if(cfg.afterLoad) cfg.afterLoad(); return true; }
+  function download(name,text,type){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text],{type:type||'text/plain'})); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500); }
+  const base=()=>(($('proj')&&$('proj').value.trim().replace(/[^\w\-]+/g,'_'))||cfg.app);
+  $('saveBtn').addEventListener('click',()=>download(base()+'.json',JSON.stringify(projectData()),'application/json'));
+  $('loadBtn').addEventListener('click',()=>$('loadFile').click());
+  $('loadFile').addEventListener('change',ev=>{ const f=ev.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ if(loadProject(JSON.parse(r.result))) go(); }catch(e){ $('warns').innerHTML='<div class="warn">El archivo no es un proyecto válido.</div>'; } }; r.readAsText(f); ev.target.value=''; });
+  $('pdfBtn').addEventListener('click',()=>{ if(!R) return; cfg.report(); window.print(); });
+  window.rerun=()=>{ bind(document); go(); };
+  try{ const d=JSON.parse(localStorage.getItem(cfg.key)||'null'); if(d) loadProject(d); }catch(e){}
+  if(cfg.init) cfg.init();
+  go();
+}
+function reportStart(title,sub,params){
+  const ct=$('printReport'); ct.innerHTML='';
+  const hd=document.createElement('div'); hd.className='rpt-header'; hd.innerHTML=`<h1>${title}</h1><div class="rpt-sub">${sub}, ${new Date().toLocaleDateString('es-CL')}</div>`; ct.appendChild(hd);
+  if(params&&params.length){ const pt=document.createElement('table'); pt.className='rpt-params'; pt.innerHTML=params.map(r=>`<tr>${r.map((c,i)=>`<td${i%2===0?' class="k"':''}>${c}</td>`).join('')}</tr>`).join(''); ct.appendChild(pt); }
+  return {
+    sec(t,html,node){ const s=document.createElement('div'); s.className='rpt-section'; s.innerHTML=`<h2>${t}</h2>`; if(html){ const tb=document.createElement('table'); tb.className='rpt-small'; tb.innerHTML=html; s.appendChild(tb); } if(node) s.appendChild(node); ct.appendChild(s); return s; },
+    svg(){ return el('svg',{width:'100%',style:'max-width:620px;height:auto;display:block;margin:0 auto;'}); },
+    foot(h){ const f=document.createElement('div'); f.className='rpt-foot'; f.innerHTML=h; ct.appendChild(f); }
+  };
+}
+const BOLTS={
+  M12:{d:12,met:1,h:{std:14,ovs:16,ssw:14,lsw:14},emin:18,Tb:{G120:49,G150:61}},M16:{d:16,met:1,h:{std:18,ovs:20,ssw:18,lsw:18},emin:22,Tb:{G120:91,G150:114}},
+  M20:{d:20,met:1,h:{std:22,ovs:24,ssw:22,lsw:22},emin:26,Tb:{G120:142,G150:179}},M22:{d:22,met:1,h:{std:24,ovs:28,ssw:24,lsw:24},emin:28,Tb:{G120:176,G150:221}},
+  M24:{d:24,met:1,h:{std:27,ovs:30,ssw:27,lsw:27},emin:30,Tb:{G120:205,G150:257}},M27:{d:27,met:1,h:{std:30,ovs:35,ssw:30,lsw:30},emin:34,Tb:{G120:267,G150:334}},
+  M30:{d:30,met:1,h:{std:33,ovs:38,ssw:33,lsw:33},emin:38,Tb:{G120:326,G150:408}},M36:{d:36,met:1,h:{std:39,ovs:44,ssw:39,lsw:39},emin:46,Tb:{G120:475,G150:595}},
+  '1/2"':{d:12.7,h:{std:14.3,ovs:15.9,ssw:14.3,lsw:14.3},emin:19.1,Tb:{G120:12,G150:15}},'5/8"':{d:15.9,h:{std:17.5,ovs:20.6,ssw:17.5,lsw:17.5},emin:22.2,Tb:{G120:19,G150:24}},
+  '3/4"':{d:19.05,h:{std:20.6,ovs:23.8,ssw:20.6,lsw:20.6},emin:25.4,Tb:{G120:28,G150:35}},'7/8"':{d:22.2,h:{std:23.8,ovs:27.0,ssw:23.8,lsw:23.8},emin:28.6,Tb:{G120:39,G150:49}},
+  '1"':{d:25.4,h:{std:28.6,ovs:31.8,ssw:28.6,lsw:28.6},emin:31.8,Tb:{G120:51,G150:64,G200:90}},'1 1/8"':{d:28.6,h:{std:31.8,ovs:36.5,ssw:31.8,lsw:31.8},emin:38.1,Tb:{G120:64,G150:80,G200:113}},
+  '1 1/4"':{d:31.75,h:{std:34.9,ovs:39.7,ssw:34.9,lsw:34.9},emin:41.3,Tb:{G120:81,G150:102,G200:143}},'1 1/2"':{d:38.1,h:{std:41.3,ovs:46.0,ssw:41.3,lsw:41.3},emin:47.6,Tb:{G120:118,G150:148}}
+};
+const FNT={A307:[310,190,190],G120:[620,370,470],G144:[750,450,560],G150:[780,470,580],G200:[1000,620,780]};
+let SEGS=[];
+function fillBolts(){ $('bd').innerHTML=Object.keys(BOLTS).map(k=>`<option${k==='M20'?' selected':''}>${k}</option>`).join(''); }
+function segUI(){
+  $('segTab').innerHTML='<tr><th>x1</th><th>y1</th><th>x2</th><th>y2</th><th></th></tr>'+SEGS.map((s,i)=>`<tr>${['x1','y1','x2','y2'].map(k=>`<td><input type="number" data-i="${i}" data-k="${k}" value="${s[k]}" step="5"></td>`).join('')}<td><button class="xb" data-del="${i}">×</button></td></tr>`).join('');
+  $('segTab').querySelectorAll('input').forEach(inp=>inp.addEventListener('input',()=>{ SEGS[+inp.dataset.i][inp.dataset.k]=parseFloat(inp.value)||0; rerun(); }));
+  $('segTab').querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>{ SEGS.splice(+b.dataset.del,1); segUI(); rerun(); }));
+}
+function preset(k){ const b=num('pb',100), h=num('ph',100);
+  if(k==='sq') SEGS=[{x1:0,y1:0,x2:b,y2:0},{x1:b,y1:0,x2:b,y2:h},{x1:b,y1:h,x2:0,y2:h},{x1:0,y1:h,x2:0,y2:0}];
+  if(k==='cc') SEGS=[{x1:b,y1:0,x2:0,y2:0},{x1:0,y1:0,x2:0,y2:h},{x1:0,y1:h,x2:b,y2:h}];
+  if(k==='pp') SEGS=[{x1:0,y1:0,x2:0,y2:h},{x1:b,y1:0,x2:b,y2:h}];
+  if(k==='hh') SEGS=[{x1:0,y1:0,x2:b,y2:0},{x1:0,y1:h,x2:b,y2:h}];
+  segUI(); }
+function boltAnalysis(){
+  const lrfd=$('meth').value==='lrfd', o={warn:[],chk:[],det:[]}, D=o.det;
+  const B=BOLTS[$('bd').value], d=B.d, g=$('bg').value, th=$('bth').value, ns=Math.max(1,Math.round(num('ns',1)));
+  const hole=$('hole').value, hk=hole==='std'?'std':hole==='ovs'?'ovs':hole.startsWith('ss')?'ssw':'lsw';
+  const dh=B.h[hk], Ab=Math.PI*d*d/4;
+  const nb=Math.max(1,Math.round(num('nb',1))), nl=Math.max(1,Math.round(num('nl',1))), s=num('sp',76), gg=num('gg',76), le=num('le',38), lev=num('lev',38);
+  const t=num('tp',10), Fy=num('pFy',250), Fu=num('pFu',400), Ubs=+$('ubs').value;
+  const V=num('bV',0)*1e3, e=num('bE',0), T=num('bT',0)*1e3, n=nb*nl;
+  let Fnt,Fnv;
+  if(g==='TP'){ const Fur=num('Fur',400); Fnt=0.75*Fur; Fnv=(th==='X'?0.563:0.450)*Fur; } else { Fnt=FNT[g][0]; Fnv=th==='X'?FNT[g][2]:FNT[g][1]; }
+  if(g==='A307'&&(hole!=='std')) o.warn.push('Perforación no estándar en conexión de aplastamiento no permitida, J3.3(d)(e)(f).');
+  const Lpat=(nb-1)*s; let fred=1; if(Lpat>950){ fred=0.833; o.warn.push('Largo del patrón > 950 mm: Fnv reducido a 83,3 %, Tabla J3.2 nota [c].'); }
+  const ph=phiOm(lrfd,0.75,2.00);
+  const rnv=Fnv*fred*Ab*ns, rnt=Fnt*Ab;
+  D.push([null,'Pernos'],['d, dh, Ab',`${d} mm, ${dh} mm, ${f1(Ab,1)} mm²`,'Tablas J3.3, J3.3M'],['Fnt / Fnv',`${f1(Fnt,0)} / ${f1(Fnv*fred,0)} MPa`,'Tabla J3.2'],['Rn corte por perno',f1(rnv/1e3,1)+' kN','Ec. J3-1, '+ns+' plano(s)'],['Rn tracción por perno',f1(rnt/1e3,1)+' kN','Ec. J3-1']);
+  const defo=$('defo').checked, slotPerp=hole==='lsl';
+  const brg=(slotPerp?2.0:defo?2.4:3.0)*d*t*Fu, tro=lc=>(slotPerp?1.0:defo?1.2:1.5)*lc*t*Fu;
+  const lcEnd=le-dh/2, lcInt=s-dh;
+  const rEnd=Math.min(brg,tro(lcEnd)), rInt=Math.min(brg,tro(lcInt));
+  D.push([null,'Aplastamiento y desgarro J3.11a'],['Aplastamiento',f1(brg/1e3,1)+' kN',slotPerp?'Ec. J3-6e':defo?'Ec. J3-6a':'Ec. J3-6b'],['lc extremo / interior',`${f1(lcEnd,1)} / ${f1(lcInt,1)} mm`,'lc = le − dh/2, s − dh'],['Rn perno extremo / interior',`${f1(rEnd/1e3,1)} / ${f1(rInt/1e3,1)} kN`,slotPerp?'Ec. J3-6f':defo?'Ec. J3-6c':'Ec. J3-6d']);
+  const reEnd=Math.min(rnv,rEnd), reInt=Math.min(rnv,rInt);
+  const Rgroup=nl*(reEnd+(nb-1)*reInt);
+  const pts=[]; for(let i=0;i<nl;i++) for(let j=0;j<nb;j++) pts.push({x:(i-(nl-1)/2)*gg,y:(j-(nb-1)/2)*s});
+  o.pts=pts;
+  let C=n, icx=null;
+  if(e>0){
+    const Dmax=8.64, R=Dx=>Math.pow(1-Math.exp(-10*Dx/25.4),0.55);
+    const f=r0=>{ const x0=-r0; let sR=0,sRy=0; const rr=pts.map(p=>Math.hypot(p.x-x0,p.y)); const rm=Math.max(...rr); pts.forEach((p,i)=>{ const Ri=R(rr[i]/rm*Dmax); sR+=Ri*rr[i]; sRy+=Ri*(p.x-x0)/rr[i]; }); return {P:sR/(e+r0),Py:sRy}; };
+    let lo=1e-3,hi=1e5; for(let k=0;k<200;k++){ const m=Math.sqrt(lo*hi); const q=f(m); if(q.P>q.Py) lo=m; else hi=m; }
+    const r0=Math.sqrt(lo*hi), q=f(r0); C=q.Py; icx=-r0;
+    D.push([null,'Grupo excéntrico, centro instantáneo'],['C, r0',`${f1(C,3)}, ${f1(r0,1)} mm`,'Manual AISC parte 7, R = Rult(1 − e^−10Δ)^0,55, Δmax = 8,64 mm']);
+  }
+  o.icx=icx; o.e=e;
+  const rmin=Math.min(reEnd,reInt);
+  const Rv=e>0?C*rmin:Rgroup;
+  D.push(['Resistencia del grupo',f1(Rv/1e3,1)+' kN',e>0?'C × min(corte, aplastamiento) por perno':'Σ min(corte, aplastamiento), J3.7 nota']);
+  o.chk.push({n:'Corte y aplastamiento del grupo',d:f1(V/1e3,1)+' kN',c:f1(ph*Rv/1e3,1)+' kN',r:V/(ph*Rv)});
+  const frv=V/(e>0?C:n)/Ab/ns;
+  if(T>0){
+    let Fntp;
+    if(lrfd) Fntp=Math.min(1.3*Fnt-Fnt/(0.75*Fnv*fred)*frv,Fnt); else Fntp=Math.min(1.3*Fnt-2.00*Fnt/(Fnv*fred)*frv,Fnt);
+    Fntp=Math.max(Fntp,0);
+    const Tb1=T/n, cap=ph*Fntp*Ab;
+    D.push([null,'Tracción y corte combinados J3.8'],['frv, F\'nt',`${f1(frv,1)} MPa, ${f1(Fntp,1)} MPa`,lrfd?'Ec. J3-3a':'Ec. J3-3b']);
+    o.chk.push({n:'Tracción con corte por perno, J3.8',d:f1(Tb1/1e3,1)+' kN',c:f1(cap/1e3,1)+' kN',r:Tb1/cap});
+  }
+  if($('ctype').value==='sc'){
+    const Tbk=g==='G144'?'G150':g; const Tb=(B.Tb[Tbk]||0)*(B.met?1e3:4448.22);
+    if(!Tb){ o.warn.push('Sin pretensión mínima en Tabla J3.1 para este grupo y diámetro.'); }
+    const mu=$('cls').value==='A'?0.30:0.50, hf=+$('fill').value, Du=1.13;
+    let phs=hole==='std'||hole==='ssl'?phiOm(lrfd,1.00,1.50):hole==='ovs'||hole==='ssp'?phiOm(lrfd,0.85,1.76):phiOm(lrfd,0.70,2.14);
+    const ksc=T>0?Math.max(0,1-(lrfd?T:1.5*T)/(Du*Tb*n)):1;
+    const rs=mu*Du*hf*Tb*ns*ksc;
+    D.push([null,'Deslizamiento crítico J3.9'],['Tb, μ, hf, ksc',`${f1(Tb/1e3,1)} kN, ${mu}, ${hf}, ${f1(ksc,3)}`,'Tabla J3.1, Ec. J3-4, J3-5'],['Rn por perno',f1(rs/1e3,1)+' kN','Ec. J3-4']);
+    o.chk.push({n:'Deslizamiento, J3.9',d:f1(V/1e3,1)+' kN',c:f1(phs*rs*(e>0?C:n)/1e3,1)+' kN',r:V/(phs*rs*(e>0?C:n))});
+  } else if(hole!=='std'&&!hole.endsWith('l')) o.warn.push('Perforación sobremedida o ranura paralela solo en conexiones de deslizamiento crítico, J3.3.');
+  const dhn=dh+2;
+  D.push([null,'Placa, J4']);
+  if($('pmode').value==='t'){
+    const W=(nl-1)*gg+2*lev, Ag=W*t, An=(W-nl*dhn)*t, Ae=Math.min(An,0.85*Ag);
+    const ry=phiOm(lrfd,0.90,1.67)*Fy*Ag, rr=phiOm(lrfd,0.75,2.00)*Fu*Ae;
+    D.push(['Ancho, Ag, An, Ae',`${f1(W,0)} mm, ${f1(Ag,0)}, ${f1(An,0)}, ${f1(Ae,0)} mm²`,'B4.3, J4.1(b) Ae ≤ 0,85Ag']);
+    o.chk.push({n:'Fluencia en tracción, J4-1',d:f1(V/1e3,1)+' kN',c:f1(ry/1e3,1)+' kN',r:V/ry});
+    o.chk.push({n:'Ruptura en tracción, J4-2',d:f1(V/1e3,1)+' kN',c:f1(rr/1e3,1)+' kN',r:V/rr});
+    const Lv=(nb-1)*s+le, Agv=2*Lv*t, Anv=2*(Lv-(nb-0.5)*dhn)*t;
+    const Ant1=((nl-1)*gg-(nl-1)*dhn)*t, Ant2=2*(lev-dhn/2)*t;
+    const bs=Ant=>Math.min(0.6*Fu*Anv+Ubs*Fu*Ant,0.6*Fy*Agv+Ubs*Fu*Ant);
+    const b1=nl>1?bs(Ant1):Infinity, b2=bs(Ant2), bmin=Math.min(b1,b2);
+    D.push(['Bloque: Agv, Anv, Ant',`${f1(Agv,0)}, ${f1(Anv,0)}, ${f1(nl>1&&b1<=b2?Ant1:Ant2,0)} mm²`,b1<=b2?'entre líneas exteriores':'hacia los bordes laterales']);
+    o.chk.push({n:'Bloque de corte, J4-5',d:f1(V/1e3,1)+' kN',c:f1(phiOm(lrfd,0.75,2.00)*bmin/1e3,1)+' kN',r:V/(phiOm(lrfd,0.75,2.00)*bmin)});
+  } else {
+    const Lp=(nb-1)*s+2*le, Agv=Lp*t, Anv=(Lp-nb*dhn)*t;
+    const vy=phiOm(lrfd,1.00,1.50)*0.6*Fy*Agv, vr=phiOm(lrfd,0.75,2.00)*0.6*Fu*Anv;
+    D.push(['Largo, Agv, Anv',`${f1(Lp,0)} mm, ${f1(Agv,0)}, ${f1(Anv,0)} mm²`,'J4.2']);
+    o.chk.push({n:'Fluencia en corte, J4-3',d:f1(V/1e3,1)+' kN',c:f1(vy/1e3,1)+' kN',r:V/vy});
+    o.chk.push({n:'Ruptura en corte, J4-4',d:f1(V/1e3,1)+' kN',c:f1(vr/1e3,1)+' kN',r:V/vr});
+    const Lv=(nb-1)*s+le, Agv2=Lv*t, Anv2=(Lv-(nb-0.5)*dhn)*t, Ant=((nl-1)*gg+lev-(nl-0.5)*dhn)*t;
+    const bs=Math.min(0.6*Fu*Anv2+Ubs*Fu*Ant,0.6*Fy*Agv2+Ubs*Fu*Ant);
+    D.push(['Bloque: Agv, Anv, Ant',`${f1(Agv2,0)}, ${f1(Anv2,0)}, ${f1(Ant,0)} mm²`,'una línea de corte y tracción al borde lateral']);
+    o.chk.push({n:'Bloque de corte, J4-5',d:f1(V/1e3,1)+' kN',c:f1(phiOm(lrfd,0.75,2.00)*bs/1e3,1)+' kN',r:V/(phiOm(lrfd,0.75,2.00)*bs)});
+  }
+  const smin=8/3*d, emin=B.emin;
+  D.push([null,'Disposición J3.4 a J3.6'],['s, g mínimos',`${f1(smin,1)} mm y libre ≥ d`,'J3.4'],['Borde mínimo',f1(emin,1)+' mm','Tabla J3.4M / J3.4'],['Borde máximo',f1(Math.min(12*t,150),0)+' mm','J3.6']);
+  [['Paso s',s,smin],['Gramil g',nl>1?gg:Infinity,smin]].forEach(([nm,v,mn])=>{ if(v<mn||v-dh<d) o.warn.push(`${nm} = ${v} mm menor que el mínimo de J3.4.`); });
+  [['Borde extremo',le],['Borde lateral',lev]].forEach(([nm,v])=>{ if(v<emin) o.warn.push(`${nm} = ${v} mm menor que el mínimo de Tabla J3.4.`); if(v>Math.min(12*t,150)) o.warn.push(`${nm} = ${v} mm mayor que el máximo de J3.6.`); });
+  o.geo={nb,nl,s,gg,le,lev,dh,t,mode:$('pmode').value};
+  o.name=`${n} pernos ${$('bd').value} ${g==='TP'?'barra roscada':$('bg').selectedOptions[0].text}`;
+  return o;
+}
+function weldAnalysis(){
+  const lrfd=$('meth').value==='lrfd', o={warn:[],chk:[],det:[]}, D=o.det;
+  const w=num('ww',6), te=w/Math.SQRT2, FEXX=+$('fexx').value, tmin=num('wtm',10), Fy=num('wFy',250), Fu=num('wFu',400);
+  const segs=SEGS.map(s=>({...s,L:Math.hypot(s.x2-s.x1,s.y2-s.y1)})).filter(s=>s.L>0);
+  if(!segs.length){ o.warn.push('Sin tramos de soldadura.'); return o; }
+  let A=0,Sx=0,Sy=0; segs.forEach(s=>{ A+=s.L*te; Sx+=s.L*te*(s.x1+s.x2)/2; Sy+=s.L*te*(s.y1+s.y2)/2; });
+  const xc=Sx/A, yc=Sy/A; let Ixx=0,Iyy=0,Ixy=0;
+  segs.forEach(s=>{ const a=s.L*te, mx=(s.x1+s.x2)/2-xc, my=(s.y1+s.y2)/2-yc, dx=s.x2-s.x1, dy=s.y2-s.y1; Ixx+=a*(my*my+dy*dy/12); Iyy+=a*(mx*mx+dx*dx/12); Ixy+=a*(mx*my+dx*dy/12); });
+  const J=Ixx+Iyy, Ltot=segs.reduce((a,s)=>a+s.L,0);
+  const Fx=num('Fx',0)*1e3, Fyl=num('Fyl',0)*1e3, Fz=num('Fz',0)*1e3, ex=num('wex',0), ey=num('wey',0);
+  const Mx=num('wMx',0)*1e6+Fz*ey, My=num('wMy',0)*1e6+Fz*ex, Mz=num('wMz',0)*1e6+Fyl*ex-Fx*ey;
+  const den=Ixx*Iyy-Ixy*Ixy;
+  const st=(x,y)=>{ const X=x-xc, Y=y-yc; const fx=Fx/A-Mz*Y/J, fy=Fyl/A+Mz*X/J, fz=Fz/A+((Mx*Iyy-My*Ixy)*Y+(My*Ixx-Mx*Ixy)*X)/den; return {fx,fy,fz,fr:Math.hypot(fx,fy,fz)}; };
+  const nodes=[]; segs.forEach(s=>{ [[s.x1,s.y1],[s.x2,s.y2]].forEach(([x,y])=>{ if(!nodes.some(n=>Math.abs(n.x-x)<1e-6&&Math.abs(n.y-y)<1e-6)) nodes.push({x,y,...st(x,y)}); }); });
+  const crit=nodes.reduce((a,b)=>b.fr>a.fr?b:a);
+  const ph=phiOm(lrfd,0.75,2.00), Fnw=0.60*FEXX, cap=ph*Fnw;
+  D.push([null,'Grupo de soldadura, método elástico'],['te = 0,707w',f1(te,2)+' mm','J2.2a'],['A, xc, yc',`${f1(A,0)} mm², ${f1(xc,1)}, ${f1(yc,1)} mm`,'garganta efectiva'],['Ixx, Iyy, Ixy',`${f1(Ixx/1e6,3)}, ${f1(Iyy/1e6,3)}, ${f1(Ixy/1e6,3)}·10⁶ mm⁴`,''],['Mx, My, Mz en centroide',`${f1(Mx/1e6,3)}, ${f1(My/1e6,3)}, ${f1(Mz/1e6,3)} kN·m`,'incluye excentricidades'],
+    ['Nodo crítico',`(${f1(crit.x,1)}, ${f1(crit.y,1)})`,''],['fx, fy, fz',`${f1(crit.fx,1)}, ${f1(crit.fy,1)}, ${f1(crit.fz,1)} MPa`,'por área de garganta'],['Fnw',f1(Fnw,1)+' MPa','Tabla J2.5, 0,60FEXX, kds = 1,0']);
+  o.chk.push({n:'Metal de soldadura, J2-4',d:f1(crit.fr,1)+' MPa',c:f1(cap,1)+' MPa',r:crit.fr/cap});
+  const q=crit.fr*te;
+  const bmY=phiOm(lrfd,1.00,1.50)*0.6*Fy*tmin, bmR=phiOm(lrfd,0.75,2.00)*0.6*Fu*tmin;
+  D.push(['Fuerza por unidad de largo',f1(q,1)+' N/mm','fr·te'],['Metal base, fluencia / ruptura en corte',`${f1(bmY,1)} / ${f1(bmR,1)} N/mm`,'J4.2 con t mín. unido']);
+  o.chk.push({n:'Metal base, J4-3 y J4-4',d:f1(q,1)+' N/mm',c:f1(Math.min(bmY,bmR),1)+' N/mm',r:q/Math.min(bmY,bmR)});
+  const wmin=tmin<=6?3:tmin<=13?5:tmin<=19?6:8, wmax=tmin<6?tmin:tmin-2;
+  D.push([null,'Limitaciones J2.2b'],['Tamaño mínimo / máximo',`${wmin} / ${f1(wmax,0)} mm`,'Tabla J2.4, J2.2b(b)']);
+  if(w<wmin) o.warn.push(`Pierna ${w} mm menor que el mínimo ${wmin} mm de Tabla J2.4.`);
+  if(w>wmax) o.warn.push(`Pierna ${w} mm mayor que el máximo ${f1(wmax,0)} mm de J2.2b(b).`);
+  segs.forEach((s,i)=>{ if(s.L<4*w) o.warn.push(`Tramo ${i+1}: largo menor que 4w, J2.2b(c).`); if(s.L>100*w) o.warn.push(`Tramo ${i+1}: largo > 100w, aplicar β de Ec. J2-1 si está cargado en el extremo.`); });
+  o.segs=segs; o.nodes=nodes; o.crit=crit; o.xc=xc; o.yc=yc; o.cap=cap; o.Ltot=Ltot;
+  o.name=`Filete ${w} mm E${Math.round(FEXX/6.895)}, L = ${f1(Ltot,0)} mm`;
+  return o;
+}
+function drawBolts(svg,o){
+  const W=760,H=360; svg.innerHTML=''; svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const g=o.geo, A=(n,a)=>svg.appendChild(el(n,a)), T=(x,y,t,op)=>svg.appendChild(tx(x,y,t,Object.assign({'font-size':11,stroke:'#fff','stroke-width':3,'paint-order':'stroke'},op||{})));
+  const PW=(g.nl-1)*g.gg+2*g.lev, PH=(g.nb-1)*g.s+2*g.le+(g.mode==='t'?80:0);
+  const sc=Math.min(280/PH,420/PW,3), cx=W/2-60, cy=H/2+20, X=x=>cx+x*sc, Y=y=>cy-y*sc;
+  const y0=-((g.nb-1)*g.s)/2-g.le, y1=g.mode==='t'?((g.nb-1)*g.s)/2+g.le+80:((g.nb-1)*g.s)/2+g.le;
+  A('rect',{x:X(-PW/2),y:Y(y1),width:PW*sc,height:(y1-y0)*sc,fill:'#e4e4e4',stroke:'#000','stroke-width':1.2});
+  o.pts.forEach(p=>A('circle',{cx:X(p.x),cy:Y(p.y),r:g.dh/2*sc,fill:'#fff',stroke:'#000','stroke-width':1.2}));
+  const xa=X(-PW/2)-30; A('line',{x1:X(o.e||0),y1:Y(y1)+10,x2:X(o.e||0),y2:Y(y0)-20,stroke:'#000','stroke-width':1.6});
+  A('polygon',{points:`${X(o.e||0)},${Y(y0)-14} ${X(o.e||0)-5},${Y(y0)-26} ${X(o.e||0)+5},${Y(y0)-26}`,fill:'#000'});
+  T(X(o.e||0)+8,Y(y0)-30,'V',{'text-anchor':'start','font-weight':700});
+  if(o.icx!=null){ A('circle',{cx:X(o.icx),cy:Y(0),r:4,fill:'#000'}); T(X(o.icx),Y(0)-8,'CI'); }
+  const dim=(xa,ya,xb,yb,t)=>{ A('line',{x1:xa,y1:ya,x2:xb,y2:yb,stroke:'#000','stroke-width':0.6}); T((xa+xb)/2,(ya+yb)/2-4,t); };
+  if(g.nb>1) dim(X(PW/2)+20,Y(-((g.nb-1)*g.s)/2),X(PW/2)+20,Y(-((g.nb-1)*g.s)/2+g.s),'');
+  T(X(PW/2)+26,Y(-((g.nb-1)*g.s)/2+g.s/2)+4,`s = ${g.s}`,{'text-anchor':'start'});
+  if(g.nl>1) T((X(-g.gg*(g.nl-1)/2)+X(-g.gg*(g.nl-1)/2+g.gg))/2,Y(y0)+16,`g = ${g.gg}`);
+  T(X(PW/2)+26,Y(y0+g.le/2)+4,`le = ${g.le}`,{'text-anchor':'start'});
+  T(W/2,H-8,o.name);
+}
+function drawWeld(svg,o){
+  const W=760,H=360; svg.innerHTML=''; svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  if(!o.segs) return;
+  const A=(n,a)=>svg.appendChild(el(n,a)), T=(x,y,t,op)=>svg.appendChild(tx(x,y,t,Object.assign({'font-size':10.5,stroke:'#fff','stroke-width':3,'paint-order':'stroke'},op||{})));
+  const xs=o.segs.flatMap(s=>[s.x1,s.x2]), ys=o.segs.flatMap(s=>[s.y1,s.y2]);
+  const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+  const sc=Math.min(260/Math.max(y1-y0,1),460/Math.max(x1-x0,1)), cx=W/2-(x0+x1)/2*sc, cy=H/2+(y0+y1)/2*sc-10;
+  const X=x=>cx+x*sc, Y=y=>cy-y*sc;
+  o.segs.forEach(s=>A('line',{x1:X(s.x1),y1:Y(s.y1),x2:X(s.x2),y2:Y(s.y2),stroke:'#000','stroke-width':5}));
+  A('circle',{cx:X(o.xc),cy:Y(o.yc),r:3.5,fill:'none',stroke:'#000'}); T(X(o.xc)+8,Y(o.yc)-6,'G',{'text-anchor':'start'});
+  o.nodes.forEach(n=>{ const r=n.fr/o.cap; A('circle',{cx:X(n.x),cy:Y(n.y),r:4,fill:r>1?FAIL:'#fff',stroke:'#000'}); T(X(n.x),Y(n.y)+(n.y<=o.yc?18:-10),`${f1(n.fr,1)} MPa`,{fill:r>1?FAIL:'#000'}); });
+  T(W/2,H-8,o.name);
+}
+function run(){
+  const mode=$('mode').value; $('bBox').hidden=mode!=='b'; $('wBox').hidden=mode!=='w';
+  const bt=$('bg').value; $('Fur').closest('.field').style.visibility=bt==='TP'?'visible':'hidden';
+  R=mode==='b'?boltAnalysis():weldAnalysis(); R.mode=mode;
+  $('warns').innerHTML=R.warn.map(w=>`<div class="warn">${w}</div>`).join('');
+  if(mode==='b') drawBolts($('cxSvg'),R); else drawWeld($('cxSvg'),R);
+  $('tbChk').innerHTML=chkTable(R.chk); $('tbDet').innerHTML=kv(R.det);
+  const mx=R.chk.length?Math.max(...R.chk.map(c=>c.r)):0;
+  $('stats').innerHTML=statsHtml([['Conexión',mode==='b'?'Pernos':'Soldadura'],['Verificaciones',String(R.chk.length)],['Razón máx.',f1(mx,3),mx<=1],['Estado',mx<=1?'Cumple':'No cumple',mx<=1]]);
+  $('notes').innerHTML=notesHtml();
+}
+function notesHtml(){ return 'Unidades N, mm, MPa. Pernos según J3: resistencia por perno igual al menor entre corte J3.7 y aplastamiento o desgarro J3.11 con lc en la dirección de la carga. Grupo excéntrico por centro instantáneo del Manual AISC parte 7 con la resistencia mínima por perno. Placa en tracción con Ae ≤ 0,85Ag de J4.1(b). Soldadura por método elástico con garganta 0,707w, kds = 1,0 y base según J4.2. Perforación más 2 mm en área neta, B4.3b.'; }
+function report(){
+  const rp=reportStart(R.mode==='b'?'Conexión apernada':'Conexión soldada',`${$('proj').value?$('proj').value+', ':''}AISC 360-22 ${$('meth').value==='lrfd'?'LRFD':'ASD'}`,[['Conexión',R.name||'','Método',$('meth').value.toUpperCase()]]);
+  const sv=rp.svg(); if(R.mode==='b') drawBolts(sv,R); else drawWeld(sv,R);
+  rp.sec('Esquema',null,sv); rp.sec('Verificaciones',chkTable(R.chk)); rp.sec('Desarrollo',kv(R.det)); rp.foot(notesHtml());
+}
+fillBolts(); preset('sq');
+$('addSeg').addEventListener('click',()=>{ SEGS.push({x1:0,y1:0,x2:100,y2:0}); segUI(); rerun(); });
+$('preset').addEventListener('change',()=>{ if($('preset').value){ preset($('preset').value); $('preset').value=''; rerun(); } });
+wireApp({app:'fddlebel-conexiones',key:'fdd_conexiones_v1',run,report,getExtra:()=>({segs:SEGS}),setExtra:e=>{ if(e&&e.segs){ SEGS=e.segs; segUI(); } }});
+</script></body></html>
