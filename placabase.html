@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pórtico de acero | fddlebel</title>
+<title>Placas base | fddlebel</title>
 <style>
 :root{
   --paper:#ffffff;--panel:#ffffff;--ink:#000000;--line:#9a9a9a;--line-strong:#7a7a7a;
@@ -91,17 +91,10 @@ svg text{font-family:var(--sans);}
 </head>
 <body>
 
-<style>
-.ltab{width:100%;border-collapse:collapse;font-size:12px;}
-.ltab td,.ltab th{padding:2px 3px;}
-.ltab input[type=number],.ltab input[type=text]{padding:4px 3px;font-size:12px;min-width:0;}
-.ltab input[type=number]{width:48px;}
-.ltab .xb{border:1px solid var(--line-strong);background:#fff;border-radius:4px;cursor:pointer;padding:2px 7px;font-size:12px;}
-</style>
 <div class="app-header">
-  <h1><a href="index.html" style="color:inherit;text-decoration:none;font-weight:400;">fddlebel</a> / Pórtico de acero</h1>
+  <h1><a href="index.html" style="color:inherit;text-decoration:none;font-weight:400;">fddlebel</a> / Placas base</h1>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-    <div class="clause">AISC 360-22, análisis directo capítulo C, capítulos E, F, G y H</div>
+    <div class="clause">AISC 360-22 J3, J8, J9, ACI 318-25 capítulo 17, NCh2369:2025 8.5</div>
     <button class="btn sec" id="saveBtn">Guardar proyecto</button>
     <button class="btn sec" id="loadBtn">Abrir proyecto</button>
     <input type="file" id="loadFile" accept=".json" hidden>
@@ -116,63 +109,90 @@ svg text{font-family:var(--sans);}
     <div class="panel">
       <div class="field"><label>Proyecto / eje</label><input type="text" id="proj" value=""></div>
       <div class="row2">
-        <div class="field"><label>Método</label><select id="meth"><option value="lrfd" selected>LRFD, φ</option><option value="asd">ASD, Ω</option></select></div>
-        <div class="field"><label>Bases</label><select id="base"><option value="pin" selected>Rotuladas</option><option value="fix">Empotradas</option></select></div>
+        <div class="field"><label>Método</label><select id="meth"><option value="lrfd">LRFD, φ</option><option value="asd" selected>ASD, Ω</option></select></div>
+        <div class="field"><label>Factor para ACI con ASD</label><input type="number" id="aF" value="1.5" step="0.05"></div>
       </div>
-      <div class="section-title" style="margin-top:12px">Geometría <span class="unit">[m]</span></div>
+      <div class="section-title" style="margin-top:12px">Columna</div>
       <div class="row2">
-        <div class="field"><label>Luz S</label><input type="number" id="S" value="20" step="0.5"></div>
-        <div class="field"><label>Altura alero h</label><input type="number" id="h" value="7" step="0.1"></div>
+        <div class="field"><label>Tipo</label><select id="cfam"><option value="W" selected>H, W</option><option value="HR">HSS rect.</option><option value="HO">HSS red.</option></select></div>
+        <div class="field"><label>Perfil</label><select id="ccat"></select></div>
       </div>
-      <div class="row2">
-        <div class="field"><label>Flecha cumbrera r</label><input type="number" id="r" value="1.5" step="0.1"></div>
-        <div class="field"><label>Distancia entre marcos</label><input type="number" id="sp" value="6" step="0.5"></div>
-      </div>
-      <div class="section-title" style="margin-top:12px">Secciones</div>
-      <div class="row2">
-        <div class="field"><label>Columnas</label><select id="cCat"></select></div>
-        <div class="field"><label>Vigas</label><select id="rCat"></select></div>
+      <div class="section-title" style="margin-top:12px">Placa <span class="unit">[mm]</span></div>
+      <div class="row3">
+        <div class="field"><label>N, paralelo a d</label><input type="number" id="N" value="450" step="10"></div>
+        <div class="field"><label>B</label><input type="number" id="B" value="300" step="10"></div>
+        <div class="field"><label>tp</label><input type="number" id="tp" value="22" step="1"></div>
       </div>
       <div class="row3">
-        <div class="field"><label>Acero</label><select id="mat"></select></div>
-        <div class="field"><label>Fy <span class="unit">[MPa]</span></label><input type="number" id="Fy" value="345" step="5"></div>
-        <div class="field"><label>Fu</label><input type="number" id="Fu" value="450" step="5"></div>
-      </div>
-      <div class="section-title" style="margin-top:12px">Arriostramiento fuera del plano <span class="unit">[m]</span></div>
-      <div class="row2">
-        <div class="field"><label>Columna Lcy, costaneras</label><input type="number" id="cLy" value="2.33" step="0.1"></div>
-        <div class="field"><label>Columna Lb, ala interior</label><input type="number" id="cLb" value="2.33" step="0.1"></div>
+        <div class="field"><label>Fy placa <span class="unit">[MPa]</span></label><input type="number" id="pFy" value="250" step="5"></div>
+        <div class="field"><label>Mortero</label><input type="number" id="grt" value="30" step="5"></div>
+        <div class="field"><label>Pernos por lado</label><input type="number" id="ns" value="2" step="1"></div>
       </div>
       <div class="row2">
-        <div class="field"><label>Viga Lcy, costaneras</label><input type="number" id="rLy" value="1.5" step="0.1"></div>
-        <div class="field"><label>Viga Lb, ala interior</label><input type="number" id="rLb" value="3" step="0.1"></div>
+        <div class="field"><label>Perno a borde N</label><input type="number" id="eN" value="50" step="5"></div>
+        <div class="field"><label>Separación en B</label><input type="number" id="sB" value="200" step="10"></div>
       </div>
-      <div class="section-title" style="margin-top:12px">Cargas</div>
+
+      <div class="section-title" style="margin-top:12px">Pedestal <span class="unit">[mm]</span></div>
+      <div class="row3">
+        <div class="field"><label>Largo, dir. N</label><input type="number" id="pN" value="900" step="10"></div>
+        <div class="field"><label>Ancho, dir. B</label><input type="number" id="pB" value="800" step="10"></div>
+        <div class="field"><label>Alto ha</label><input type="number" id="ha" value="800" step="50"></div>
+      </div>
+      <div class="row3">
+        <div class="field"><label>f'c <span class="unit">[MPa]</span></label><input type="number" id="fc" value="25" step="1"></div>
+        <div class="field"><label>λ</label><input type="number" id="lam" value="1" step="0.05"></div>
+        <div class="field"><label>Fisurado</label><select id="crk"><option value="1" selected>Sí</option><option value="0">No</option></select></div>
+      </div>
+
+      <div class="section-title" style="margin-top:12px">Pernos de anclaje</div>
+      <div class="row3">
+        <div class="field"><label>Diámetro <span class="unit">[in]</span></label><select id="da"><option>0.625</option><option>0.75</option><option selected>0.875</option><option>1</option><option>1.125</option><option>1.25</option><option>1.5</option><option>1.75</option><option>2</option></select></div>
+        <div class="field"><label>futa <span class="unit">[MPa]</span></label><input type="number" id="futa" value="400" step="10"></div>
+        <div class="field"><label>fya</label><input type="number" id="fya" value="250" step="10"></div>
+      </div>
+      <div class="row3">
+        <div class="field"><label>hef <span class="unit">[mm]</span></label><input type="number" id="hef" value="450" step="25"></div>
+        <div class="field"><label>Cabeza</label><select id="head"><option value="hex">Hexagonal</option><option value="plate" selected>Placa</option><option value="J">Gancho J o L</option></select></div>
+        <div class="field"><label>Placa extremo b</label><input type="number" id="Bp" value="75" step="5"></div>
+      </div>
       <div class="row2">
-        <div class="field"><label>D techo <span class="unit">[kPa]</span></label><input type="number" id="qD" value="0.25" step="0.05"></div>
-        <div class="field"><label>Lr techo, proyección <span class="unit">[kPa]</span></label><input type="number" id="qL" value="0.5" step="0.05"></div>
+        <div class="field"><label>Espesor placa extremo</label><input type="number" id="tpe" value="12" step="1"></div>
+        <div class="field"><label>eh gancho</label><input type="number" id="eh" value="100" step="5"></div>
       </div>
-      <div class="row2">
-        <div class="field"><label>W muro barlovento <span class="unit">[kPa]</span></label><input type="number" id="w1" value="0.6" step="0.05"></div>
-        <div class="field"><label>W muro sotavento</label><input type="number" id="w2" value="-0.4" step="0.05"></div>
+      <label class="chk"><input type="checkbox" id="duct" checked> Anclaje dúctil, 17.10.5.3</label>
+      <label class="chk"><input type="checkbox" id="seis"> Categoría sísmica C a F, 17.10</label>
+
+      <div class="section-title" style="margin-top:12px">Corte</div>
+      <div class="field"><label>Transferencia</label><select id="vt"><option value="bolt">Pernos, NCh2369 8.5.3</option><option value="lug" selected>Llave de corte</option></select></div>
+      <div class="row3" id="lugBox">
+        <div class="field"><label>b llave</label><input type="number" id="bsl" value="200" step="10"></div>
+        <div class="field"><label>H llave</label><input type="number" id="Hsl" value="200" step="10"></div>
+        <div class="field"><label>t llave</label><input type="number" id="tsl" value="40" step="1"></div>
       </div>
-      <div class="row2">
-        <div class="field"><label>W techo barlovento</label><input type="number" id="w3" value="-0.7" step="0.05"></div>
-        <div class="field"><label>W techo sotavento</label><input type="number" id="w4" value="-0.5" step="0.05"></div>
+
+      <div class="section-title" style="margin-top:12px">Silla de pernos</div>
+      <label class="chk"><input type="checkbox" id="ch"> Pernos sobre silla, placa continua y un atiesador entre pernos</label>
+      <div id="chBox">
+        <div class="row3">
+          <div class="field"><label>Borde placa sup. e</label><input type="number" id="ce" value="60" step="5"></div>
+          <div class="field"><label>Ancho placa sup.</label><input type="number" id="cb" value="120" step="5"></div>
+          <div class="field"><label>t placa sup.</label><input type="number" id="ct" value="25" step="1"></div>
+        </div>
+        <div class="row3">
+          <div class="field"><label>Atiesador ancho</label><input type="number" id="sbw" value="100" step="5"></div>
+          <div class="field"><label>Atiesador t</label><input type="number" id="stw" value="12" step="1"></div>
+          <div class="field"><label>Altura silla</label><input type="number" id="shh" value="250" step="10"></div>
+        </div>
       </div>
-      <div class="row2">
-        <div class="field"><label>Coef. sísmico C <span class="unit">[g]</span></label><input type="number" id="Cs" value="0.2" step="0.01"></div>
-        <div class="field"><label>Fracción de Lr en peso sísmico</label><input type="number" id="fL" value="0" step="0.05"></div>
+
+      <div class="section-title" style="margin-top:12px">Solicitaciones <span class="unit">[kN, kN·m]</span></div>
+      <div class="row3">
+        <div class="field"><label>P (+ compr.)</label><input type="number" id="P" value="340" step="10"></div>
+        <div class="field"><label>M, eje fuerte</label><input type="number" id="M" value="0" step="5"></div>
+        <div class="field"><label>V, dirección N</label><input type="number" id="V" value="110" step="5"></div>
       </div>
-      <div class="note" style="margin:4px 0 8px">Presión positiva hacia la superficie. El viento se analiza en ambos sentidos y el sismo con ambos signos.</div>
-      <div class="section-title" style="margin-top:12px">Combinaciones</div>
-      <table class="ltab" id="cTab"></table>
-      <div style="margin-top:6px;display:flex;gap:6px;"><button class="btn sec" id="addC">Agregar</button><button class="btn sec" id="defC">Restablecer</button></div>
-      <div class="section-title" style="margin-top:12px">Servicio</div>
-      <div class="row2">
-        <div class="field"><label>Deriva alero W, h/</label><input type="number" id="dW" value="150" step="10"></div>
-        <div class="field"><label>Flecha viga Lr, L/</label><input type="number" id="dL" value="240" step="10"></div>
-      </div>
+      <div class="note">Para tracción neta ingresar P negativo. Con ASD el factor convierte las cargas para la verificación del hormigón según ACI 318-25.</div>
     </div>
     <div class="panel">
       <div class="section-title">Notas</div>
@@ -182,20 +202,16 @@ svg text{font-family:var(--sans);}
   <div style="min-width:0;">
     <div class="stat-row" id="stats"></div>
     <div id="warns"></div>
-    <div class="chartwrap"><svg id="elSvg" viewBox="0 0 1300 600" width="100%" style="display:block;height:auto"></svg></div>
-    <div class="ctrls">
-      <div class="field"><label>Diagrama</label><select id="dg"><option value="M" selected>Momento</option><option value="N">Axial</option><option value="V">Corte</option><option value="d">Deformada</option></select></div>
-      <div class="field" style="width:220px"><label>Caso</label><select id="dc"></select></div>
-    </div>
-    <div class="chartwrap"><svg id="frSvg" viewBox="0 0 760 420" width="100%" style="display:block;height:auto"></svg></div>
+    <div class="chartwrap"><div class="toolbar" id="v3bar"></div><canvas id="v3" style="width:100%;height:460px;display:block"></canvas></div>
+    <div class="chartwrap"><svg id="bpSvg" viewBox="0 0 1300 660" width="100%" style="display:block;height:auto"></svg></div>
     <div class="tabs" id="tabs">
-      <button data-tab="vm" class="active">Miembros</button>
-      <button data-tab="vc">Combinaciones</button>
-      <button data-tab="sv">Servicio y análisis</button>
+      <button data-tab="rs" class="active">Resumen</button>
+      <button data-tab="pl">Placa y apoyo</button>
+      <button data-tab="an">Anclajes</button>
     </div>
-    <div class="tabpane" data-pane="vm"><div class="panel"><div class="tablewrap"><table id="tbMem"></table></div></div><div class="panel"><div class="section-title">Desarrollo del miembro gobernante</div><div class="tablewrap"><table id="tbDev"></table></div></div></div>
-    <div class="tabpane" data-pane="vc" hidden><div class="panel"><div class="tablewrap"><table id="tbCmb"></table></div></div></div>
-    <div class="tabpane" data-pane="sv" hidden><div class="panel"><div class="tablewrap"><table id="tbSrv"></table></div></div></div>
+    <div class="tabpane" data-pane="rs"><div class="panel"><div class="tablewrap"><table id="tbSum"></table></div></div></div>
+    <div class="tabpane" data-pane="pl" hidden><div class="panel"><div class="tablewrap"><table id="tbPl"></table></div></div></div>
+    <div class="tabpane" data-pane="an" hidden><div class="panel"><div class="tablewrap"><table id="tbAn"></table></div></div><div class="panel"><div class="tablewrap"><table id="tbAc"></table></div></div></div>
   </div>
 </div>
 <script>
@@ -666,6 +682,343 @@ function torsionHSS(s,m){
   else { const h=Math.max(s.h,s.b), ht=h/s.t; Fcr=ht<=2.45*SQ(E/Fy)?0.6*Fy:ht<=3.07*SQ(E/Fy)?0.6*Fy*2.45*SQ(E/Fy)/ht:0.458*PI*PI*E/(ht*ht); }
   const Tn=Fcr*s.C; return {Tn,Tc:phiOm(m.lrfd,0.90,1.67)*Tn,Fcr};
 }
+const ANCH=(function(){
+const clamp=(x,a,b)=>x<a?a:x>b?b:x;
+const BOLTS={'0.375':[16,16.669,142.511],'0.5':[13,22.225,303.225],'0.625':[11,26.987,432.257],'0.75':[10,31.75,587.096],'0.875':[9,36.525,767.74],'1':[8,41.275,967.74],'1.125':[7,46.037,1193.546],'1.25':[7,50.8,1445.158],'1.5':[6,60.325,2012.899],'1.75':[5,69.85,2670.962],'2':[4.5,79.375,3432.251]};
+const PSAT={cast:[0.95,1.0],adh:[[0.85,1.0],[0.75,0.85],[0.60,0.75]]};
+function devLen(p){
+  const sq=Math.min(Math.sqrt(p.fc),8.3), db=p.dbT, lam=p.lam||1;
+  const pss=db<=29?1:db<=36?1.15:db<=43?1.3:1.5;
+  if(p.btype==='hook') return {l:Math.max(pss*p.fyr*db/(21*lam*sq),8*db,150),name:'ℓdh',pss};
+  const psg=p.fyr<=420?1:p.fyr<=550?1.15:1.3;
+  return {l:Math.max(p.fyr*psg*db/((db<=19?2.1:1.7)*lam*sq),300),name:'ℓd'};
+}
+
+function vcbCalc(p,da,ca1,c2a,c2b,Wg,nrow,sper,ecc,parallel){
+  if(!isFinite(ca1)) return null;
+  const lam=p.lam, sfc=Math.sqrt(p.fc), ha=p.ha;
+  let c1=ca1;
+  if(c2a<1.5*ca1&&c2b<1.5*ca1&&ha<1.5*ca1) c1=Math.min(ca1,Math.max(Math.max(c2a,c2b)/1.5,ha/1.5,nrow>1?sper/3:0));
+  const AVc=Math.min((Math.min(c2a,1.5*c1)+Wg+Math.min(c2b,1.5*c1))*Math.min(1.5*c1,ha),nrow*4.5*c1*c1), AVco=4.5*c1*c1;
+  const c2min=Math.min(c2a,c2b);
+  const psiec=1/(1+Math.abs(ecc)/(1.5*c1));
+  const psied=parallel?1:(c2min>=1.5*c1?1:0.7+0.3*c2min/(1.5*c1));
+  const psic=p.crk?p.psicV:1.4;
+  const psih=Math.max(1,Math.sqrt(1.5*c1/ha));
+  const le=Math.min(p.hef,8*da);
+  const Vb1=0.6*Math.pow(le/da,0.2)*Math.sqrt(da)*lam*sfc*Math.pow(c1,1.5), Vb2=3.7*lam*sfc*Math.pow(c1,1.5);
+  const Vb=Math.min(Vb1,Vb2)/1000;
+  const Vcb=(parallel?2:1)*AVc/AVco*psiec*psied*psic*psih*Vb;
+  return {ca1,c1,AVc,AVco,psiec,psied,psic,psih,le,Vb,Vcb};
+}
+
+function analyze(p){
+  const o={p,warn:[],rows:[]};
+  const b=BOLTS[p.dain]||BOLTS['0.75'];
+  const da=+p.dain*25.4, ntm=b[0]/25.4, F=b[1];
+  const Ase=Math.PI/4*Math.pow(da-0.9743/ntm,2);
+  const futa=Math.min(p.futa,1.9*p.fya,860);
+  const cast=p.inst==='cast';
+  const E=v=>v>0?v:Infinity;
+  const cx=[E(p.cxm),E(p.cxp)], cy=[E(p.cym),E(p.cyp)];
+  const nx=p.nx, ny=p.ny, n=nx*ny, sx=nx>1?p.sx:0, sy=ny>1?p.sy:0, Xg=(nx-1)*sx, Yg=(ny-1)*sy;
+  const pts=[]; for(let i=0;i<nx;i++) for(let j=0;j<ny;j++) pts.push({x:i*sx-Xg/2,y:j*sy-Yg/2});
+  const sfc=Math.sqrt(p.fc), lam=p.lam;
+  Object.assign(o,{da,F,Ase,futa,cast,cx,cy,n,nx,ny,sx,sy,Xg,Yg,pts,ntm});
+
+  const Nsa=Ase*futa/1000, Vsa=0.6*Ase*futa/1000*(p.grout?0.8:1);
+  o.Nsa=Nsa; o.Vsa=Vsa;
+  let Ng=Math.max(p.Nua,0), Vg=Math.max(p.Vua,0), eNx=p.eNx, eNy=p.eNy;
+  if(p.dmode==='cap'){ if(Ng>0){ Ng=n*Nsa; eNx=0; eNy=0; } if(Vg>0) Vg=n*Vsa; }
+  const Sxx=pts.reduce((s,q)=>s+q.x*q.x,0), Syy=pts.reduce((s,q)=>s+q.y*q.y,0);
+  pts.forEach(q=>{ q.N=Ng/n+(Sxx>0?Ng*eNx*q.x/Sxx:0)+(Syy>0?Ng*eNy*q.y/Syy:0); });
+  const Nmax=Math.max(0,...pts.map(q=>q.N));
+  const nt=pts.filter(q=>q.N>1e-9).length;
+  o.Ng=Ng; o.Vg=Vg; o.Nmax=Nmax; o.nt=nt; o.eNx=eNx; o.eNy=eNy;
+  if(pts.some(q=>q.N<-1e-9)) o.warn.push('La excentricidad genera compresión en algunos anclajes. Se usa la tracción del anclaje más solicitado.');
+
+  const iA=c=>c==='A'?0:1;
+  const supT=p.condT==='A', supV=p.condV==='A';
+  const tT=cast?PSAT.cast[supT?1:0]:PSAT.adh[p.cat-1][supT?1:0];
+  o.psa={T:p.psaT>0?p.psaT:tT,V:p.psaV>0?p.psaV:(supV?1.0:0.95)};
+  const pc=p.red==='1'?0.75:0.65, pv=0.75, par=0.90;
+  o.pc=pc; o.pv=pv; o.par=par;
+  const fs=p.seis?0.75:1;
+  const phS=p.duct?[0.75,0.65]:[0.65,0.60];
+
+  const add=(grp,name,Nn,phi,psi,f,dem,det)=>{ const des=Nn*phi*psi*f; const r={grp,name,Nn,phi,psi,f,des,dem,ratio:dem>0?dem/des:0,det:det||{}}; r.ok=r.ratio<=1+1e-9; o.rows.push(r); return r; };
+
+  add('T','Acero en tracción, Nsa',Nsa,phS[0],1,1,Nmax,{Ase,futa});
+
+  const h0=p.hef, near=[...cx,...cy].filter(c=>c<1.5*h0);
+  let hp=h0;
+  if(near.length>=3) hp=Math.min(h0,Math.max(Math.max(...near)/1.5,Math.max(sx,sy)/3));
+  const camin=Math.min(...cx,...cy);
+  const ANco=9*hp*hp;
+  const ANc=Math.min((Math.min(cx[0],1.5*hp)+Xg+Math.min(cx[1],1.5*hp))*(Math.min(cy[0],1.5*hp)+Yg+Math.min(cy[1],1.5*hp)),n*ANco);
+  const psiecN=1/(1+Math.abs(eNx)/(1.5*hp))/(1+Math.abs(eNy)/(1.5*hp));
+  const psiedN=camin>=1.5*hp?1:0.7+0.3*camin/(1.5*hp);
+  const psicN=p.crk?1:(cast?1.25:1.4);
+  const cac=p.cac>0?p.cac:2*p.hef;
+  const psicpN=(!cast&&!p.crk&&p.condT==='B'&&camin<cac)?Math.max(camin/cac,1.5*hp/cac):1;
+  const kc=cast?10:7;
+  const alt=cast&&hp>=280&&hp<=635;
+  const Nb=(alt?3.9*lam*sfc*Math.pow(hp,5/3):kc*lam*sfc*Math.pow(hp,1.5))/1000;
+  const psicm=(p.zcm>0&&camin>=1.5*p.hef)?Math.max(1,2-p.zcm/(1.5*p.hef)):1;
+  const Ncbg=ANc/ANco*psiecN*psiedN*psicN*psicpN*psicm*Nb;
+  const Ncb0=ANc/ANco*psiedN*psicN*psicpN*Nb;
+  o.tb={hp,camin,ANc,ANco,psiecN,psiedN,psicN,psicpN,psicm,kc,alt,Nb,Ncbg,cac};
+  const rCb=add('T','Arrancamiento del hormigón, Ncbg',Ncbg,pc,o.psa.T,fs,Ng,o.tb);
+
+  if(p.arT){
+    const As=p.nbT*Math.PI*p.dbT*p.dbT/4, dl=devLen(p);
+    const bp=p.head==='plate'?Math.min(F+2*p.tp,p.Bp):p.head==='J'?da:F;
+    const Ldis=p.hef-(Math.hypot(p.Lx,p.Ly)-0.5*bp)/1.5-p.rtop;
+    o.ar={As,dl,bp,Ldis,okL:Ldis>=dl.l};
+    const r=add('T','Armadura de anclaje en tracción',As*p.fyr/1000,par,1,1,Ng,o.ar);
+    if(!o.ar.okL){ r.ok=false; r.note='Largo disponible insuficiente'; }
+    rCb.alt=r;
+  }
+
+  if(cast){
+    let Abrg, Np, pl=null;
+    if(p.head==='J'){
+      const ehp=clamp(p.eh,3*da,4.5*da); Np=0.9*p.fc*ehp*da/1000; o.po={ehp};
+    }else{
+      if(p.head==='plate'){
+        const bef=Math.min(F+2*p.tp,p.Bp), lef=Math.min(F+2*p.tp,p.Lp);
+        Abrg=bef*lef-Math.PI/4*da*da;
+        const sig=Nmax*1000/Abrg, a=Math.max((bef-F)/2,0), M=sig*a*a/2, treq=Math.sqrt(4*M/(0.9*p.fyp));
+        pl={bef,lef,sig,a,M,treq,ok:p.tp>=treq};
+      }else Abrg=b[2];
+      Np=8*Abrg*p.fc/1000; o.po={Abrg,pl};
+    }
+    const psicP=p.crk?1:1.4;
+    o.po.psicP=psicP; o.po.Np=Np;
+    add('T','Extracción por deslizamiento, Npn',psicP*Np,pc,o.psa.T,fs,Nmax,o.po);
+    if(pl){ const r={grp:'T',name:'Flexión placa de extracción',Nn:NaN,phi:0.9,psi:1,f:1,des:p.tp,dem:pl.treq,ratio:pl.treq/p.tp,det:pl,unit:'mm'}; r.ok=pl.ok; o.rows.push(r); }
+    if(p.head!=='J'){
+      const Ab=o.po.Abrg; let best=null;
+      const edges=[{c:cx[0],c2:Math.min(...cy),nrow:ny,s:Yg,row:pts.filter(q=>Math.abs(q.x+Xg/2)<1e-6)},{c:cx[1],c2:Math.min(...cy),nrow:ny,s:Yg,row:pts.filter(q=>Math.abs(q.x-Xg/2)<1e-6)},
+        {c:cy[0],c2:Math.min(...cx),nrow:nx,s:Xg,row:pts.filter(q=>Math.abs(q.y+Yg/2)<1e-6)},{c:cy[1],c2:Math.min(...cx),nrow:nx,s:Xg,row:pts.filter(q=>Math.abs(q.y-Yg/2)<1e-6)}];
+      edges.forEach(e=>{
+        if(!isFinite(e.c)||p.hef<=2.5*e.c) return;
+        let Nsb=13*e.c*Math.sqrt(Ab)*lam*sfc/1000;
+        const fc2=e.c2<3*e.c?clamp((1+e.c2/e.c)/4,0.5,1):1;
+        Nsb*=fc2;
+        let Nn,dem,grpF=1;
+        if(e.nrow>1&&e.s<6*e.c){ grpF=1+e.s/(6*e.c); Nn=grpF*Nsb; dem=e.row.reduce((s,q)=>s+Math.max(q.N,0),0); }
+        else{ Nn=Nsb; dem=Math.max(0,...e.row.map(q=>q.N)); }
+        const r=dem/(Nn*pc*o.psa.T*fs);
+        if(!best||r>best.r) best={r,Nn,dem,ca1:e.c,ca2:e.c2,fc2,grpF,Nsb};
+      });
+      o.sb=best;
+      if(best) add('T','Desprendimiento lateral, Nsb',best.Nn,pc,o.psa.T,fs,best.dem,best);
+    }
+  }else{
+    const tau=p.crk?p.tcr:p.tunc;
+    const cNa=10*da*Math.sqrt(p.tunc/7.6);
+    const ANao=4*cNa*cNa;
+    const ANa=Math.min((Math.min(cx[0],cNa)+Xg+Math.min(cx[1],cNa))*(Math.min(cy[0],cNa)+Yg+Math.min(cy[1],cNa)),n*ANao);
+    const psiec=1/(1+Math.abs(eNx)/cNa)/(1+Math.abs(eNy)/cNa);
+    const psied=camin>=cNa?1:0.7+0.3*camin/cNa;
+    const psicp=(!p.crk&&p.condT==='B'&&camin<cac)?Math.max(camin/cac,cNa/cac):1;
+    const Nba=lam*tau*Math.PI*da*p.hef/1000;
+    const Nag=ANa/ANao*psiec*psied*psicp*Nba;
+    o.bd={tau,cNa,ANa,ANao,psiec,psied,psicp,Nba,Nag,Nag0:ANa/ANao*psied*psicp*Nba};
+    add('T','Adherencia, Nag',Nag,pc,o.psa.T,fs,Ng,o.bd);
+    if(p.Nus>0){ const r=add('T','Tracción sostenida, 0,55ψaφNba',Nba,pc,o.psa.T,0.55,p.Nus,{}); }
+  }
+
+  add('V','Acero en corte, Vsa',Vsa,phS[1],1,1,Vg/n,{});
+
+  const dir=p.vdir;
+  let G;
+  if(dir==='px') G={front:cx[1],depth:Xg,c2a:cy[0],c2b:cy[1],Wg:Yg,nrow:ny,nrows:nx,sper:sy,side:Math.min(...cy),sideW:Xg,sideN:nx,sideS:sx,sc2a:cx[0],sc2b:cx[1]};
+  else if(dir==='mx') G={front:cx[0],depth:Xg,c2a:cy[0],c2b:cy[1],Wg:Yg,nrow:ny,nrows:nx,sper:sy,side:Math.min(...cy),sideW:Xg,sideN:nx,sideS:sx,sc2a:cx[0],sc2b:cx[1]};
+  else if(dir==='py') G={front:cy[1],depth:Yg,c2a:cx[0],c2b:cx[1],Wg:Xg,nrow:nx,nrows:ny,sper:sx,side:Math.min(...cx),sideW:Yg,sideN:ny,sideS:sy,sc2a:cy[0],sc2b:cy[1]};
+  else G={front:cy[0],depth:Yg,c2a:cx[0],c2b:cx[1],Wg:Xg,nrow:nx,nrows:ny,sper:sx,side:Math.min(...cx),sideW:Yg,sideN:ny,sideS:sy,sc2a:cy[0],sc2b:cy[1]};
+  o.G=G;
+  const cases=[];
+  if(isFinite(G.front)){
+    const srow=G.nrows>1?G.depth/(G.nrows-1):0;
+    if(G.nrows===1) cases.push({k:'Fila única',row:'f',v:vcbCalc(p,da,G.front,G.c2a,G.c2b,G.Wg,G.nrow,G.sper,p.eV),dem:Vg});
+    else if(p.vcase!=='weld'&&srow<G.front) cases.push({k:'Caso 3, fila frontal',row:'f',v:vcbCalc(p,da,G.front,G.c2a,G.c2b,G.Wg,G.nrow,G.sper,p.eV),dem:Vg});
+    else{
+      if(p.vcase!=='weld') cases.push({k:'Caso 1, fila frontal',row:'f',v:vcbCalc(p,da,G.front,G.c2a,G.c2b,G.Wg,G.nrow,G.sper,p.eV),dem:Vg/G.nrows});
+      cases.push({k:'Caso 2, fila posterior',row:'b',v:vcbCalc(p,da,G.front+G.depth,G.c2a,G.c2b,G.Wg,G.nrow,G.sper,p.eV),dem:Vg});
+    }
+  }
+  cases.forEach(c=>c.ratio=c.dem/(c.v.Vcb*pv*o.psa.V));
+  o.vc=cases;
+  let rVb=null;
+  if(cases.length){
+    const g=cases.reduce((a,c)=>c.ratio>a.ratio?c:a);
+    rVb=add('V','Arrancamiento por corte, Vcbg ('+g.k.toLowerCase()+')',g.v.Vcb,pv,o.psa.V,1,g.dem,g.v); o.vgov=g;
+  }
+  if(isFinite(G.side)){
+    const v=vcbCalc(p,da,G.side,G.sc2a,G.sc2b,G.sideW,G.sideN,G.sideS,0,true);
+    o.vpar=v;
+    add('V','Arrancamiento, corte paralelo al borde',v.Vcb,pv,o.psa.V,1,Vg,v);
+  }
+  if(p.arV){
+    const As=p.nbV*Math.PI*p.dbV*p.dbV/4;
+    const r=add('V','Armadura de anclaje en corte',As*p.fyv/1000,par,1,1,Vg,{As});
+    if(rVb) rVb.alt=r;
+  }
+  const kcp=p.hef<65?1:2;
+  const Ncp=cast?Ncb0:Math.min(Ncb0,o.bd.Nag0);
+  o.cp={kcp,Ncp};
+  add('V','Desprendimiento por palanca, Vcpg',kcp*Ncp,pv,o.psa.T,1,Vg,o.cp);
+
+  const single=n===1;
+  const find=pre=>o.rows.find(x=>x.name.startsWith(pre));
+  const eff=r=>!r?0:(r.alt&&r.alt.ok?Math.min(r.ratio,r.alt.ratio):r.ratio);
+  const tn=['Arrancamiento del hormigón','Adherencia','Desprendimiento lateral'].concat(single?['Extracción']:[]);
+  const vn=['Arrancamiento por corte','Desprendimiento por palanca','Arrancamiento, corte paralelo'];
+  const rNc=Math.max(0,...tn.map(k=>eff(find(k)))), rVc=Math.max(0,...vn.map(k=>eff(find(k))));
+  const rs1=find('Acero en tracción'), rs2=find('Acero en corte');
+  o.inter={single,rNc,rVc,ic:Math.pow(rNc,5/3)+Math.pow(rVc,5/3),rNs:rs1.ratio,rVs:rs2.ratio,is:rs1.ratio*rs1.ratio+rs2.ratio*rs2.ratio};
+  o.inter.okc=o.inter.ic<=1+1e-9; o.inter.oks=o.inter.is<=1+1e-9;
+
+  if(p.lug){
+    const hsl=p.Hsl-p.gbp;
+    const Vn1=0.6*p.fysl*p.tsl*p.bsl/1000, Mn=p.fysl*p.bsl*p.tsl*p.tsl/4/1e6, Vn2=Mn/((p.gbp+hsl/2)/1000), Vsl=Math.min(Vn1,Vn2);
+    const Vd=p.lmode==='cap'?Vsl:Math.max(p.Vua,0);
+    const Aef=p.bsl*Math.min(2*p.tsl,hsl), Abp=p.Bbp*p.Lbp;
+    let psib=1;
+    if(p.Pu>0) psib=Math.min(1+4*p.Pu*1000/(Abp*p.fc),2);
+    else if(p.Pu<0) psib=Math.max(0,1+p.Pu/(Math.max(nt,1)*Nsa));
+    const Vbrg=1.7*p.fc*Aef*psib/1000;
+    const ca1=G.front+G.depth/2-p.tsl/2, c2a=G.c2a+G.Wg/2-p.bsl/2, c2b=G.c2b+G.Wg/2-p.bsl/2, ca2=Math.min(c2a,c2b);
+    const hc=Math.min(hsl+1.5*ca1,p.ha), wid=p.bsl+Math.min(1.5*ca1,c2a)+Math.min(1.5*ca1,c2b);
+    const AVc=Math.max(hc*wid-p.bsl*hsl,0), AVco=4.5*ca1*ca1;
+    const psied=ca2>=1.5*ca1?1:0.7+0.3*ca2/(1.5*ca1), psic=p.crk?p.psicV:1.4, psih=Math.max(1,Math.sqrt(1.5*ca1/p.ha));
+    const Vb=3.7*lam*sfc*Math.pow(ca1,1.5)/1000;
+    const Vcb=isFinite(ca1)?AVc/AVco*psied*psic*psih*Vb:Infinity;
+    const Asl=p.nbl*Math.PI*p.dbl*p.dbl/4;
+    const csl=(dir==='px'||dir==='mx')?Xg/2:Yg/2;
+    o.lug={hsl,Vn1,Mn,Vn2,Vsl,Vd,Aef,Abp,psib,Vbrg,ca1,ca2,hc,wid,AVc,AVco,psied,psic,psih,Vb,Vcb,Asl,csl,
+      rStl:p.lmode==='res'?Vd/(0.9*Vsl):NaN,
+      rBrg:Vd/(0.65*Vbrg),
+      rCb:Vd/(0.65*o.psa.V*Vcb),
+      rAs:Asl>0?Vd/(par*Asl*p.fyl/1000):Infinity,
+      geo1:csl>0?p.hef/csl:Infinity, geo2:p.hef/hsl};
+    o.lug.okGeo=o.lug.geo1>=2.5&&o.lug.geo2>=2.5;
+  }
+
+  if(p.lug&&n<4) o.warn.push('La llave de corte exige al menos 4 anclajes, 17.11.1.1.2.');
+  if(n>1&&Math.min(nx>1?sx:Infinity,ny>1?sy:Infinity)<4*da) o.warn.push(`Separación menor que 4da = ${f1(4*da,0)} mm, 17.9.1.`);
+  if(camin<6*da) o.warn.push(`Distancia al borde menor que 6da = ${f1(6*da,0)} mm, exigida si el anclaje se aprieta, 17.9.2.`);
+  if(p.hef>p.ha) o.warn.push('hef mayor que el espesor del elemento.');
+  if(!cast&&p.ha<p.hef+Math.max(2*da,100)) o.warn.push('Espesor ha insuficiente para anclaje adhesivo, 17.9.4.');
+  return o;
+}
+return {analyze,BOLTS};})();
+const M3={
+  box(x0,y0,z0,x1,y1,z1,c,a){ const P=[[x0,y0,z0],[x1,y0,z0],[x1,y1,z0],[x0,y1,z0],[x0,y0,z1],[x1,y0,z1],[x1,y1,z1],[x0,y1,z1]];
+    return {c,a:a==null?1:a,f:[[0,3,2,1],[4,5,6,7],[0,1,5,4],[1,2,6,5],[2,3,7,6],[3,0,4,7]].map(q=>q.map(i=>P[i]))}; },
+  prism(poly,z0,z1,c,a){ const n=poly.length, f=[]; const b=poly.map(p=>[p[0],p[1],z0]), t=poly.map(p=>[p[0],p[1],z1]);
+    f.push(b.slice().reverse(),t); for(let i=0;i<n;i++){ const j=(i+1)%n; f.push([b[i],b[j],t[j],t[i]]); } return {c,a:a==null?1:a,f}; },
+  cyl(cx,cy,z0,z1,r,c,n,a,segs){ n=n||16; segs=segs||1; const f=[], ring=z=>Array.from({length:n},(_,i)=>[cx+r*Math.cos(2*Math.PI*i/n),cy+r*Math.sin(2*Math.PI*i/n),z]);
+    const zs=Array.from({length:segs+1},(_,k)=>z0+(z1-z0)*k/segs), R=zs.map(ring);
+    f.push(R[0].slice().reverse(),R[segs]); for(let k=0;k<segs;k++) for(let i=0;i<n;i++){ const j=(i+1)%n; f.push([R[k][i],R[k][j],R[k+1][j],R[k+1][i]]); } return {c,a:a==null?1:a,f,smooth:true}; },
+  tube(cx,cy,z0,z1,ro,ri,c,n){ n=n||28; const f=[], P=(r,z,i)=>[cx+r*Math.cos(2*Math.PI*i/n),cy+r*Math.sin(2*Math.PI*i/n),z];
+    for(let i=0;i<n;i++){ const j=(i+1)%n; f.push([P(ro,z0,i),P(ro,z0,j),P(ro,z1,j),P(ro,z1,i)],[P(ri,z0,j),P(ri,z0,i),P(ri,z1,i),P(ri,z1,j)],[P(ro,z1,i),P(ro,z1,j),P(ri,z1,j),P(ri,z1,i)],[P(ri,z0,i),P(ri,z0,j),P(ro,z0,j),P(ro,z0,i)]); }
+    return {c,a:1,f,smooth:true}; },
+  hex(cx,cy,z0,z1,s,c){ const r=s/Math.sqrt(3); return M3.prism(Array.from({length:6},(_,i)=>[cx+r*Math.cos(Math.PI/3*i+Math.PI/6),cy+r*Math.sin(Math.PI/3*i+Math.PI/6)]),z0,z1,c); },
+  rot(m,ax,ang,o){ o=o||[0,0,0]; const c=Math.cos(ang), s=Math.sin(ang); const R=p=>{ let [x,y,z]=[p[0]-o[0],p[1]-o[1],p[2]-o[2]]; if(ax==='x') [y,z]=[y*c-z*s,y*s+z*c]; else if(ax==='y') [x,z]=[x*c+z*s,-x*s+z*c]; else [x,y]=[x*c-y*s,x*s+y*c]; return [x+o[0],y+o[1],z+o[2]]; };
+    return {...m,f:m.f.map(q=>q.map(R))}; },
+  key(m,k){ [].concat(m).forEach(q=>q.k=k); return m; },
+  move(m,dx,dy,dz){ return {...m,f:m.f.map(q=>q.map(p=>[p[0]+dx,p[1]+dy,p[2]+dz]))}; },
+  prismY(poly,y0,y1,c,a){ const m=M3.prism(poly,y0,y1,c,a); m.f=m.f.map(q=>q.map(p=>[p[0],p[2],p[1]]).reverse()); return m; },
+  cone(r,h,c,n){ n=n||16; const R=Array.from({length:n},(_,i)=>[r*Math.cos(2*Math.PI*i/n),r*Math.sin(2*Math.PI*i/n),0]), ap=[0,0,h], f=[R.slice().reverse()]; for(let i=0;i<n;i++) f.push([R[i],R[(i+1)%n],ap]); return {c,a:1,f,smooth:true}; },
+  xf(m,e1,e2,e3,p){ return {...m,f:m.f.map(q=>q.map(v=>[p[0]+v[0]*e1[0]+v[1]*e2[0]+v[2]*e3[0],p[1]+v[0]*e1[1]+v[1]*e2[1]+v[2]*e3[1],p[2]+v[0]*e1[2]+v[1]*e2[2]+v[2]*e3[2]]))}; },
+  basis(d){ const L=Math.hypot(...d)||1, e3=d.map(v=>v/L), t=Math.abs(e3[2])<0.9?[0,0,1]:[1,0,0]; let e1=[t[1]*e3[2]-t[2]*e3[1],t[2]*e3[0]-t[0]*e3[2],t[0]*e3[1]-t[1]*e3[0]]; const l1=Math.hypot(...e1); e1=e1.map(v=>v/l1); const e2=[e3[1]*e1[2]-e3[2]*e1[1],e3[2]*e1[0]-e3[0]*e1[2],e3[0]*e1[1]-e3[1]*e1[0]]; return [e1,e2,e3]; },
+  along(m,p,d){ const [e1,e2,e3]=M3.basis(d); return M3.xf(m,e1,e2,e3,p); },
+  arrow(tip,d,len,c,r){ r=r||len*0.035; const [e1,e2,e3]=M3.basis(d), hl=Math.min(len*0.3,r*7), base=tip.map((v,i)=>v-e3[i]*len);
+    return [M3.xf(M3.cyl(0,0,0,len-hl,r,c,12),e1,e2,e3,base),M3.xf(M3.cone(r*2.6,hl,c,16),e1,e2,e3,tip.map((v,i)=>v-e3[i]*hl))]; },
+  ext(poly,O,U,A,B,L,c,a){ const P=(p,s)=>[0,1,2].map(i=>O[i]+A[i]*p[0]+B[i]*p[1]+U[i]*s), n=poly.length, f=[poly.map(p=>P(p,0)),poly.map(p=>P(p,L)).reverse()];
+    for(let i=0;i<n;i++){ const j=(i+1)%n; f.push([P(poly[i],0),P(poly[i],L),P(poly[j],L),P(poly[j],0)]); } return {c,a:a==null?1:a,f,two:true}; }
+};
+const COL={steel:[236,237,239],steel2:[214,216,219],plate:[244,244,245],conc:[232,230,225],grout:[196,194,188],rod:[150,152,156],nut:[112,114,118],weld:[60,60,60],red:[198,40,40],load:[30,30,30],wood:[220,210,190],liquid:[215,225,232],soil:[214,206,190]};
+function View3D(canvas,opts){
+  const V=this; opts=opts||{}; if(typeof V3S!=='undefined') V3S.push(V);
+  V.cv=canvas; V.yaw=opts.yaw==null?-0.75:opts.yaw; V.pitch=opts.pitch==null?0.55:opts.pitch; V.zoom=1; V.meshes=[]; V.labels=[]; V.pan=[0,0];
+  V.def={yaw:V.yaw,pitch:V.pitch};
+  let drag=null;
+  canvas.style.touchAction='none'; canvas.style.cursor='grab';
+  canvas.addEventListener('pointerdown',e=>{ V.dragging=true; drag={x:e.clientX,y:e.clientY,yaw:V.yaw,pitch:V.pitch,pan:[...V.pan],btn:e.button||(e.shiftKey?1:0)}; canvas.setPointerCapture(e.pointerId); canvas.style.cursor='grabbing'; });
+  canvas.addEventListener('pointermove',e=>{ if(!drag) return; const dx=e.clientX-drag.x, dy=e.clientY-drag.y;
+    if(drag.btn){ V.pan=[drag.pan[0]+dx,drag.pan[1]+dy]; } else { V.yaw=drag.yaw-dx*0.008; V.pitch=Math.max(-1.55,Math.min(1.55,drag.pitch+dy*0.008)); } V.draw(); });
+  const up=()=>{ drag=null; canvas.style.cursor='grab'; if(V.dragging){ V.dragging=false; V.draw(); } }; canvas.addEventListener('pointerup',up); canvas.addEventListener('pointercancel',up);
+  canvas.addEventListener('wheel',e=>{ e.preventDefault(); V.zoom=Math.max(0.3,Math.min(6,V.zoom*Math.exp(-e.deltaY*0.0012))); V.draw(); },{passive:false});
+  canvas.addEventListener('dblclick',()=>V.view('iso'));
+  canvas.addEventListener('contextmenu',e=>e.preventDefault());
+  if(window.ResizeObserver) new ResizeObserver(()=>V.draw()).observe(canvas);
+}
+View3D.prototype.view=function(k){ const V=this; if(k==='iso'){ V.yaw=V.def.yaw; V.pitch=V.def.pitch; } else if(k==='top'){ V.yaw=-Math.PI/2; V.pitch=1.5499; } else if(k==='front'){ V.yaw=-Math.PI/2; V.pitch=0; } else if(k==='side'){ V.yaw=0; V.pitch=0; } V.zoom=1; V.pan=[0,0]; V.draw(); };
+View3D.prototype.set=function(meshes,labels){ const V=this; V.meshes=meshes; V.labels=labels||[];
+  let mn=[1e18,1e18,1e18], mx=[-1e18,-1e18,-1e18]; meshes.forEach(m=>m.f.forEach(q=>q.forEach(p=>{ for(let i=0;i<3;i++){ mn[i]=Math.min(mn[i],p[i]); mx[i]=Math.max(mx[i],p[i]); } })));
+  V.ctr=[(mn[0]+mx[0])/2,(mn[1]+mx[1])/2,(mn[2]+mx[2])/2]; V.rad=Math.max(1,Math.hypot(mx[0]-mn[0],mx[1]-mn[1],mx[2]-mn[2])/2);
+  const h=V.rad/9, L=(a,b)=>Math.hypot(b[0]-a[0],b[1]-a[1],b[2]-a[2]), lerp=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];
+  V.faces=[];
+  meshes.forEach(m=>m.f.forEach(q=>{ const a=[q[1][0]-q[0][0],q[1][1]-q[0][1],q[1][2]-q[0][2]], b=[q[2][0]-q[0][0],q[2][1]-q[0][1],q[2][2]-q[0][2]];
+    let n=[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]]; const nl=Math.hypot(...n)||1; n=n.map(v=>v/nl);
+    const nu=q.length===4&&m.a>=1?Math.min(14,Math.ceil(Math.max(L(q[0],q[1]),L(q[3],q[2]))/h)):1, nv=q.length===4&&m.a>=1?Math.min(14,Math.ceil(Math.max(L(q[1],q[2]),L(q[0],q[3]))/h)):1;
+    if(nu*nv===1){ V.faces.push({q,m,n,eb:q.map(()=>true)}); return; }
+    const P=(u,v)=>lerp(lerp(q[0],q[1],u),lerp(q[3],q[2],u),v);
+    for(let i=0;i<nu;i++) for(let j=0;j<nv;j++){ const u0=i/nu,u1=(i+1)/nu,v0=j/nv,v1=(j+1)/nv;
+      V.faces.push({q:[P(u0,v0),P(u1,v0),P(u1,v1),P(u0,v1)],m,n,eb:[j===0,i===nu-1,j===nv-1,i===0]}); } }));
+  V.draw(); };
+View3D.prototype.draw=function(){
+  const V=this, cv=V.cv, dpr=V.dragging?1:(window.devicePixelRatio||1), w=cv.clientWidth||760, h=cv.clientHeight||420, Wp=Math.round(w*dpr), Hp=Math.round(h*dpr);
+  if(cv.width!==Wp||cv.height!==Hp){ cv.width=Wp; cv.height=Hp; }
+  const g=cv.getContext('2d'); g.setTransform(1,0,0,1,0,0); g.fillStyle='#fff'; g.fillRect(0,0,Wp,Hp);
+  if(!V.faces||!V.faces.length) return;
+  const cy=Math.cos(V.yaw), sy=Math.sin(V.yaw), cp=Math.cos(V.pitch), sp=Math.sin(V.pitch);
+  const s=Math.min(w,h)*0.46/V.rad*V.zoom*dpr, c=V.ctr, ox=Wp/2+V.pan[0]*dpr, oy=Hp/2+V.pan[1]*dpr;
+  const T=p=>{ const x=p[0]-c[0], y=p[1]-c[1], z=p[2]-c[2]; const x1=x*cy-y*sy, y1=x*sy+y*cy; return [ox+x1*s, oy-(y1*sp+z*cp)*s, (y1*cp-z*sp)*s]; };
+  const vd=[sy*cp,cy*cp,-sp], Lt=[0.35,-0.55,0.76], Ln=Math.hypot(...Lt);
+  const img=g.createImageData(Wp,Hp), D=img.data; D.fill(255); const ZB=new Float32Array(Wp*Hp).fill(Infinity);
+  const opq=[], trn=[];
+  V.faces.forEach(F=>{ const m=F.m, P=F.q.map(T), n=F.n;
+    const sx=(P[1][0]-P[0][0])*(P[2][1]-P[0][1])-(P[1][1]-P[0][1])*(P[2][0]-P[0][0]);
+    if(m.a>=1&&sx>0&&!m.two) return;
+    const dif=Math.abs(n[0]*Lt[0]+n[1]*Lt[1]+n[2]*Lt[2])/Ln, k=0.62+0.38*dif, hk=V.hl&&m.k&&m.k.split(' ').includes(V.hl);
+    const col=hk?[Math.round(245*k),Math.round(160*k),Math.round(150*k)]:m.c.map(v=>Math.round(v*k));
+    const sil=m.smooth?Math.abs(n[0]*vd[0]+n[1]*vd[1]+n[2]*vd[2])<0.35:true;
+    const it={P,col,a:m.a,eb:F.eb,sm:m.smooth,cap:P.length>4,sil,hk,d:P.reduce((q,p)=>q+p[2],0)/P.length};
+    (m.a>=1?opq:trn).push(it); });
+  const tri=(A,B,C,col,al,wr)=>{ const area=(B[0]-A[0])*(C[1]-A[1])-(B[1]-A[1])*(C[0]-A[0]); if(Math.abs(area)<1e-6) return;
+    const x0=Math.max(0,Math.floor(Math.min(A[0],B[0],C[0]))), x1=Math.min(Wp-1,Math.ceil(Math.max(A[0],B[0],C[0]))), y0=Math.max(0,Math.floor(Math.min(A[1],B[1],C[1]))), y1=Math.min(Hp-1,Math.ceil(Math.max(A[1],B[1],C[1])));
+    const ia=1/area, r=col[0], gg=col[1], bb=col[2], e=-1e-4;
+    for(let y=y0;y<=y1;y++){ const py=y+0.5; let i=y*Wp+x0;
+      for(let x=x0;x<=x1;x++,i++){ const px=x+0.5;
+        const w0=((B[0]-px)*(C[1]-py)-(B[1]-py)*(C[0]-px))*ia, w1=((C[0]-px)*(A[1]-py)-(C[1]-py)*(A[0]-px))*ia, w2=1-w0-w1;
+        if(w0<e||w1<e||w2<e) continue; const z=w0*A[2]+w1*B[2]+w2*C[2]; if(z>=ZB[i]) continue; const j=4*i;
+        if(wr){ ZB[i]=z; D[j]=r; D[j+1]=gg; D[j+2]=bb; } else { D[j]=D[j]*(1-al)+r*al; D[j+1]=D[j+1]*(1-al)+gg*al; D[j+2]=D[j+2]*(1-al)+bb*al; } } } };
+  opq.forEach(f=>{ for(let i=1;i<f.P.length-1;i++) tri(f.P[0],f.P[i],f.P[i+1],f.col,1,true); });
+  trn.sort((p,q)=>q.d-p.d).forEach(f=>{ for(let i=1;i<f.P.length-1;i++) tri(f.P[0],f.P[i],f.P[i+1],f.col,f.a,false); });
+  g.putImageData(img,0,0);
+  const eps=1.6+0.002*s*V.rad/100, groups={};
+  const seg=(A,B,key)=>{ const L=Math.hypot(B[0]-A[0],B[1]-A[1]), n=Math.max(2,Math.ceil(L/1.5)); let run=null; const out=groups[key]||(groups[key]=[]);
+    for(let k=0;k<=n;k++){ const t=k/n, x=A[0]+(B[0]-A[0])*t, y=A[1]+(B[1]-A[1])*t, z=A[2]+(B[2]-A[2])*t, xi=Math.round(x-0.5), yi=Math.round(y-0.5);
+      let vis=true; if(xi>=0&&yi>=0&&xi<Wp&&yi<Hp){ let zm=ZB[yi*Wp+xi]; if(xi+1<Wp) zm=Math.max(zm,ZB[yi*Wp+xi+1]); if(yi+1<Hp) zm=Math.max(zm,ZB[(yi+1)*Wp+xi]); vis=z<=zm+eps; }
+      if(vis){ if(!run){ run=[x,y,x,y]; } else { run[2]=x; run[3]=y; } } else if(run){ out.push(run); run=null; } }
+    if(run) out.push(run); };
+  [...opq,...trn].forEach(f=>{ if(f.sm&&!f.cap&&!f.sil) return; const n=f.P.length, key=f.hk?'h':f.a<1?'t':f.sm?'s':'o'; for(let i=0;i<n;i++) if(f.eb[i]) seg(f.P[i],f.P[(i+1)%n],key); });
+  const ST={o:['rgba(0,0,0,0.88)',1.0],s:['rgba(0,0,0,0.7)',0.8],t:['rgba(0,0,0,0.3)',0.8],h:['#c62828',1.6]};
+  Object.entries(groups).forEach(([k,list])=>{ g.beginPath(); list.forEach(r=>{ g.moveTo(r[0],r[1]); g.lineTo(r[2],r[3]); }); g.strokeStyle=ST[k][0]; g.lineWidth=ST[k][1]*dpr; g.lineCap='round'; g.stroke(); });
+  g.setTransform(dpr,0,0,dpr,0,0);
+  const Tl=p=>{ const q=T(p); return [q[0]/dpr,q[1]/dpr]; };
+  V.labels.forEach(l=>{ const P=Tl(l.p), hi=V.hl&&l.k&&l.k.split(' ').includes(V.hl); g.lineWidth=3; g.strokeStyle='#fff'; g.font=(hi?'bold ':'')+'12px Arial Narrow, Arial'; g.textAlign='left'; g.strokeText(l.t,P[0]+6,P[1]-4); g.fillStyle=hi?'#c62828':'#000'; g.fillText(l.t,P[0]+6,P[1]-4); g.beginPath(); g.arc(P[0],P[1],hi?3.5:2,0,7); g.fill(); });
+  const ax=[[1,0,0,'x'],[0,1,0,'y'],[0,0,1,'z']], o=[42,h-34]; g.font='12px Arial Narrow, Arial';
+  ax.forEach(([x,y,z,t])=>{ const x1=x*cy-y*sy, y1=x*sy+y*cy; const z2=y1*sp+z*cp; g.strokeStyle='#000'; g.lineWidth=1; g.beginPath(); g.moveTo(o[0],o[1]); g.lineTo(o[0]+x1*22,o[1]-z2*22); g.stroke(); g.fillStyle='#000'; g.fillText(t,o[0]+x1*26-3,o[1]-z2*26+4); });
+};
+function view3dBar(id,V){ const bar=document.getElementById(id); if(!bar) return; bar.innerHTML=['iso:Isométrica','top:Planta','front:Elevación','side:Lateral'].map(s=>{ const [k,t]=s.split(':'); return `<button class="tool" data-v="${k}">${t}</button>`; }).join('')+'<span class="note" style="margin-left:8px">Arrastrar para girar, Shift o botón derecho para desplazar, rueda para acercar</span>';
+  bar.querySelectorAll('[data-v]').forEach(b=>b.addEventListener('click',()=>V.view(b.dataset.v))); }
+function snap3D(V,w,h){ const c=document.createElement('canvas'); c.style.width=w+'px'; c.style.height=h+'px'; c.width=w*2; c.height=h*2; const old=V.cv; Object.defineProperty(c,'clientWidth',{value:w}); Object.defineProperty(c,'clientHeight',{value:h}); V.cv=c; V.draw(); V.cv=old; const img=document.createElement('img'); img.src=c.toDataURL('image/png'); img.style.cssText='width:100%;max-width:620px;display:block;margin:0 auto;'; return img; }
 const DKS={cut:[2.2],vis:[1.3],thin:[0.7],dim:[0.6],hid:[1,'7 4'],ctr:[0.6,'18 4 3 4'],phan:[0.7,'14 3 3 3 3 3']};
 let HLK=null, DKN=0, DKRAF=0;
 const V3S=[];
@@ -759,297 +1112,269 @@ function DK(svg,W,H,cfg){ const FS=(cfg&&cfg.fs)||1;
   if(!DKRAF){ DKRAF=requestAnimationFrame(()=>{ DKRAF=0; hlApply(); }); }
   return K;
 }
-const NE=8;
-const DEFC={lrfd:[['1,4D',1.4,0,0,0],['1,2D + 1,6Lr',1.2,1.6,0,0],['1,2D + 1,6Lr + 0,5W',1.2,1.6,0.5,0],['1,2D + 0,5Lr + 1,0W',1.2,0.5,1,0],['1,2D + 1,0E',1.2,0,0,1],['0,9D + 1,0W',0.9,0,1,0],['0,9D + 1,0E',0.9,0,0,1]],
-  asd:[['D',1,0,0,0],['D + Lr',1,1,0,0],['D + 0,6W',1,0,0.6,0],['D + 0,75Lr + 0,45W',1,0.75,0.45,0],['D + 0,7E',1,0,0,0.7],['0,6D + 0,6W',0.6,0,0.6,0],['0,6D + 0,7E',0.6,0,0,0.7]]};
-let COMBOS=null;
-function cUI(){
-  $('cTab').innerHTML='<tr><th>Nombre</th><th>D</th><th>Lr</th><th>W</th><th>E</th><th></th></tr>'+COMBOS.map((c,i)=>`<tr><td><input type="text" data-i="${i}" data-k="0" value="${c[0]}" style="width:100%"></td>${[1,2,3,4].map(k=>`<td><input type="number" data-i="${i}" data-k="${k}" value="${c[k]}" step="0.1"></td>`).join('')}<td><button class="xb" data-del="${i}">×</button></td></tr>`).join('');
-  $('cTab').querySelectorAll('input').forEach(inp=>inp.addEventListener('input',()=>{ const k=+inp.dataset.k; COMBOS[+inp.dataset.i][k]=k?parseFloat(inp.value)||0:inp.value; rerun(); }));
-  $('cTab').querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>{ COMBOS.splice(+b.dataset.del,1); cUI(); rerun(); }));
+function sheet(svg,o){
+  const W=1300,H=660, K=DK(svg,W,H,{fs:1.05});
+  const g=num('grt',30), tp=o.tp, hef=num('hef',450), chair=$('ch').checked, sh=num('shh',250), ct=num('ct',25), ce=num('ce',60), cb=num('cb',120), sbw=num('sbw',100), stw=num('stw',12);
+  const head=$('head').value, Bp=num('Bp',75), tpe=num('tpe',12), lug=$('vt').value==='lug', tsl=num('tsl',40), bsl=num('bsl',200), Hsl=num('Hsl',200);
+  const d=o.d, bf=o.bf, tf=o.tf, tw=o.c.tw||tf, db=o.db, da=$('da').value, nr=2*o.ns, ys=Array.from({length:o.ns},(_,i)=>(i-(o.ns-1)/2)*o.sB);
+  const fl=v=>f1(v,0);
+  /* PLANTA */
+  const sc=Math.min(330/o.pN,330/o.pB), cx=310, cy=300, X=x=>cx+x*sc, Y=y=>cy-y*sc;
+  K.rc(X(-o.pN/2),Y(o.pB/2),o.pN*sc,o.pB*sc,'vis',null,{k:'pN pB'});
+  K.rc(X(-o.N/2-25),Y(o.B/2+25),(o.N+50)*sc,(o.B+50)*sc,'thin',null,{k:'grt'});
+  if(lug) K.rc(X(-tsl/2),Y(bsl/2),tsl*sc,bsl*sc,'hid',null,{k:'tsl bsl'});
+  K.rc(X(-o.N/2),Y(o.B/2),o.N*sc,o.B*sc,'vis','#fff',{k:'N B tp'});
+  if(o.Y!=null&&o.P>0&&o.Y<o.N){ const xa=X(o.N/2-o.Y); K.ln(xa,Y(o.B/2),xa,Y(-o.B/2),'hid'); }
+  const fillC=Math.min(tf,tw)*sc<3.5?'#111':K.H('st');
+  if(o.f==='W') K.pl([[-d/2,-bf/2],[-d/2+tf,-bf/2],[-d/2+tf,-tw/2],[d/2-tf,-tw/2],[d/2-tf,-bf/2],[d/2,-bf/2],[d/2,bf/2],[d/2-tf,bf/2],[d/2-tf,tw/2],[-d/2+tf,tw/2],[-d/2+tf,bf/2],[-d/2,bf/2]].map(q=>[X(q[0]),Y(q[1])]),'cut',fillC,{k:'ccat'});
+  else if(o.f==='HR'){ K.pa(`M${X(-d/2)},${Y(bf/2)}H${X(d/2)}V${Y(-bf/2)}H${X(-d/2)}Z M${X(-d/2+tf)},${Y(bf/2-tf)}V${Y(-bf/2+tf)}H${X(d/2-tf)}V${Y(bf/2-tf)}Z`,'cut',fillC,{k:'ccat'}).setAttribute('fill-rule','evenodd'); }
+  else { const r1=d/2*sc, r2=(d/2-tf)*sc; K.pa(`M${X(0)-r1},${Y(0)}a${r1},${r1} 0 1,0 ${2*r1},0a${r1},${r1} 0 1,0 ${-2*r1},0Z M${X(0)-r2},${Y(0)}a${r2},${r2} 0 1,1 ${2*r2},0a${r2},${r2} 0 1,1 ${-2*r2},0Z`,'cut',fillC,{k:'ccat'}).setAttribute('fill-rule','evenodd'); }
+  const Lc=(o.ns-1)*o.sB+2*ce, yst=Array.from({length:o.ns-1},(_,i)=>(i+0.5-(o.ns-1)/2)*o.sB);
+  if(chair) [-1,1].forEach(s=>{ const x0=s>0?d/2:-d/2-cb; K.rc(X(x0),Y(Lc/2),cb*sc,Lc*sc,'vis','#fff',{k:'cb ce ct'}); yst.forEach(y=>K.rc(X(s>0?d/2:-d/2-sbw),Y(y+stw/2),sbw*sc,stw*sc,'hid',null,{k:'sbw stw'})); });
+  if(chair){ const xr2=X(-d/2-cb)-14; K.dv(Y(Lc/2),Y(-Lc/2),X(-d/2-cb),X(-d/2-cb),xr2,fl(Lc),{k:'ce sB'}); K.dh(X(-d/2-cb),X(-d/2),Y(Lc/2),Y(Lc/2),Y(Lc/2)-14,fl(cb),{k:'cb'}); }
+  ys.forEach(y=>[-1,1].forEach(s=>K.boltPlan(X(s*o.fd),Y(y),Math.max(db/2*sc,2.5),{hex:0.87*db*sc,k:'da'})));
+  K.cl(X(-o.pN/2)-4,Y(0),X(o.pN/2)+4,Y(0)); K.cl(X(0),Y(o.pB/2)+4,X(0),Y(-o.pB/2)-4);
+  const yb0=Y(-o.pB/2);
+  K.chainH([X(-o.N/2),X(-o.fd),X(o.fd),X(o.N/2)],Y(-o.B/2),yb0+22,[fl(o.eN),fl(2*o.fd),fl(o.eN)],{ks:['eN','N eN','eN']});
+  K.chainH([X(-o.pN/2),X(-o.N/2),X(o.N/2),X(o.pN/2)],yb0,yb0+46,[fl((o.pN-o.N)/2),fl(o.N),fl((o.pN-o.N)/2)],{ks:['pN','N','pN']});
+  K.dh(X(-o.pN/2),X(o.pN/2),yb0,yb0,yb0+70,fl(o.pN),{k:'pN'});
+  const xl=X(-o.pN/2), eB=(o.B-(o.ns-1)*o.sB)/2;
+  const yv=[o.B/2,...ys.slice().reverse(),-o.B/2].map(Y); K.chainV(yv,X(-o.N/2),xl-22,[fl(eB),...Array(o.ns-1).fill(fl(o.sB)),fl(eB)],{ks:['B',...Array(o.ns-1).fill('sB'),'B']});
+  K.chainV([Y(o.pB/2),Y(o.B/2),Y(-o.B/2),Y(-o.pB/2)],xl,xl-46,[fl((o.pB-o.B)/2),fl(o.B),fl((o.pB-o.B)/2)],{ks:['pB','B','pB']});
+  K.dv(Y(o.pB/2),Y(-o.pB/2),xl,xl,xl-70,fl(o.pB),{k:'pB'});
+  if(o.Y!=null&&o.P>0&&o.Y<o.N) K.dh(X(o.N/2-o.Y),X(o.N/2),Y(o.B/2),Y(o.B/2),Y(o.B/2)-14,'Y = '+fl(o.Y));
+  K.lead(X(o.N/2-12),Y(-o.B/2+12),X(o.pN/2)+22,Y(-o.pB/4),[`PL ${o.N}×${o.B}×${tp}`,`Fy ${$('pFy').value} MPa`],{k:'N B tp'});
+  K.lead(X(o.fd)+db/2*sc*0.7,Y(ys[ys.length-1])-db/2*sc*0.7,X(o.pN/2)+22,Y(o.pB/2)-24,[`${nr} PERNOS Ø${da}"`,`hef = ${hef}`],{k:'da hef'});
+  K.lead(X(-d/2+tf/2),Y(bf/2-6),X(-o.d/2)-40,Y(o.pB/2)-24,[$('ccat').value],{k:'ccat',side:1});
+  K.lead(X(o.pN/2-30),Y(-o.pB/2+40),X(o.pN/2)+22,Y(-o.pB/2)+6,[`PEDESTAL ${o.pN}×${o.pB}`,`f'c ${$('fc').value} MPa`],{dot:true,k:'pN pB fc'});
+  K.cut(xl-100,Y(0),X(o.pN/2)+12,Y(0),'A',[0,-1]);
+  K.title(cx,H-28,'Planta','S/E');
+  /* CORTE A-A */
+  const Hc=Math.max(0.8*d,(chair?sh+ct:0)+140), dep=Math.min(num('ha',800),hef+(head==='plate'?tpe:0)+120);
+  const s2=Math.min(sc*1.25,400/o.pN,450/(Hc+g+tp+dep)), ex=830, zt=110+(Hc+g+tp)*s2;
+  const U=x=>ex+x*s2, Z=z=>zt-z*s2, zp=g+tp;
+  const xa=U(-o.pN/2), xb=U(o.pN/2);
+  K.pl([[xa,Z(-dep)],[xa,Z(0)],[xb,Z(0)],[xb,Z(-dep)]],null,K.H('cc'));
+  K.ln(xa,Z(0),xb,Z(0),'cut',{k:'pN'}); K.ln(xa,Z(0),xa,Z(-dep),'cut',{k:'pN'}); K.ln(xb,Z(0),xb,Z(-dep),'cut',{k:'pN'}); K.brk(xa-6,Z(-dep),xb+6,Z(-dep));
+  if(lug){ K.rc(U(-tsl/2)-2,Z(g),tsl*s2+4,(Hsl-g)*s2+2,null,'#fff'); }
+  K.rc(U(-o.N/2-25),Z(g),(o.N+50)*s2,g*s2,'cut',K.H('gr'),{k:'grt'});
+  K.rc(U(-o.N/2),Z(zp),o.N*s2,tp*s2,'cut',tp*s2<4?'#111':K.H('st'),{k:'N tp'});
+  if(lug) K.rc(U(-tsl/2),Z(g),tsl*s2,Hsl*s2,'cut',K.H('st2'),{k:'tsl Hsl'});
+  const zc=zp+Hc;
+  if(o.f==='W'){ K.rc(U(-d/2),Z(zc),tf*s2,Hc*s2,'cut',K.H('st2'),{k:'ccat'}); K.rc(U(d/2-tf),Z(zc),tf*s2,Hc*s2,'cut',K.H('st2'),{k:'ccat'}); K.rc(U(-d/2+tf),Z(zc),(d-2*tf)*s2,Hc*s2,'cut',K.H('sw'),{k:'ccat'}); }
+  else { K.rc(U(-d/2),Z(zc),tf*s2,Hc*s2,'cut',K.H('st2'),{k:'ccat'}); K.rc(U(d/2-tf),Z(zc),tf*s2,Hc*s2,'cut',K.H('st2'),{k:'ccat'}); }
+  K.rc(U(-d/2)-2,Z(zc)-3,d*s2+4,6,null,'#fff'); K.brk(U(-d/2)-8,Z(zc),U(d/2)+8,Z(zc));
+  K.cl(U(0),Z(zc)-16,U(0),Z(-dep)+6);
+  const fw=Math.max(5,8*s2); [[-d/2,1],[d/2,-1]].forEach(([x,sg])=>{ K.pl([[U(x),Z(zp)],[U(x)-sg*fw,Z(zp)],[U(x),Z(zp)-fw]],null,'#111'); });
+  if(lug) [[-tsl/2,-1],[tsl/2,1]].forEach(([x,sg])=>K.pl([[U(x),Z(g)],[U(x)+sg*fw,Z(g)],[U(x),Z(g)+fw]],null,'#111'));
+  const zn=chair?zp+sh+ct:zp, rw=db/2*s2, hw=0.87*db*s2;
+  [-1,1].forEach(s=>{ const x=U(s*o.fd), ztop=zn+6+1.6*db+12, zbot=-hef;
+    if(chair){ const cutS=yst.some(y=>Math.abs(y)<stw/2), xs0=s>0?d/2:-d/2-sbw, xc0=s>0?d/2:-d/2-cb;
+      if(yst.length) K.rc(U(xs0),Z(zp+sh),sbw*s2,sh*s2,cutS?'cut':'vis',cutS?K.H('st2'):'#fff',{k:'shh sbw stw'});
+      K.rc(U(xc0),Z(zp+sh+ct),cb*s2,ct*s2,'cut',K.H('st'),{k:'ct cb'});
+      if(yst.length) K.pl([[U(s>0?d/2:-d/2),Z(zp+sh)],[U(s>0?d/2:-d/2)+s*fw,Z(zp+sh)],[U(s>0?d/2:-d/2),Z(zp+sh)+fw]],null,'#111'); }
+    K.rc(x-rw,Z(ztop),2*rw,(ztop-zbot)*s2,'vis','#fff',{k:'da hef'});
+    K.ln(x,Z(ztop)-4,x,Z(zbot)+4,'ctr');
+    K.rc(x-1.1*db*s2,Z(zn+6),2.2*db*s2,6*s2,'vis','#fff',{k:'da'});
+    K.rc(x-hw,Z(zn+6+0.9*db),2*hw,0.9*db*s2,'vis','#fff',{k:'da'}); K.rc(x-hw,Z(zn+6+1.65*db),2*hw,0.75*db*s2,'vis','#fff',{k:'da'});
+    if(head==='plate'){ K.rc(x-Bp/2*s2,Z(-hef),Bp*s2,tpe*s2,'vis','#fff',{k:'Bp tpe'}); K.rc(x-hw,Z(-hef+0.85*db),2*hw,0.85*db*s2,'vis','#fff',{k:'da'}); }
+    else if(head==='hex') K.rc(x-hw,Z(-hef),2*hw,0.7*db*s2,'vis','#fff',{k:'da'});
+    else { const eh=num('eh',100); K.pa(`M${x-rw},${Z(-hef+20)} V${Z(-hef)} H${x+s*eh*s2}`,'vis',null,{k:'eh'}); } });
+  const zr=Z(zp);
+  const xr=xb+22; K.dv(Z(zp),Z(g),U(o.N/2),U(o.N/2),xr,fl(tp),{k:'tp',side:1}); K.dv(Z(g),Z(0),U(o.N/2+25),U(o.N/2+25),xr,fl(g),{k:'grt',side:-1});
+  K.dv(Z(0),Z(-hef),xb,U(o.fd),xr+28,'hef = '+hef,{k:'hef'});
+  if(lug) K.dv(Z(g),Z(g-Hsl),U(tsl/2),U(tsl/2),U(tsl/2)+26,fl(Hsl),{k:'Hsl'});
+  if(chair) K.dv(Z(zp),Z(zp+sh),U(o.fd+sbw/2),U(o.fd+sbw/2),U(o.N/2)+40,fl(sh),{k:'shh'});
+  if(o.P>0){ K.force(U(-d/4),Z(zc)-6,0,1,48,`P = ${f1(o.P/1e3,0)} kN`,{k:'P'}); }
+  if(o.M>0){ const r=26, c0=[U(d/4)+10,Z(zc)-30]; K.pa(`M${c0[0]-r},${c0[1]} A${r},${r} 0 1,1 ${c0[0]+r*0.2},${c0[1]+r*0.98}`,null,null,{k:'M'}).setAttribute('style','stroke:#111;stroke-width:1.6;fill:none'); K.ah(c0[0]+r*0.2,c0[1]+r*0.98,Math.PI*0.95,{k:'M'},11,3.6); K.t(c0[0]+r+6,c0[1]-6,`M = ${f1(o.M/1e6,1)} kN·m`,{a:'start',b:true,k:'M'}); }
+  if(o.V>0) K.force(U(-d/2)-4,Z(zp+40),1,0,56,`V = ${f1(o.V/1e3,0)} kN`,{k:'V',ly:-4});
+  if(o.T>0){ const x=U(-o.fd), z1=Z(zn+6+1.6*db+12); K.force(x,z1-8,0,-1,40,`T = ${f1(o.T/1e3,1)} kN`,{k:'P M',a:'end',lx:-8,ly:-50}); }
+  if(o.P>0&&o.fpB>0){ const Yb=o.Y!=null?Math.min(o.Y,o.N):o.N, x0=o.N/2-Yb, z0=Z(0)+8, hh=Math.min(46,0.3*dep*s2);
+    K.pl([[U(x0),z0],[U(o.N/2),z0],[U(o.N/2),z0+hh],[U(x0),z0+hh]],'vis','#fff');
+    const nA=Math.max(3,Math.round(Yb*s2/14)); for(let i=0;i<=nA;i++){ const x=U(x0+Yb*i/nA); K.ln(x,z0+hh-2,x,z0+9,'thin'); K.ah(x,z0+1,-Math.PI/2,null,7,2.2); }
+    K.t(U(o.N/2)+8,z0+hh/2+5,`fp = ${f1(o.fpB,2)} MPa`,{b:true,a:'start'}); }
+  const tx=xb+86, L=[];
+  L.push([U(o.fd)+rw*2.4,Z(zn+6+1.2*db),['TUERCA Y GOLILLA'],'da']);
+  if(chair) L.push([U(d/2+cb*0.6),Z(zp+sh+ct/2),[`PL ${cb}×${fl(Lc)}×${ct} CONTINUA`,o.ns>1?`${o.ns-1} ATIESADOR${o.ns>2?'ES':''} PL ${stw} POR LADO`:'SIN ATIESADORES'],'cb ct ce stw']);
+  L.push([U(d/2)+fw*0.6,Z(zp)-fw*0.6,null,'ccat']);
+  L.push([U(o.N/2)-6,Z(zp)+tp*s2/2,[`PL e = ${tp}`],'tp']);
+  L.push([U(o.N/2+12),Z(g/2),['GROUT NO RETRÁCTIL',`e = ${g}`],'grt']);
+  if(lug) L.push([U(tsl/2),Z(g-Hsl*0.7),[`LLAVE PL ${bsl}×${Hsl}×${tsl}`],'bsl Hsl tsl']);
+  L.push([U(o.fd)+rw,Z(-hef*0.55),[`PERNO Ø${da}" L = ${fl(hef+zn+50)}`],'da hef']);
+  if(head==='plate') L.push([U(o.fd+Bp/2),Z(-hef+tpe/2),[`PL ANCLAJE ${Bp}×${Bp}×${tpe}`],'Bp tpe']);
+  L.push([xb-30,Z(-dep*0.8),[`H.A. f'c ${$('fc').value} MPa`],'fc']);
+  const yTop=Math.max(Z(zc)+10,40), yBot=Z(-dep)-6, step=Math.max(30,(yBot-yTop)/Math.max(1,L.length-1));
+  L.forEach((q,i)=>{ const ty=Math.max(Math.min(yTop+i*step,yBot),q[1]-140); if(q[2]===null) K.weld(q[0],q[1],tx,yTop+i*step,{all:true,side:1,len:44,note:'E70 COL. A PL',k:q[3]}); else K.lead(q[0],q[1],tx,yTop+i*step,q[2],{k:q[3],dot:q[3]==='fc'}); });
+  K.title(ex,H-28,'Corte A-A','S/E');
 }
-function secOf(id){ return secI_cat(shapeGet('W',$(id).value)); }
-function readP(){
-  const p={}; ['S','h','r','sp','Fy','Fu','cLy','cLb','rLy','rLb','qD','qL','w1','w2','w3','w4','Cs','fL','dW','dL'].forEach(k=>p[k]=num(k,0));
-  p.lrfd=$('meth').value==='lrfd'; p.base=$('base').value; p.proj=$('proj').value.trim(); return p;
-}
-function buildModel(p,sc,sr){
-  const S=p.S*1000,h=p.h*1000,r=p.r*1000;
-  const key=[[0,0],[0,h],[S/2,h+r],[S,h],[S,0]];
-  const mems=[{n:'Columna izq.',a:0,b:1,s:sc,type:'c'},{n:'Viga izq.',a:1,b:2,s:sr,type:'r'},{n:'Viga der.',a:2,b:3,s:sr,type:'r'},{n:'Columna der.',a:3,b:4,s:sc,type:'c'}];
-  const nodes=[], els=[];
-  const nid=(x,y)=>{ let i=nodes.findIndex(n=>Math.abs(n.x-x)<1e-6&&Math.abs(n.y-y)<1e-6); if(i<0){ nodes.push({x,y}); i=nodes.length-1; } return i; };
-  mems.forEach((m,mi)=>{ const A=key[m.a],B=key[m.b]; m.L=Math.hypot(B[0]-A[0],B[1]-A[1]); m.c=(B[0]-A[0])/m.L; m.sn=(B[1]-A[1])/m.L; m.els=[];
-    for(let k=0;k<NE;k++){ const t0=k/NE,t1=(k+1)/NE; const i=nid(A[0]+(B[0]-A[0])*t0,A[1]+(B[1]-A[1])*t0), j=nid(A[0]+(B[0]-A[0])*t1,A[1]+(B[1]-A[1])*t1); els.push({i,j,m:mi,L:m.L/NE,c:m.c,s:m.sn,sec:m.s,x0:m.L*t0}); m.els.push(els.length-1); } });
-  const sup=[nid(0,0),nid(S,0)], eaves=[nid(0,h),nid(S,h)], ridge=nid(S/2,h+r);
-  return {nodes,els,mems,sup,eaves,ridge,S,h,r,th:Math.atan2(r,S/2)};
-}
-function loadCase(M,p,lc){
-  const sp=p.sp*1000, th=M.th, ct=Math.cos(th), st=Math.sin(th);
-  M.els.forEach(e=>{ e.q=e.q||{}; let gx=0,gy=0; const mem=M.mems[e.m];
-    if(lc==='D'){ gy=-(e.sec.A*77e-6); if(mem.type==='r') gy-=p.qD*1e-3*sp; }
-    if(lc==='Lr'&&mem.type==='r'){ gy=-p.qL*1e-3*sp*ct; }
-    if(lc==='W+'||lc==='W-'){ const flip=lc==='W-';
-      let pr=0, inx=0, iny=0;
-      if(e.m===0){ pr=flip?p.w2:p.w1; inx=1; } else if(e.m===3){ pr=flip?p.w1:p.w2; inx=-1; }
-      else if(e.m===1){ pr=flip?p.w4:p.w3; inx=st; iny=-ct; } else { pr=flip?p.w3:p.w4; inx=-st; iny=-ct; }
-      gx=pr*1e-3*sp*inx; gy=pr*1e-3*sp*iny; }
-    e.q[lc]=[gx,gy]; });
-}
-function solve(M,p,load,second){
-  const n=M.nodes.length*3, E=ESTEEL, red=second?0.8:1;
-  const fixed=[]; M.sup.forEach(s=>{ fixed.push(3*s,3*s+1); if(p.base==='fix') fixed.push(3*s+2); });
-  const free=[...Array(n).keys()].filter(i=>!fixed.includes(i)), map=new Int32Array(n).fill(-1); free.forEach((d,i)=>map[d]=i);
-  const nf=free.length; let Nax=M.els.map(()=>0), U=new Float64Array(n), it=0, conv=false;
-  const F=new Float64Array(n); load.nodal.forEach(([nd,fx,fy])=>{ F[3*nd]+=fx; F[3*nd+1]+=fy; });
-  const fe=M.els.map(e=>{ const [gx,gy]=load.q(e); const wx=gx*e.c+gy*e.s, wy=-gx*e.s+gy*e.c, L=e.L; return {wx,wy,f:[wx*L/2,wy*L/2,wy*L*L/12,wx*L/2,wy*L/2,-wy*L*L/12]}; });
-  M.els.forEach((e,k)=>{ const f=fe[k].f, c=e.c, s=e.s, g=[c*f[0]-s*f[1],s*f[0]+c*f[1],f[2],c*f[3]-s*f[4],s*f[3]+c*f[4],f[5]]; const d=[3*e.i,3*e.i+1,3*e.i+2,3*e.j,3*e.j+1,3*e.j+2]; d.forEach((q,a)=>F[q]+=g[a]); });
-  const kl=(e,N)=>{ const L=e.L, EA=red*E*e.sec.A, EI=red*E*e.sec.Ix, a=EA/L, b=12*EI/L**3, c=6*EI/L**2, d=4*EI/L, f=2*EI/L;
-    const K=[[a,0,0,-a,0,0],[0,b,c,0,-b,c],[0,c,d,0,-c,f],[-a,0,0,a,0,0],[0,-b,-c,0,b,-c],[0,c,f,0,-c,d]];
-    if(second&&N){ const g=N/L; const G=[[0,0,0,0,0,0],[0,6/5,L/10,0,-6/5,L/10],[0,L/10,2*L*L/15,0,-L/10,-L*L/30],[0,0,0,0,0,0],[0,-6/5,-L/10,0,6/5,-L/10],[0,L/10,-L*L/30,0,-L/10,2*L*L/15]]; for(let i=0;i<6;i++) for(let j=0;j<6;j++) K[i][j]+=g*G[i][j]; }
-    return K; };
-  const T=e=>{ const c=e.c,s=e.s; return [[c,s,0,0,0,0],[-s,c,0,0,0,0],[0,0,1,0,0,0],[0,0,0,c,s,0],[0,0,0,-s,c,0],[0,0,0,0,0,1]]; };
-  let endF=[];
-  for(it=0;it<30;it++){
-    const K=Array.from({length:nf},()=>new Float64Array(nf));
-    M.els.forEach((e,k)=>{ const Kl=kl(e,Nax[k]), Tm=T(e); const Kg=Array.from({length:6},()=>new Float64Array(6));
-      for(let i=0;i<6;i++) for(let j=0;j<6;j++){ let s=0; for(let a=0;a<6;a++) for(let b=0;b<6;b++) s+=Tm[a][i]*Kl[a][b]*Tm[b][j]; Kg[i][j]=s; }
-      const d=[3*e.i,3*e.i+1,3*e.i+2,3*e.j,3*e.j+1,3*e.j+2]; for(let i=0;i<6;i++){ const I=map[d[i]]; if(I<0) continue; for(let j=0;j<6;j++){ const J=map[d[j]]; if(J>=0) K[I][J]+=Kg[i][j]; } } });
-    const b=Float64Array.from(free.map(d=>F[d]));
-    const x=gauss(K,b); if(!x) return null;
-    U=new Float64Array(n); free.forEach((d,i)=>U[d]=x[i]);
-    const Nn=[]; endF=M.els.map((e,k)=>{ const Tm=T(e), d=[3*e.i,3*e.i+1,3*e.i+2,3*e.j,3*e.j+1,3*e.j+2], ug=d.map(q=>U[q]); const ul=Tm.map(r=>r.reduce((s,v,j)=>s+v*ug[j],0)); const Kl=kl(e,Nax[k]); const fl=Kl.map((r,i)=>r.reduce((s,v,j)=>s+v*ul[j],0)-fe[k].f[i]); Nn.push(fl[3]); return {fl,ul,wy:fe[k].wy,wx:fe[k].wx}; });
-    if(!second){ conv=true; break; }
-    const dmax=Math.max(...Nn.map((v,k)=>Math.abs(v-Nax[k])))/Math.max(1,...Nn.map(Math.abs));
-    Nax=Nn; if(dmax<1e-5&&it>0){ conv=true; break; }
-  }
-  const R=M.sup.map(s=>{ let rx=-F[3*s],ry=-F[3*s+1],rm=-F[3*s+2]; return {rx,ry,rm}; });
-  return {U,endF,conv,it};
-}
-function gauss(A,b){ const n=b.length, M=A.map((r,i)=>{ const x=new Float64Array(n+1); x.set(r); x[n]=b[i]; return x; });
-  for(let c=0;c<n;c++){ let p=c; for(let r=c+1;r<n;r++) if(Math.abs(M[r][c])>Math.abs(M[p][c])) p=r; if(Math.abs(M[p][c])<1e-12) return null; [M[c],M[p]]=[M[p],M[c]];
-    for(let r=c+1;r<n;r++){ const f=M[r][c]/M[c][c]; if(f) for(let k=c;k<=n;k++) M[r][k]-=f*M[c][k]; } }
-  const x=new Float64Array(n); for(let r=n-1;r>=0;r--){ let s=M[r][n]; for(let k=r+1;k<n;k++) s-=M[r][k]*x[k]; x[r]=s/M[r][r]; } return x; }
-function memberDiag(M,res,mi){
-  const m=M.mems[mi], pts=[];
-  m.els.forEach((ek,j)=>{ const e=M.els[ek], f=res.endF[ek].fl, wy=res.endF[ek].wy, wx=res.endF[ek].wx;
-    for(let k=0;k<=4;k++){ if(j>0&&k===0) continue; const x=e.L*k/4; const N=-f[0]-wx*x, V=f[1]+wy*x, Mm=-f[2]+f[1]*x+wy*x*x/2; pts.push({x:e.x0+x,N,V,M:Mm}); } });
-  return pts;
-}
-function interpM(pts,x){ for(let i=1;i<pts.length;i++){ if(x<=pts[i].x+1e-9){ const a=pts[i-1],b=pts[i],t=(x-a.x)/Math.max(b.x-a.x,1e-9); return a.M+(b.M-a.M)*t; } } return pts[pts.length-1].M; }
-function checkMember(M,p,mi,dg){
-  const m=M.mems[mi], s=m.s, lrfd=p.lrfd, L=m.L, Lcy=(m.type==='c'?p.cLy:p.rLy)*1000, Lb=(m.type==='c'?p.cLb:p.rLb)*1000;
-  const base={lrfd,E:ESTEEL,G:GSTEEL,Fy:p.Fy,Fu:p.Fu,Lcx:L,Lcy:Math.min(Lcy,L),Lcz:Math.min(Lcy,L),Lb:Math.min(Lb,L),Cb:1,anr:1,U:1};
-  const Nmin=Math.min(...dg.map(q=>q.N)), Nmax=Math.max(...dg.map(q=>q.N));
-  const comp=Nmin<0, Pr=comp?-Nmin:Math.max(Nmax,0);
-  const cc=compressionCheck(s,base), tc=tensionCheck(s,base);
-  const Pc=comp?cc.Pc:tc.Pc;
-  let worst=null;
-  const nseg=Math.max(1,Math.ceil(L/base.Lb-1e-6)), Ls=L/nseg;
-  for(let k=0;k<nseg;k++){ const x0=k*Ls, x1=x0+Ls; const seg=dg.filter(q=>q.x>=x0-1e-6&&q.x<=x1+1e-6);
-    const Mmax=Math.max(...seg.map(q=>Math.abs(q.M))); const MA=Math.abs(interpM(dg,x0+Ls/4)), MB=Math.abs(interpM(dg,x0+Ls/2)), MC=Math.abs(interpM(dg,x0+3*Ls/4));
-    const Cb=Mmax>0?12.5*Mmax/(2.5*Mmax+3*MA+4*MB+3*MC):1;
-    const fl=flexIx(s,Object.assign({},base,{Lb:Ls,Cb,Mx:Mmax}));
-    const rp=Pr/Pc, rx=Mmax/fl.Mc, it=rp>=0.2?rp+8/9*rx:rp/2+rx;
-    if(!worst||it>worst.it) worst={k,x0,x1,Mmax,Cb,fl,rp,rx,it,eq:rp>=0.2?'H1-1a':'H1-1b'}; }
-  const Vmax=Math.max(...dg.map(q=>Math.abs(q.V))), sh=shearCheck(s,base,Vmax,'y');
-  return {Pr,comp,Pc,cc,tc,worst,Vmax,sh,rv:Vmax/sh.Vc,ratio:Math.max(worst.it,Vmax/sh.Vc),nseg,Ls};
-}
+let V3=null;
+let lastFam=null;
+const CDEF={W:'W310X38.7',HR:'HSS203.2X203.2X9.5',HO:'HSS219.1X8.2'};
+function fillCat(){ const f=$('cfam').value, cur=$('ccat').value, list=SHAPES[f].map(r=>r[0]); $('ccat').innerHTML=list.map(n=>`<option>${n}</option>`).join(''); $('ccat').value=list.includes(cur)?cur:(list.includes(CDEF[f])?CDEF[f]:list[0]); }
 function analyze(){
-  const p=readP(), o={p,warn:[]};
-  const sc=secOf('cCat'), sr=secOf('rCat'); o.sc=sc; o.sr=sr;
-  const M=buildModel(p,sc,sr); o.M=M;
-  ['D','Lr','W+','W-'].forEach(lc=>loadCase(M,p,lc));
-  const sum=lc=>{ let fx=0,fy=0; M.els.forEach(e=>{ fx+=e.q[lc][0]*e.L; fy+=e.q[lc][1]*e.L; }); return {fx,fy}; };
-  const WD=-sum('D').fy, WL=-sum('Lr').fy, Ws=WD+p.fL*WL, HE=p.Cs*Ws;
-  o.WD=WD; o.WL=WL; o.Ws=Ws; o.HE=HE;
-  const alpha=p.lrfd?1:1.6;
-  const cases=[];
-  (COMBOS||[]).forEach(c=>{ const [nm,fD,fL,fW,fE]=c; const wv=fW?['W+','W-']:[null], ev=fE?[1,-1]:[0];
-    wv.forEach(w=>ev.forEach(es=>{ const grav=!w&&!es; const nv=grav?[1,-1]:[0]; nv.forEach(ns=>cases.push({nm:nm+(w?(w==='W+'?' (W →)':' (W ←)'):'')+(es?(es>0?' (E →)':' (E ←)'):'')+(grav?(ns>0?' (N →)':' (N ←)'):''),fD,fL,fW,fE,w,es,ns,grav})); })); });
-  o.cases=[]; let gov=null;
-  cases.forEach(cs=>{
-    const qf=e=>{ const a=[0,0]; [['D',cs.fD],['Lr',cs.fL]].forEach(([k,f])=>{ a[0]+=f*e.q[k][0]; a[1]+=f*e.q[k][1]; }); if(cs.w){ a[0]+=cs.fW*e.q[cs.w][0]; a[1]+=cs.fW*e.q[cs.w][1]; } return [alpha*a[0],alpha*a[1]]; };
-    const Y=alpha*(cs.fD*WD+cs.fL*WL);
-    let Hlat=cs.es*cs.fE*HE*alpha + (cs.w?alpha*cs.fW*sum(cs.w).fx:0);
-    const dir=cs.grav?cs.ns:(Math.abs(Hlat)>0?Math.sign(Hlat):1);
-    const mk=(kN)=>{ const nod=[]; const Nn=kN*Y; const H=cs.es*cs.fE*HE*alpha; M.eaves.forEach(nd=>nod.push([nd,(H/2)+dir*Nn/2,0])); return {nodal:nod,q:qf}; };
-    let kN=0.001+(cs.grav?0.002:0);
-    let r2=solve(M,p,mk(kN),true);
-    let ratio=1;
-    if(!cs.grav&&r2){ const r1=solve(M,p,mk(kN),false); const dx2=Math.abs(r2.U[3*M.eaves[0]]), dx1=Math.abs(r1.U[3*M.eaves[0]]); ratio=dx1>0?dx2/dx1:1; if(ratio>1.7){ kN=0.003; r2=solve(M,p,mk(kN),true); } }
-    if(!r2||!r2.conv){ o.warn.push(`${cs.nm}: el análisis de segundo orden no converge, estructura inestable.`); return; }
-    const dgs=M.mems.map((m,mi)=>memberDiag(M,r2,mi).map(q=>({x:q.x,N:q.N/alpha,V:q.V/alpha,M:q.M/alpha})));
-    const chk=M.mems.map((m,mi)=>checkMember(M,p,mi,dgs[mi]));
-    const cr={cs,res:r2,dgs,chk,kN,ratio,max:Math.max(...chk.map(c=>c.ratio))};
-    o.cases.push(cr); if(!gov||cr.max>gov.max) gov=cr;
-  });
-  o.gov=gov;
-  const svc=(lc,ux)=>{ const r=solve(M,p,{nodal:[],q:e=>e.q[lc]},false); return r; };
-  const rW=solve(M,p,{nodal:[],q:e=>e.q['W+']},false), rL=solve(M,p,{nodal:[],q:e=>e.q['Lr']},false);
-  o.dW=Math.max(Math.abs(rW.U[3*M.eaves[0]]),Math.abs(rW.U[3*M.eaves[1]])); o.dL=Math.abs(rL.U[3*M.ridge+1]);
-  o.dWlim=M.h/p.dW; o.dLlim=M.S/p.dL;
+  const lrfd=$('meth').value==='lrfd', o={warn:[],chk:[],det:[]}, D=o.det, C=o.chk, E=ESTEEL;
+  const f=$('cfam').value, c=shapeGet(f,$('ccat').value); o.f=f; o.c=c;
+  const N=num('N'), B=num('B'), tp=num('tp'), Fy=num('pFy',250), fc=num('fc',25), pN=num('pN'), pB=num('pB');
+  const P=num('P',0)*1e3, M=Math.abs(num('M',0))*1e6, V=num('V',0)*1e3;
+  const ns=Math.max(1,Math.round(num('ns',2))), eN=num('eN',50), sB=num('sB',200), nt=2*ns;
+  const fd=N/2-eN;
+  const phb=phiOm(lrfd,0.90,1.67), phc=phiOm(lrfd,0.65,2.31);
+  const treq=Mu=>SQ(4*Mu/(phb*Fy));
+  const tplate=(Tside)=>{ let x=fd-d/2+tf/2, w=B, how='x = f − d/2 + tf/2, M = T·x/B';
+    if(x<=0){ const tw=f==='W'?c.tw:tf; x=Math.max((ns>1?sB/2:0)-tw/2,1); w=Math.min(2*x*ns,B); how='pernos dentro de las alas: voladizo desde el alma, ancho 2x por perno'; o.warn.push('Pernos dentro de la proyección de las alas: placa en voladizo desde el alma con ancho efectivo 2x por perno.'); }
+    const Mt=Tside*x/w; return {x,w,Mt,tr:treq(Mt),how}; };
+  let d,bf,tf;
+  if(f==='W'){ d=c.d; bf=c.bf; tf=c.tf; } else if(f==='HR'){ d=c.H; bf=c.B; tf=c.t; } else { d=c.D; bf=c.D; tf=c.t; }
+  if(N<d||B<bf) o.warn.push('La placa es menor que la columna.');
+  if(pN<N||pB<B) o.warn.push('El pedestal es menor que la placa.');
+  const A1=N*B, cmin=Math.max(0,Math.min((pN-N)/2,(pB-B)/2)), A2=(N+2*cmin)*(B+2*cmin);
+  const Pp=Math.min(0.85*fc*A1*SQ(A2/A1),1.7*fc*A1), Ppa=phc*Pp, fpmax=Ppa/A1;
+  let m,n,lnp=0,lam=1;
+  if(f==='W'){ m=(N-0.95*d)/2; n=(B-0.8*bf)/2; } else if(f==='HR'){ m=(N-0.95*d)/2; n=(B-0.95*bf)/2; } else { m=(N-0.8*d)/2; n=(B-0.8*d)/2; }
+  D.push([null,'Apoyo en el hormigón, J8'],['A1, A2',`${f1(A1,0)}, ${f1(A2,0)} mm²`,'A2 geométricamente semejante y concéntrica'],['Pp',f1(Pp/1e3,1)+' kN','Ec. J8-2, ≤ 1,7f\'c·A1'],['Disponible',f1(Ppa/1e3,1)+' kN',lrfd?'φc = 0,65':'Ωc = 2,31'],['m, n',`${f1(m,1)}, ${f1(n,1)} mm`,f==='W'?'(N − 0,95d)/2, (B − 0,8bf)/2':f==='HR'?'(N − 0,95d)/2, (B − 0,95b)/2':'(N − 0,8D)/2']);
+  let T=0, Y=null, regime='';
+  if(P>0&&M===0){
+    regime='compresión axial';
+    const fp=P/A1; o.fpB=fp;
+    C.push({n:'Aplastamiento del hormigón, J8',d:f1(P/1e3,1)+' kN',c:f1(Ppa/1e3,1)+' kN',r:P/Ppa});
+    if(f==='W'){ const X=4*d*bf/Math.pow(d+bf,2)*P/Ppa; lam=Math.min(1,2*SQ(X)/(1+SQ(Math.max(1-X,0)))); lnp=lam*SQ(d*bf)/4; D.push(['X, λ, λn\'',`${f1(X,3)}, ${f1(lam,3)}, ${f1(lnp,1)} mm`,'Manual AISC parte 14 y Guía de Diseño 1']); }
+    const l=Math.max(m,n,lnp), Mu=fp*l*l/2, tr=treq(Mu);
+    D.push(['fp, l',`${f1(fp,2)} MPa, ${f1(l,1)} mm`,'l = máx(m, n, λn\')'],['Momento por ancho unitario',f1(Mu,0)+' N·mm/mm','fp·l²/2'],['tp requerido',f1(tr,1)+' mm',lrfd?'√(4M/(0,9Fy))':'√(4M·1,67/Fy)']);
+    C.push({n:'Espesor de placa, compresión',d:f1(tr,1)+' mm',c:f1(tp,1)+' mm',r:tr/tp});
+  } else if(P>0){
+    const e=M/P, qmax=fpmax*B, ecr=N/2-P/(2*qmax);
+    D.push([null,'Flexocompresión, Guía de Diseño 1 con presión uniforme'],['e = M/P',f1(e,1)+' mm',''],['fp máx, qmax',`${f1(fpmax,2)} MPa, ${f1(qmax,1)} N/mm`,'φ·Pp/A1'],['e crítica',f1(ecr,1)+' mm','N/2 − P/(2qmax)']);
+    let fp, Yc;
+    if(e<=ecr){ regime='excentricidad pequeña'; Yc=N-2*e; fp=P/(Yc*B); D.push(['Y, fp',`${f1(Yc,1)} mm, ${f1(fp,2)} MPa`,'Y = N − 2e']); C.push({n:'Presión de contacto',d:f1(fp,2)+' MPa',c:f1(fpmax,2)+' MPa',r:fp/fpmax}); }
+    else{ regime='excentricidad grande'; const a=fd+N/2, q=2*P*(e+fd)/qmax;
+      if(a*a<q){ o.warn.push('Sin solución real para Y: aumentar la placa, (f + N/2)² < 2P(e + f)/qmax.'); C.push({n:'Equilibrio de la placa',d:f1(q,0),c:f1(a*a,0),r:q/(a*a)}); Yc=N; fp=fpmax; }
+      else { Yc=a-SQ(a*a-q); fp=fpmax; T=qmax*Yc-P; }
+      D.push(['f, Y, T',`${f1(fd,1)} mm, ${f1(Yc,1)} mm, ${f1(T/1e3,1)} kN`,'Y = (f + N/2) − √((f + N/2)² − 2P(e + f)/qmax), T = qmax·Y − P']); }
+    Y=Yc; o.fpB=fp;
+    const Mc=Yc>=m?fp*m*m/2:fp*Yc*(m-Yc/2), Mn_=fp*n*n/2, Mmax=Math.max(Mc,Mn_), tr=treq(Mmax);
+    D.push(['M lado comprimido',f1(Mc,0)+' N·mm/mm',Yc>=m?'fp·m²/2':'fp·Y·(m − Y/2)'],['M dirección n',f1(Mn_,0)+' N·mm/mm','fp·n²/2'],['tp requerido, compresión',f1(tr,1)+' mm','√(4M/(φFy))']);
+    C.push({n:'Espesor de placa, lado comprimido',d:f1(tr,1)+' mm',c:f1(tp,1)+' mm',r:tr/tp});
+    if(T>0){ const q=tplate(T); D.push(['x, ancho, M lado traccionado',`${f1(q.x,1)} mm, ${f1(q.w,0)} mm, ${f1(q.Mt,0)} N·mm/mm`,q.how],['tp requerido, tracción',f1(q.tr,1)+' mm','']); C.push({n:'Espesor de placa, lado traccionado',d:f1(q.tr,1)+' mm',c:f1(tp,1)+' mm',r:q.tr/tp}); }
+  } else {
+    regime='tracción';
+    T=-P/2+M/(2*fd);
+    if(P<0&&M===0) T=-P/2;
+    const q=tplate(T);
+    D.push([null,'Tracción neta'],['T por lado',f1(T/1e3,1)+' kN','|P|/2 + M/(2f)'],['x, ancho, M',`${f1(q.x,1)} mm, ${f1(q.w,0)} mm, ${f1(q.Mt,0)} N·mm/mm`,q.how],['tp requerido',f1(q.tr,1)+' mm','√(4M/(φFy))']);
+    C.push({n:'Espesor de placa por tracción de pernos',d:f1(q.tr,1)+' mm',c:f1(tp,1)+' mm',r:q.tr/tp});
+  }
+  o.T=T; o.Y=Y; o.regime=regime;
+  const dain=$('da').value, db=+dain*25.4, Ab=PI*db*db/4, Fu=num('futa',400);
+  const Tr=T/ns, Fnt=0.75*Fu, Fnv=0.450*Fu, ph=phiOm(lrfd,0.75,2.00);
+  D.push([null,'Pernos, AISC J3 y J9, parte roscada'],['Ab, Fnt, Fnv',`${f1(Ab,0)} mm², ${f1(Fnt,0)}, ${f1(Fnv,0)} MPa`,'Tabla J3.2, 0,75Fu y 0,450Fu'],['Tracción por perno',f1(Tr/1e3,1)+' kN',`${ns} pernos en el lado traccionado`]);
+  if(T>0) C.push({n:'Perno en tracción, J3.7',d:f1(Tr/1e3,1)+' kN',c:f1(ph*Fnt*Ab/1e3,1)+' kN',r:Tr/(ph*Fnt*Ab)});
+  const vt=$('vt').value, lim=lrfd?75e3:50e3;
+  if(vt==='bolt'&&V>0){
+    let nact=0, rule='';
+    if(V<=lim){ nact=2; rule=`V ≤ ${lrfd?75:50} kN, dos pernos activos`; } else if(nt>=9){ nact=nt/3; rule='nueve o más pernos, un tercio activo'; }
+    D.push([null,'Corte en pernos, NCh2369 8.5.3'],['Pernos activos',nact?f1(nact,1):'-',rule||'requiere llave de corte']);
+    if(!nact){ C.push({n:'Corte sin llave, NCh2369 8.5.3',d:f1(V/1e3,1)+' kN',c:f1(lim/1e3,0)+' kN',r:V/lim}); o.warn.push('NCh2369 8.5.3: el corte supera el límite para pernos con menos de 9 anclajes, se requiere llave de corte.'); }
+    else { const Vr=V/nact, frv=Vr/Ab; const Fntp=Math.max(0,Math.min(lrfd?1.3*Fnt-Fnt/(0.75*Fnv)*frv:1.3*Fnt-2*Fnt/Fnv*frv,Fnt));
+      D.push(['frv, F\'nt',`${f1(frv,1)} MPa, ${f1(Fntp,1)} MPa`,lrfd?'Ec. J3-3a':'Ec. J3-3b']);
+      C.push({n:'Perno en corte, J3.7',d:f1(Vr/1e3,1)+' kN',c:f1(ph*Fnv*Ab/1e3,1)+' kN',r:Vr/(ph*Fnv*Ab)});
+      if(T>0) C.push({n:'Perno en tracción con corte, J3.8',d:f1(Tr/1e3,1)+' kN',c:f1(ph*Fntp*Ab/1e3,1)+' kN',r:Tr/(ph*Fntp*Ab)}); }
+  }
+  const af=lrfd?1:num('aF',1.5);
+  const base={inst:'cast',head:$('head').value,dain,fya:num('fya',250),futa:Fu,hef:num('hef',450),ha:num('ha',800),duct:$('duct').checked,grout:num('grt',0)>0,Bp:num('Bp',75),Lp:num('Bp',75),tp:num('tpe',12),fyp:250,eh:num('eh',100),tcr:0,tunc:0,cat:1,cac:0,Nus:0,
+    fc,lam:num('lam',1),zcm:0,crk:$('crk').value==='1',seis:$('seis').checked,condT:'B',condV:'B',psicV:1,red:'1',psaT:0,psaV:0,dmode:'res',eNx:0,eNy:0,vcase:'std',arT:false,nbT:0,dbT:16,fyr:420,btype:'hook',rtop:50,Lx:50,Ly:100,arV:false,nbV:0,dbV:10,fyv:420,
+    lmode:'res',bsl:num('bsl',150),Hsl:num('Hsl',150),tsl:num('tsl',25),fysl:Fy,Bbp:B,Lbp:N,tbp:tp,gbp:num('grt',30),nbl:0,dbl:12,fyl:420,eV:0};
+  const ex=(pB-(ns-1)*sB)/2, eyT=pN/2-fd;
+  const runs={};
+  if(T>0){ runs.T=ANCH.analyze(Object.assign({},base,{nx:ns,sx:sB,ny:(P<0&&M===0)?2:1,sy:2*fd,cxm:ex,cxp:ex,cym:(P<0&&M===0)?eyT:pN/2+fd,cyp:eyT,Nua:T*((P<0&&M===0)?2:1)*af/1e3,Vua:0,vdir:'py',lug:false,Pu:0})); }
+  if(V>0){ runs.V=ANCH.analyze(Object.assign({},base,{nx:ns,sx:sB,ny:2,sy:2*fd,cxm:ex,cxp:ex,cym:eyT,cyp:eyT,Nua:0,Vua:V*af/1e3,vdir:'py',lug:vt==='lug',Pu:Math.max(P,0)*af/1e3})); }
+  o.runs=runs; o.af=af;
+  const rows=[];
+  if(runs.T) rows.push(...runs.T.rows.filter(r=>r.grp==='T'&&!r.unit),...runs.T.rows.filter(r=>r.unit));
+  if(runs.V&&vt==='bolt') rows.push(...runs.V.rows.filter(r=>r.grp==='V'));
+  rows.forEach(r=>C.push({n:'ACI: '+r.name,d:r.unit?f1(r.dem,1)+' mm':f1(r.dem,1)+' kN',c:r.unit?f1(r.des,1)+' mm':f1(r.des,1)+' kN',r:r.ratio}));
+  o.aciRows=rows;
+  if(runs.T&&runs.V&&vt==='bolt'){
+    const eff=(R,pre)=>{ const x=R.rows.filter(r=>r.name.startsWith(pre)); return x.length?Math.max(...x.map(r=>r.ratio)):0; };
+    const rN=Math.max(...['Arrancamiento del hormigón','Extracción','Desprendimiento lateral'].map(k=>eff(runs.T,k))), rV=Math.max(...['Arrancamiento por corte','Desprendimiento por palanca','Arrancamiento, corte paralelo'].map(k=>eff(runs.V,k)));
+    const rNs=eff(runs.T,'Acero en tracción'), rVs=eff(runs.V,'Acero en corte');
+    C.push({n:'ACI: interacción acero, 17.8.4',d:'',c:'1.000',r:rNs*rNs+rVs*rVs});
+    C.push({n:'ACI: interacción hormigón, 17.8.3',d:'',c:'1.000',r:Math.pow(rN,5/3)+Math.pow(rV,5/3)});
+  }
+  if(runs.V&&vt==='lug'){ const L=runs.V.lug; o.lug=L;
+    C.push({n:'Llave: acero, 17.11',d:f1(L.Vd,1)+' kN',c:f1(0.9*L.Vsl,1)+' kN',r:L.Vd/(0.9*L.Vsl)});
+    C.push({n:'Llave: aplastamiento, 17.11.2',d:f1(L.Vd,1)+' kN',c:f1(0.65*L.Vbrg,1)+' kN',r:L.rBrg});
+    C.push({n:'Llave: arrancamiento, 17.11.3',d:f1(L.Vd,1)+' kN',c:f1(L.Vd/L.rCb,1)+' kN',r:L.rCb});
+    if(!L.okGeo) o.warn.push('Llave de corte: hef/csl o hef/hsl menor que 2,5, 17.11.1.1.'); }
+  Object.values(runs).forEach(R=>R.warn.forEach(w=>{ if(!o.warn.includes(w)) o.warn.push(w); }));
+  if($('ch').checked){
+    const ce=num('ce',60), cb=num('cb',100), ct=num('ct',25), sbw=num('sbw',100), stw=num('stw',12), sh=num('shh',250), nst=ns-1, Lc=(ns-1)*sB+2*ce, a1=fd-d/2;
+    D.push([null,'Silla de pernos'],['Placa superior continua',`${f1(cb,0)} × ${f1(Lc,0)} × ${f1(ct,0)} mm por lado`,'Lc = (n − 1)·s + 2e'],['Atiesadores por lado',`${nst}`,'uno entre pernos, n − 1']);
+    if(a1<0.9*db+10) o.warn.push('Silla: el perno queda muy cerca del ala de la columna, sin espacio para tuerca y soldadura.');
+    if(a1+0.9*db>cb) o.warn.push('Silla: el perno queda fuera del ancho de la placa superior.');
+    if(T>0){
+      const b1=Math.min(Lc/ns,2*a1+1.5*db), M1=Tr*Math.max(a1,0), t1=SQ(4*M1/(phb*Fy*b1));
+      let t2=Infinity, M2=0, m2='';
+      if(nst>0){ const a2=Math.max(sB/2-stw/2,0); if(ns>=3){ M2=Math.max(Tr*a2,Tr*sB/8); m2='extremo en voladizo T·a2, interior T·s/8'; } else { M2=Tr*a2; m2='voladizo desde el atiesador T·a2'; } t2=SQ(4*M2/(phb*Fy*cb)); }
+      const trq=Math.min(t1,t2);
+      D.push(['Modelo 1, voladizo desde el ala',`a1 = ${f1(a1,0)} mm, b = ${f1(b1,0)} mm, t = ${f1(t1,1)} mm`,'M = T·a1, b = min(Lc/n, 2a1 + 1,5db)']);
+      if(nst>0) D.push(['Modelo 2, apoyo en atiesadores',`M = ${f1(M2/1e6,3)} kN·m, b = ${f1(cb,0)} mm, t = ${f1(t2,1)} mm`,m2]);
+      D.push(['t requerido',f1(trq,1)+' mm','menor de ambos modelos, cota inferior, t = √(4M/(φFy·b))']);
+      C.push({n:'Silla: placa superior en flexión',d:f1(trq,1)+' mm',c:f1(ct,1)+' mm',r:trq/ct});
+      if(nst>0){
+        const Rs=Tr*ns/nst, r=stw/SQ(12), KLr=0.65*sh/r, Ag=sbw*stw;
+        let Pn; if(KLr<=25) Pn=Fy*Ag; else { const Fe=PI*PI*E/(KLr*KLr); Pn=fnE3(Fy,Fe)*Ag; }
+        const lr=0.56*SQ(E/Fy);
+        D.push(['Reacción por atiesador',f1(Rs/1e3,1)+' kN','n·T/(n − 1), sin aporte del ala'],['Lc/r atiesador',f1(KLr,1),'K = 0,65, r = t/√12, J4.4'],['Pn atiesador',f1(Pn/1e3,1)+' kN',KLr<=25?'Ec. J4-6':'capítulo E']);
+        C.push({n:'Silla: atiesador en compresión, J4.4',d:f1(Rs/1e3,1)+' kN',c:f1(phiOm(lrfd,0.9,1.67)*Pn/1e3,1)+' kN',r:Rs/(phiOm(lrfd,0.9,1.67)*Pn)});
+        C.push({n:'Silla: esbeltez del atiesador, Tabla B4.1a caso 1',d:f1(sbw/stw,2),c:f1(lr,2),r:(sbw/stw)/lr});
+      }
+    }
+  }
+  Object.assign(o,{N,B,tp,pN,pB,d,bf,tf,ns,eN,sB,fd,m,n,lrfd,P,M,V,db});
   return o;
 }
-function drawFrame(svg,o,ci,kind){
-  const W=760,H=420; svg.innerHTML=''; svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
-  const M=o.M, A=(n,a)=>svg.appendChild(el(n,a)), T=(x,y,t,op)=>svg.appendChild(tx(x,y,t,Object.assign({'font-size':10.5,stroke:'#fff','stroke-width':3,'paint-order':'stroke'},op||{})));
-  const sc=Math.min(600/M.S,300/(M.h+M.r)), ox=(W-M.S*sc)/2, oy=H-50;
-  const X=x=>ox+x*sc, Y=y=>oy-y*sc;
-  const cr=o.cases[ci]; if(!cr) return;
-  M.mems.forEach((m,mi)=>{ const a=M.nodes[M.els[m.els[0]].i], b=M.nodes[M.els[m.els[NE-1]].j]; A('line',{x1:X(a.x),y1:Y(a.y),x2:X(b.x),y2:Y(b.y),stroke:'#000','stroke-width':2}); });
-  M.sup.forEach(s=>{ const n=M.nodes[s]; if(o.p.base==='fix') A('rect',{x:X(n.x)-10,y:Y(n.y),width:20,height:6,fill:'#000'}); else A('polygon',{points:`${X(n.x)},${Y(n.y)} ${X(n.x)-9},${Y(n.y)+14} ${X(n.x)+9},${Y(n.y)+14}`,fill:'none',stroke:'#000','stroke-width':1.2}); });
-  if(kind==='d'){ const U=cr.res.U, mx=Math.max(...M.nodes.map((n,i)=>Math.hypot(U[3*i],U[3*i+1]))), f=40/Math.max(mx,1e-9);
-    const pts=M.nodes.map((n,i)=>({x:X(n.x+U[3*i]*f/sc*1),y:Y(n.y+U[3*i+1]*f/sc)}));
-    M.els.forEach(e=>A('line',{x1:pts[e.i].x,y1:pts[e.i].y,x2:pts[e.j].x,y2:pts[e.j].y,stroke:'#000','stroke-width':1,'stroke-dasharray':'5,3'}));
-    T(W/2,22,`Deformada, máx. ${f1(mx/(o.p.lrfd?1:1.6),1)} mm (factor ${f1(f/sc,0)})`); return; }
-  const vals=cr.dgs.flatMap(d=>d.map(q=>Math.abs(q[kind]))), mx=Math.max(...vals,1e-9), f=60/mx;
-  M.mems.forEach((m,mi)=>{ const a=M.nodes[M.els[m.els[0]].i], dg=cr.dgs[mi], nx=-m.sn, ny=m.c;
-    let path=`M ${X(a.x)} ${Y(a.y)} `; dg.forEach(q=>{ const px=a.x+m.c*q.x, py=a.y+m.sn*q.x, v=q[kind]*f/sc; path+=`L ${X(px+nx*v)} ${Y(py+ny*v)} `; });
-    const b=M.nodes[M.els[m.els[NE-1]].j]; path+=`L ${X(b.x)} ${Y(b.y)} Z`;
-    A('path',{d:path,fill:'#e2e2e2',stroke:'#000','stroke-width':0.8,'fill-opacity':0.8});
-    const ext=dg.reduce((a2,q)=>Math.abs(q[kind])>Math.abs(a2[kind])?q:a2,dg[0]); const px=a.x+m.c*ext.x, py=a.y+m.sn*ext.x, v=ext[kind]*f/sc;
-    const u=kind==='M'?1e6:1e3; T(X(px+nx*v),Y(py+ny*v)-4,f1(ext[kind]/u,1)); });
-  const un=kind==='M'?'kN·m':'kN'; T(W/2,22,`${kind==='M'?'Momento':kind==='N'?'Axial':'Corte'} [${un}], ${cr.cs.nm}`);
-}
-function elevSheet(svg,o){
-  const W=1300, H=600, K=DK(svg,W,H,{fs:1.05}), p=o.p, M=o.M, S=M.S, h=M.h, r=M.r, th=M.th, tn=Math.tan(th), ct=Math.cos(th);
-  const sc=Math.min(520/S,290/(h+r)), y0=420, narrow=S*sc<330, xc=narrow?250+S*sc/2:410, X=x=>xc+(x-S/2)*sc, Y=y=>y0-y*sc, mm=v=>f1(v,0), lv=v=>(v>0?'+':'±')+f1(v/1000,3);
-  const dc=Math.max(o.sc.d,4/sc), dr=Math.max(o.sr.d,4/sc), top=x=>h+Math.min(x,S-x)*tn+dr/(2*ct), bot=x=>h+Math.min(x,S-x)*tn-dr/(2*ct);
-  const Lr=Math.hypot(S/2,r);
-  /* ejes */
-  [[0,'A'],[S,'B']].forEach(([x,n])=>{ K.ln(X(x),Y(h+r)-24,X(x),y0+62,'ctr',{k:'S'}); K.ci(X(x),y0+76,14,'vis','#fff',{k:'S'}); K.t(X(x),y0+81,n,{b:true,s:14,k:'S'}); });
-  /* vigas */
-  [0,1].forEach(sd=>{ const f=x=>sd?S-x:x; const xs=[-dc/2,S/2];
-    K.pl([[X(f(xs[0])),Y(top(xs[0]))],[X(f(xs[1])),Y(top(xs[1]))],[X(f(xs[1])),Y(bot(xs[1]))],[X(f(xs[0])),Y(bot(xs[0]))]],'vis','#fff',{k:'rCat S h r'});
-    K.ln(X(f(0)),Y(h),X(S/2),Y(h+r),'ctr'); });
-  /* columnas */
-  [0,S].forEach(x=>{ const s=x?-1:1; K.pl([[X(x-dc/2),Y(0)],[X(x+dc/2),Y(0)],[X(x+dc/2),Y(top(x+dc/2))],[X(x-dc/2),Y(top(x-dc/2))]],'vis','#fff',{k:'cCat h'}); });
-  /* placa base y pedestal */
-  [0,S].forEach(x=>{ const w=dc*sc+14; K.rc(X(x)-w/2,y0,w,3.5,null,'#111',{k:'base'}); const pw=w+22; K.pl([[X(x)-pw/2,y0+3.5],[X(x)+pw/2,y0+3.5],[X(x)+pw/2,y0+34],[X(x)-pw/2,y0+34]],null,K.H('cc'));
-    K.ln(X(x)-pw/2,y0+3.5,X(x)-pw/2,y0+34,'cut'); K.ln(X(x)+pw/2,y0+3.5,X(x)+pw/2,y0+34,'cut'); K.ln(X(x)-pw/2,y0+3.5,X(x)+pw/2,y0+3.5,'cut'); K.brk(X(x)-pw/2-4,y0+34,X(x)+pw/2+4,y0+34); });
-  K.ln(X(0)-60,y0+3.5,X(0)-30,y0+3.5,'thin'); K.ln(X(0)+30,y0+3.5,X(S)-30,y0+3.5,'thin'); K.ln(X(S)+30,y0+3.5,X(S)+60,y0+3.5,'thin');
-  /* costaneras de techo */
-  const nP=Math.max(1,Math.min(60,Math.ceil(Lr/Math.max(p.rLy*1000,100)-1e-6))), pw=Math.max(4,Math.min(7,60*sc)), ph=Math.max(7,Math.min(11,100*sc));
-  const purl=[]; [0,1].forEach(sd=>{ for(let i=0;i<=nP;i++){ const xx=(S/2)*i/nP*(i===nP?0.985:1)+(i===0?dc/2:0)*0, x=sd?S-xx:xx, yt=Y(top(xx)); K.rc(X(x)-pw/2,yt-ph,pw,ph,'thin','#111',{k:'rLy'}); if(!!sd===narrow) purl.push([X(x),yt-ph/2]); } });
-  /* costaneras laterales */
-  const nG=Math.max(1,Math.min(40,Math.floor((h-dr)/Math.max(p.cLy*1000,100)+1e-6))), girt=[];
-  [0,S].forEach(x=>{ const s=x?1:-1; for(let i=1;i<=nG;i++){ const y=i*p.cLy*1000; if(y>h-dr*0.5) break; const xo=X(x)+s*dc*sc/2; K.rc(s>0?xo:xo-ph,Y(y)-pw/2,ph,pw,'thin','#111',{k:'cLy'}); if((x>0)===narrow) girt.push([xo+s*ph/2,Y(y),y]); } });
-  /* tornapuntas, ala interior */
-  const kick=[], kc=[];
-  { const nb=Math.max(1,Math.min(40,Math.ceil(Lr/Math.max(p.rLb*1000,100)-1e-6))); [0,1].forEach(sd=>{ for(let i=1;i<nb;i++){ const xx=(S/2)*i/nb, x=sd?S-xx:xx, x2=sd?x-dr*1.4:x+dr*1.4, xb2=sd?S-x2:x2;
-      K.ln(X(x),Y(bot(xx)),X(x2),Y(top(sd?S-x2:x2)),'thin',{k:'rLb'}); if(!!sd===narrow) kick.push([X(x),Y(bot(xx))]); } }); }
-  { const nb=Math.max(1,Math.min(40,Math.ceil(h/Math.max(p.cLb*1000,100)-1e-6))); [0,S].forEach(x=>{ const s=x?-1:1; for(let i=1;i<nb;i++){ const y=h*i/nb; if(y>h-dr) break; K.ln(X(x)+s*dc*sc/2,Y(y),X(x)-s*dc*sc/2,Y(y)-dc*sc*1.2,'thin',{k:'cLb'}); if((x>0)===narrow) kc.push([X(x)+s*dc*sc/2,Y(y),y]); } }); }
-  /* textos de perfiles */
-  const rIn=Lr*sc>=190, mx=S/4, myT=Y(top(mx))-ph-12, ang=-th*180/PI;
-  if(rIn){ K.t(X(mx),myT,`VIGA ${o.sr.name}`,{r:ang,b:true,k:'rCat'}); K.t(X(S-mx),myT,`VIGA ${o.sr.name}, i = ${f1(r/(S/2)*100,1)} %`,{r:-ang,b:true,k:'rCat'}); }
-  const ycm=Y(h*0.55), colIn=h*sc>170; if(colIn){ K.t(X(dc/2)+14,ycm,`COLUMNA ${o.sc.name}`,{r:-90,b:true,k:'cCat'}); K.t(X(S-dc/2)-14,ycm,`COLUMNA ${o.sc.name}`,{r:90,b:true,k:'cCat'}); }
-  /* notas interiores */
-  const notes=[];
-  if(!rIn){ const xx=S/2*0.55; notes.push([[narrow?X(S-xx):X(xx),Y(bot(xx))],[`VIGAS ${o.sr.name}`,`i = ${f1(r/(S/2)*100,1)} %`],'rCat r S']); }
-  if(purl.length>2) notes.push([purl[Math.min(1,purl.length-1)],[`COSTANERAS DE TECHO @ ${f1(Lr/nP/1000,2)} m`,'Lcy VIGA'],'rLy']);
-  if(kick.length) notes.push([kick[Math.floor((kick.length-1)/2)],[`TORNAPUNTAS @ ${f1(Lr/Math.max(1,kick.length+1)/1000,2)} m`,'Lb ALA INTERIOR VIGA'],'rLb']);
-  if(girt.length){ const g=girt[girt.length-1]; notes.push([[g[0],g[1]],[`COSTANERAS LATERALES @ ${f1(p.cLy,2)} m`,'Lcy COLUMNA'],'cLy']); }
-  if(kc.length){ const g=kc[Math.floor((kc.length-1)/2)]; notes.push([[g[0],g[1]],[`TORNAPUNTAS @ ${f1(h/(kc.length+1)/1000,2)} m`,'Lb ALA INTERIOR COLUMNA'],'cLb']); }
-  if(!colIn) notes.push([[narrow?X(S)-dc*sc/2:X(0)+dc*sc/2,Y(h*0.4)],[`COLUMNAS ${o.sc.name}`],'cCat']);
-  const xl0=X(S)+dc*sc/2+ph+44, above=!narrow&&h*sc<90+(notes.length-1)*30;
-  const tx=narrow?xl0+16:X(S*0.2)+30, yA=above?40:narrow?Y(h)+20:Y(h)+40, yB=above?Y(h+r)-ph-60:y0-50, st=notes.length>1?Math.min(44,Math.max(28,(yB-yA)/(notes.length-1))):0;
-  notes.forEach((n,i)=>K.lead(n[0][0],n[0][1],tx,yA+i*st,n[1],{k:n[2],side:1,dot:i>=2}));
-  /* cotas */
-  const xd=X(0)-dc*sc/2-ph-30;
-  K.dh(X(0),X(S),y0+34,y0+34,y0+50,mm(S),{k:'S'});
-  K.dv(Y(h),Y(0),X(0),X(0)-dc*sc/2,xd,mm(h),{k:'h'});
-  K.ln(X(0)+dc*sc/2+4,Y(h),X(S)-dc*sc/2-4,Y(h),'thin',{k:'r'}); K.dv(Y(h+r),Y(h),X(S/2),X(S/2),X(S/2),mm(r),{k:'r',side:-1});
-  /* niveles */
-  const xl=X(S)+dc*sc/2+ph+44;
-  { const yr=Y(top(S/2))-ph-6, xr0=X(S/2); K.pl([[xr0,yr],[xr0-6,yr-10],[xr0+6,yr-10]],'thin','#111',{k:'h r'}); K.ln(xr0-8,yr-10,xr0+60,yr-10,'thin',{k:'h r'}); K.t(xr0+12,yr-15,lv(h+r),{a:'start',b:true,k:'h r'}); K.t(xr0-12,yr-15,'CUMBRERA',{a:'end',s:11,k:'h r'}); }
-  if(!narrow) [[h,lv(h),'ALERO',X(S)+dc*sc/2+ph+4,'h'],[0,lv(0),'N.P.T.',X(S)+dc*sc+30,null]].forEach(([y,t,s,xf,k])=>{
-    K.ln(xf+4,Y(y),xl+50,Y(y),'thin',{k}); K.pl([[xl,Y(y)],[xl-6,Y(y)-10],[xl+6,Y(y)-10]],'thin','#111',{k}); K.t(xl+12,Y(y)-5,t,{a:'start',b:true,k}); K.t(xl+12,Y(y)+15,s,{a:'start',s:11,k}); });
-  else { const xm=xd-60; [[h,lv(h),'ALERO',X(0)-dc*sc/2-ph-4,'h'],[0,lv(0),'N.P.T.',X(0)-dc*sc-30,null]].forEach(([y,t,s,xf,k])=>{
-    K.ln(xf-4,Y(y),xm-50,Y(y),'thin',{k}); K.pl([[xm,Y(y)],[xm-6,Y(y)-10],[xm+6,Y(y)-10]],'thin','#111',{k}); K.t(xm-12,Y(y)-5,t,{a:'end',b:true,k}); K.t(xm-12,Y(y)+15,s,{a:'end',s:11,k}); }); }
-  K.lead(X(S)+dc*sc/2+6,y0+1,X(S)+70,y0+46,[p.base==='fix'?'BASE EMPOTRADA':'BASE ROTULADA'],{k:'base'});
-  K.t(X(S/2),y0+110,`MARCOS @ ${f1(p.sp,2)} m, ACERO ${$('mat').value.toUpperCase()} Fy ${p.Fy} MPa`,{k:'sp mat Fy',s:11.5});
-  K.title(xc,H-40,'Elevación eje tipo','S/E, cotas en mm');
-  /* ESQUEMAS DE CARGA */
-  const s2=Math.min(300/S,105/(h+r)), cx2=1075, F=(yb)=>({X:x=>cx2+(x-S/2)*s2,Y:y=>yb-y*s2});
-  const frame=(G,yb)=>{ const pts=[[0,0],[0,h],[S/2,h+r],[S,h],[S,0]]; K.pl(pts.map(q=>[G.X(q[0]),G.Y(q[1])]),'cut',null,{open:true,k:'S h r'});
-    [0,S].forEach(x=>{ const px=G.X(x), py=yb; if(p.base==='fix'){ K.ln(px-12,py,px+12,py,'cut',{k:'base'}); K.rc(px-12,py,24,7,null,K.H('st'),{k:'base'}); }
-      else { K.pl([[px,py],[px-9,py+14],[px+9,py+14]],'vis','#fff',{k:'base'}); K.ln(px-13,py+14,px+13,py+14,'vis',{k:'base'}); K.rc(px-13,py+14,26,6,null,K.H('st'),{k:'base'}); } }); };
-  /* gravitacional */
-  const G1=F(220); frame(G1,220);
-  { const off=26, n=6; [0,1].forEach(sd=>{ for(let i=0;i<=n;i++){ const xx=S/2*i/n, x=sd?S-xx:xx, yy=h+xx*tn, px=G1.X(x), py=G1.Y(yy); K.ln(px,py-off,px,py-8,'thin',{k:'qD qL'}); K.ah(px,py-2,PI/2,{k:'qD qL'},7,2.4); }
-      K.ln(G1.X(sd?S:0),G1.Y(h)-off,G1.X(S/2),G1.Y(h+r)-off,'thin',{k:'qD qL'}); }); }
-  K.t(cx2,G1.Y(h+r)-36,`D = ${f1(p.qD,2)} kPa, Lr = ${f1(p.qL,2)} kPa`,{b:true,k:'qD qL'});
-  K.t(cx2,G1.Y(h/2)+4,`s = ${f1(p.sp,2)} m`,{s:11,k:'sp'});
-  K.title(cx2,268,'Cargas gravitacionales','S/E');
-  /* viento y sismo */
-  const yb2=478, G2=F(yb2); frame(G2,yb2);
-  const wArr=(x0,y0_,x1,y1_,nx,ny,w,k,lbl,lpos)=>{ const n=4, L=22, sg=Math.sign(w)||1;
-    for(let i=0;i<n;i++){ const t=(i+0.5)/n, px=G2.X(x0+(x1-x0)*t), py=G2.Y(y0_+(y1_-y0_)*t);
-      if(sg>0){ K.ln(px-nx*L,py-ny*L,px-nx*7,py-ny*7,'thin',{k}); K.ah(px-nx*1.5,py-ny*1.5,Math.atan2(ny,nx),{k},7,2.4); }
-      else { K.ln(px-nx*3,py-ny*3,px-nx*(L-6),py-ny*(L-6),'thin',{k}); K.ah(px-nx*L,py-ny*L,Math.atan2(-ny,-nx),{k},7,2.4); } }
-    K.t(lpos[0],lpos[1],lbl,{a:lpos[2]||'middle',b:true,k,s:11.5}); };
-  const sn=Math.sin(th);
-  wArr(0,0,0,h,1,0,p.w1,'w1',`${f1(p.w1,2)}`,[G2.X(0)-30,G2.Y(h*0.5)+4,'end']);
-  wArr(S,0,S,h,-1,0,p.w2,'w2',`${f1(p.w2,2)}`,[G2.X(S)+30,G2.Y(h*0.5)+4,'start']);
-  wArr(0,h,S/2,h+r,sn,ct,p.w3,'w3',`${f1(p.w3,2)}`,[G2.X(S*0.2)-14,G2.Y(h+S*0.2*tn)-34,'end']);
-  wArr(S,h,S/2,h+r,-sn,ct,p.w4,'w4',`${f1(p.w4,2)}`,[G2.X(S*0.8)+14,G2.Y(h+S*0.2*tn)-34,'start']);
-  K.force(G2.X(0)-2,G2.Y(h),1,0,50,null,{k:'Cs fL'}); K.force(G2.X(S)+54,G2.Y(h),1,0,50,null,{k:'Cs fL'});
-  K.t(G2.X(0)-56,G2.Y(h)-8,`E/2`,{a:'end',b:true,k:'Cs fL'});
-  K.t(cx2,G2.Y(h+r)-46,`W → [kPa], PRESIÓN + HACIA LA SUPERFICIE`,{s:11,k:'w1 w2 w3 w4'});
-  K.t(cx2,yb2+40,`E/2 EN CADA ALERO, E = ${f1(p.Cs,2)}·(D + ${f1(p.fL,2)}·Lr)`,{s:11,k:'Cs fL'});
-  K.title(cx2,H-40,'Viento y sismo','S/E');
-}
-function devRows(o){
-  const cr=o.gov; if(!cr) return [];
-  const mi=cr.chk.reduce((a,c,i)=>c.ratio>cr.chk[a].ratio?i:a,0), c=cr.chk[mi], m=o.M.mems[mi], w=c.worst;
-  const rows=[[null,`${m.n}, ${m.s.name}, ${cr.cs.nm}`],['L, Lcy, Lb',`${f1(m.L/1e3,2)} m, ${f1((m.type==='c'?o.p.cLy:o.p.rLy),2)} m, ${f1(c.Ls/1e3,2)} m`,'C3: Lcx = L en el plano'],
-    ['Pr',`${f1(c.Pr/1e3,1)} kN ${c.comp?'compresión':'tracción'}`,'segundo orden directo']];
-  rows.push(...(c.comp?c.cc.rows:c.tc.rows));
-  rows.push(['Pc',f1(c.Pc/1e3,1)+' kN',c.comp?'E':'D2']);
-  rows.push([null,`Tramo ${w.k+1} de ${c.nseg}, x = ${f1(w.x0/1e3,2)} a ${f1(w.x1/1e3,2)} m`],['Mr, Cb',`${f1(w.Mmax/1e6,1)} kN·m, ${f1(w.Cb,3)}`,'Ec. F1-1 con el diagrama del tramo']);
-  rows.push(...w.fl.rows,['Mc',f1(w.fl.Mc/1e6,1)+' kN·m',''],['Interacción',`${f1(w.rp,3)} + ${w.eq==='H1-1a'?'8/9·':''}${f1(w.rx,3)} = ${f1(w.it,3)}`,w.eq,w.it<=1],
-    ['Vr / Vc',`${f1(c.Vmax/1e3,1)} / ${f1(c.sh.Vc/1e3,1)} kN`,c.sh.ref,c.rv<=1]);
-  return rows;
-}
-function renderAll(o,T,S){
-  const sel=+($('dc').value||0);
-  drawFrame(S.fr,o,isFinite(sel)?sel:0,$('dg').value);
-  const cr=o.gov;
-  if(cr) T.mem.innerHTML=tbl(['Miembro','Sección','Pr [kN]','Mr [kN·m]','Cb','Interacción','Corte','Razón'],cr.chk.map((c,i)=>({fail:c.ratio>1,c:[o.M.mems[i].n,o.M.mems[i].s.name,f1(c.Pr/1e3,1)+(c.comp?' C':' T'),f1(c.worst.Mmax/1e6,1),f1(c.worst.Cb,2),f1(c.worst.it,3),f1(c.rv,3),f1(c.ratio,3)]})),2);
-  T.dev.innerHTML=kv(devRows(o));
-  T.cmb.innerHTML=tbl(['Caso','Nociva','Δ2/Δ1','Col. izq.','Viga izq.','Viga der.','Col. der.','Máx.'],o.cases.map(c=>({fail:c.max>1,c:[c.cs.nm,f1(c.kN,3)+'·Y',f1(c.ratio,3),...c.chk.map(k=>f1(k.ratio,3)),f1(c.max,3)]})),1);
-  const sv=[['Peso D por marco',f1(o.WD/1e3,1)+' kN','techo y peso propio'],['Peso Lr por marco',f1(o.WL/1e3,1)+' kN',''],['Peso sísmico, H sísmico',`${f1(o.Ws/1e3,1)} kN, ${f1(o.HE/1e3,1)} kN`,'C·(D + f·Lr), mitad en cada alero'],
-    ['Deriva alero por W',`${f1(o.dW,1)} mm ≤ ${f1(o.dWlim,1)} mm`,'primer orden, rigidez nominal',o.dW<=o.dWlim],['Flecha cumbrera por Lr',`${f1(o.dL,1)} mm ≤ ${f1(o.dLlim,1)} mm`,'primer orden, rigidez nominal',o.dL<=o.dLlim]];
-  T.srv.innerHTML=kv(sv);
-}
 function run(){
-  if(!COMBOS) COMBOS=JSON.parse(JSON.stringify(DEFC[$('meth').value]));
+  const f=$('cfam').value; if(f!==lastFam){ fillCat(); lastFam=f; }
+  $('lugBox').hidden=$('vt').value!=='lug'; $('chBox').hidden=!$('ch').checked; $('aF').closest('.field').style.visibility=$('meth').value==='lrfd'?'hidden':'visible';
   R=analyze();
   $('warns').innerHTML=R.warn.map(w=>`<div class="warn">${w}</div>`).join('');
-  const cur=$('dc').value; $('dc').innerHTML=R.cases.map((c,i)=>`<option value="${i}">${c.cs.nm}</option>`).join('');
-  const gi=R.cases.indexOf(R.gov); $('dc').value=cur&&+cur<R.cases.length?cur:String(gi);
-  elevSheet($('elSvg'),R);
-  renderAll(R,{mem:$('tbMem'),dev:$('tbDev'),cmb:$('tbCmb'),srv:$('tbSrv')},{fr:$('frSvg')});
-  const mx=R.gov?R.gov.max:NaN;
-  $('stats').innerHTML=statsHtml([['Caso gobernante',R.gov?R.gov.cs.nm.split(' (')[0]:'-'],['Razón máx.',f1(mx,3),mx<=1],['Deriva W',f1(R.dW,0)+' mm',R.dW<=R.dWlim],['Flecha Lr',f1(R.dL,0)+' mm',R.dL<=R.dLlim]]);
+  sheet($('bpSvg'),R); if(!V3){ V3=new View3D($('v3')); view3dBar('v3bar',V3); } const S3=scene3D(R); V3.set(S3.ms,S3.lb); $('tbSum').innerHTML=chkTable(R.chk); $('tbPl').innerHTML=kv(R.det.filter((r,i)=>true));
+  $('tbAn').innerHTML=tbl(['Estado límite ACI','φ','ψ','Rn [kN]','Diseño [kN]','Demanda [kN]','Razón'],R.aciRows.filter(r=>!r.unit).map(r=>({fail:!r.ok,c:[r.name,f1(r.phi,2),f1(r.psi,2),f1(r.Nn,1),f1(r.des,1),f1(r.dem,1),f1(r.ratio,3)]})),1);
+  $('tbAc').innerHTML=kv([['Factor de carga para ACI',f1(R.af,2),R.lrfd?'LRFD':'ASD × factor'],['Tracción del grupo',f1(R.T*R.af/1e3,1)+' kN','lado traccionado'],['Corte',f1(R.V*R.af/1e3,1)+' kN',$('vt').value==='lug'?'llave de corte':'pernos']]);
+  const mx=Math.max(...R.chk.map(c=>c.r));
+  $('stats').innerHTML=statsHtml([['Régimen',R.regime],['T pernos',f1(R.T/1e3,1)+' kN'],['Razón máx.',f1(mx,3),mx<=1],['Estado',mx<=1?'Cumple':'No cumple',mx<=1]]);
   $('notes').innerHTML=notesHtml();
 }
-function notesHtml(){ return 'Análisis elástico de segundo orden por rigidez con matriz geométrica, 8 elementos por miembro para P-δ, rigidez 0,8EA y 0,8EI con τb = 1 y carga nocional adicional 0,001Y según C2.3(c). Carga nocional 0,002Y en combinaciones gravitacionales en ambos sentidos, y en combinaciones laterales cuando Δ2/Δ1 > 1,7, C2.2b. ASD analizado con 1,6 veces la combinación y dividido por 1,6, C2.1(d). Longitud efectiva igual a la no arriostrada, C3. Cb por tramo de largo Lb con el diagrama real, F1-1. Presiones de viento según la herramienta NCh432 y coeficiente sísmico según NCh2369.'; }
-function report(){
-  const p=R.p, rp=reportStart('Pórtico de acero',`${p.proj?p.proj+', ':''}AISC 360-22 ${p.lrfd?'LRFD':'ASD'}, análisis directo`,[['Geometría',`S = ${p.S} m, h = ${p.h} m, r = ${p.r} m, s = ${p.sp} m, bases ${p.base==='fix'?'empotradas':'rotuladas'}`,'Secciones',`Columnas ${R.sc.name}, vigas ${R.sr.name}, Fy ${p.Fy} MPa`],['Cargas',`D ${p.qD} kPa, Lr ${p.qL} kPa, W ${p.w1}/${p.w2}/${p.w3}/${p.w4} kPa, C ${p.Cs} g`,'Arriostramiento',`Columnas Lcy ${p.cLy}, Lb ${p.cLb} m, vigas Lcy ${p.rLy}, Lb ${p.rLb} m`]]);
-  const T={mem:document.createElement('table'),dev:document.createElement('table'),cmb:document.createElement('table'),srv:document.createElement('table')};
-  const ev=rp.svg(); ev.style.maxWidth='100%'; elevSheet(ev,R); rp.sec('Elevación y cargas',null,ev);
-  const gi=R.cases.indexOf(R.gov);
-  ['M','N','V'].forEach(k=>{ const s=rp.svg(); const old=$('dg').value; $('dg').value=k; const oldc=$('dc').value; $('dc').value=String(gi); renderAll(R,T,{fr:s}); $('dg').value=old; $('dc').value=oldc; rp.sec(k==='M'?'Momento, caso gobernante':k==='N'?'Axial, caso gobernante':'Corte, caso gobernante',null,s); });
-  rp.sec('Miembros, caso gobernante',T.mem.innerHTML); rp.sec('Desarrollo',T.dev.innerHTML); rp.sec('Combinaciones',T.cmb.innerHTML); rp.sec('Servicio',T.srv.innerHTML); rp.foot(notesHtml());
-  renderAll(R,{mem:$('tbMem'),dev:$('tbDev'),cmb:$('tbCmb'),srv:$('tbSrv')},{fr:$('frSvg')});
+function notesHtml(){ return 'Unidades N, mm, MPa. Apoyo en el hormigón según J8 con A2 concéntrica en el pedestal. Espesor de placa según el procedimiento del Manual AISC parte 14 y la Guía de Diseño 1, con λ calculado y presión uniforme en flexocompresión, tp = √(4M/(φFy)) por ancho unitario. Pernos como partes roscadas de la Tabla J3.2 según J9 y hormigón según ACI 318-25 capítulo 17 con el mismo cálculo de la herramienta de anclajes. Corte según NCh2369 8.5.3: con pernos solo bajo 75 kN LRFD o 50 kN ASD con dos pernos activos, o con nueve o más pernos y un tercio activo. Las solicitaciones sísmicas para corte y anclajes deben venir amplificadas por 0,7R1 ≥ 1 según 8.5.2 y 8.5.3. Silla: placa superior continua por lado con un atiesador entre pernos, n − 1 por lado. Su espesor se toma como el menor entre el voladizo desde el ala de la columna y el apoyo en los atiesadores (cota inferior de plasticidad, modelo propio, no es fórmula AISC). Cada atiesador recibe n·T/(n − 1) sin aporte del ala.'; }
+function report(){ const rp=reportStart('Placa base',`${$('proj').value?$('proj').value+', ':''}AISC 360-22 ${R.lrfd?'LRFD':'ASD'}, ACI 318-25`,[['Columna',$('ccat').value,'Placa',`${R.N} × ${R.B} × ${R.tp} mm, Fy ${$('pFy').value} MPa`],['Solicitaciones',`P ${R.P/1e3} kN, M ${R.M/1e6} kN·m, V ${R.V/1e3} kN`,'Pernos',`${2*R.ns} × ${$('da').value} in, hef ${$('hef').value} mm`]]);
+  rp.sec('Vista 3D',null,snap3D(V3,760,440)); const sv=rp.svg(); sv.style.maxWidth='100%'; sheet(sv,R); rp.sec('Detalle',null,sv); rp.sec('Verificaciones',chkTable(R.chk)); rp.sec('Desarrollo',kv(R.det)); rp.sec('Anclajes ACI 318-25',$('tbAn').innerHTML); rp.foot(notesHtml()); }
+fillCat(); lastFam='W';
+wireApp({app:'fddlebel-placabase',key:'fdd_placabase_v1',run,report,getExtra:()=>({fam:$('cfam').value}),setExtra:e=>{ if(e&&e.fam){ $('cfam').value=e.fam; lastFam=e.fam; fillCat(); } }});
+function scene3D(o){
+  const g=num('grt',30), tp=o.tp, zp=g+tp, ms=[], lb=[];
+  const hef=num('hef',450), dep=Math.min(num('ha',800),hef+250);
+  ms.push(M3.key(M3.box(-o.pN/2,-o.pB/2,-dep,o.pN/2,o.pB/2,0,COL.conc,0.3),'pN pB'));
+  if(g>0) ms.push(M3.box(-o.N/2-25,-o.B/2-25,0,o.N/2+25,o.B/2+25,g,COL.grout));
+  ms.push(M3.key(M3.box(-o.N/2,-o.B/2,g,o.N/2,o.B/2,zp,COL.plate),'N B tp'));
+  const Hc=Math.max(1.6*o.d,600), c=o.c, d=o.d, bf=o.bf, tf=o.tf;
+  if(o.f==='W'){ const tw=c.tw; ms.push(M3.box(-d/2,-bf/2,zp,-d/2+tf,bf/2,zp+Hc,COL.steel),M3.box(d/2-tf,-bf/2,zp,d/2,bf/2,zp+Hc,COL.steel),M3.box(-d/2+tf,-tw/2,zp,d/2-tf,tw/2,zp+Hc,COL.steel2)); }
+  else if(o.f==='HR'){ ms.push(M3.box(-d/2,-bf/2,zp,-d/2+tf,bf/2,zp+Hc,COL.steel),M3.box(d/2-tf,-bf/2,zp,d/2,bf/2,zp+Hc,COL.steel),M3.box(-d/2+tf,-bf/2,zp,d/2-tf,-bf/2+tf,zp+Hc,COL.steel2),M3.box(-d/2+tf,bf/2-tf,zp,d/2-tf,bf/2,zp+Hc,COL.steel2)); }
+  else ms.push(M3.tube(0,0,zp,zp+Hc,d/2,d/2-tf,COL.steel,32));
+  const db=o.db, chair=$('ch').checked, sh=num('shh',250), ct=num('ct',25), ce=num('ce',60), sbw=num('sbw',100), stw=num('stw',12), cb=num('cb',100);
+  const head=$('head').value, Bp=num('Bp',75), tpe=num('tpe',12);
+  for(const sx of [-1,1]) for(let i=0;i<o.ns;i++){
+    const x=sx*o.fd, y=(i-(o.ns-1)/2)*o.sB, ztop=chair?zp+sh+ct:zp;
+    ms.push(M3.key(M3.cyl(x,y,-hef-(head==='J'?0:tpe),ztop+1.6*db+12,db/2,(sx<0&&o.T>0)?COL.red:COL.rod,12,1,6),'da hef eN sB'));
+    ms.push(M3.cyl(x,y,ztop,ztop+6,db*1.1,COL.nut,16),M3.hex(x,y,ztop+6,ztop+6+0.85*db,1.5*db,COL.nut),M3.hex(x,y,ztop+6+0.9*db,ztop+6+1.6*db,1.5*db,COL.nut));
+    if(head==='plate') ms.push(M3.box(x-Bp/2,y-Bp/2,-hef-tpe,x+Bp/2,y+Bp/2,-hef,COL.nut),M3.hex(x,y,-hef,-hef+0.8*db,1.5*db,COL.nut));
+    else if(head==='hex') ms.push(M3.hex(x,y,-hef-0.7*db,-hef,1.5*db,COL.nut));
+    else { const eh=num('eh',100); ms.push(M3.rot(M3.cyl(x,y,-hef,-hef+eh,db/2,COL.rod,10),'y',sx>0?Math.PI/2:-Math.PI/2,[x,y,-hef])); }
+  }
+  if(chair){ const Lc=(o.ns-1)*o.sB+2*ce; [-1,1].forEach(sx=>{ const f0=sx*d/2;
+    ms.push(M3.key(M3.box(Math.min(f0,f0+sx*cb),-Lc/2,zp+sh,Math.max(f0,f0+sx*cb),Lc/2,zp+sh+ct,COL.plate),'cb ct ce'));
+    for(let i=0;i<o.ns-1;i++){ const y=(i+0.5-(o.ns-1)/2)*o.sB; ms.push(M3.key(M3.box(Math.min(f0,f0+sx*sbw),y-stw/2,zp,Math.max(f0,f0+sx*sbw),y+stw/2,zp+sh,COL.steel2),'sbw stw shh')); } }); }
+  if($('vt').value==='lug'){ const t=num('tsl',40), b=num('bsl',200), H=num('Hsl',200); ms.push(M3.key(M3.box(-t/2,-b/2,g-H,t/2,b/2,g,COL.steel2),'tsl bsl Hsl')); lb.push({p:[t/2,b/2,g-H/2],t:`Llave ${b}×${H}×${t}`}); }
+  lb.push({p:[o.pN/2,o.pB/2,-dep/2],t:`Pedestal f'c ${num('fc',25)} MPa`},{p:[o.N/2,-o.B/2,zp],t:`Placa ${o.N}×${o.B}×${tp}`},{p:[o.fd,(o.ns-1)/2*o.sB,(chair?zp+sh+ct:zp)+1.6*db+12],t:`${2*o.ns} pernos Ø${$('da').value}"`},{p:[0,bf/2,zp+Hc],t:$('ccat').value});
+  return {ms,lb};
 }
-function fillCats(){ ['cCat','rCat'].forEach((id,i)=>{ $(id).innerHTML=SHAPES.W.map(r=>`<option${r[0]===(i?'W410X46.1':'W410X60')?' selected':''}>${r[0]}</option>`).join(''); }); }
-fillCats(); fillMat('mat','Fy','Fu','A572 Gr50');
-$('addC').addEventListener('click',()=>{ COMBOS.push(['Nueva',1,0,0,0]); cUI(); rerun(); });
-$('defC').addEventListener('click',()=>{ COMBOS=JSON.parse(JSON.stringify(DEFC[$('meth').value])); cUI(); rerun(); });
-$('meth').addEventListener('change',()=>{ COMBOS=JSON.parse(JSON.stringify(DEFC[$('meth').value])); cUI(); });
-COMBOS=JSON.parse(JSON.stringify(DEFC.lrfd)); cUI();
-wireApp({app:'fddlebel-portico',key:'fdd_portico_v1',run,report,getExtra:()=>({combos:COMBOS}),setExtra:e=>{ if(e&&e.combos){ COMBOS=e.combos; cUI(); } }});
 </script></body></html>

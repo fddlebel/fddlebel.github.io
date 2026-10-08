@@ -160,7 +160,7 @@ svg text{font-family:var(--sans);}
   <div style="min-width:0;">
     <div class="stat-row" id="stats"></div>
     <div id="warns"></div>
-    <div class="chartwrap"><svg id="cSvg" viewBox="0 0 760 420" width="100%" style="display:block;height:auto"></svg></div>
+    <div class="chartwrap"><svg id="cSvg" viewBox="0 0 1300 660" width="100%" style="display:block;height:auto"></svg></div>
     <div class="panel"><div class="section-title">Verificaciones</div><div class="tablewrap"><table id="tbChk"></table></div></div>
     <div class="panel"><div class="section-title">Desarrollo del cálculo</div><div class="tablewrap"><table id="tbCalc"></table></div></div>
   </div>
@@ -226,6 +226,99 @@ function chart(svg,cfg){
   }
 }
 
+const DKS={cut:[2.2],vis:[1.3],thin:[0.7],dim:[0.6],hid:[1,'7 4'],ctr:[0.6,'18 4 3 4'],phan:[0.7,'14 3 3 3 3 3']};
+let HLK=null, DKN=0, DKRAF=0;
+const V3S=[];
+(function(){ if(typeof document==='undefined') return; const st=document.createElement('style');
+  st.textContent=`svg.dk text{font-family:"Arial Narrow",Arial,sans-serif;fill:#111}
+svg.dk [data-k].hl line,svg.dk [data-k].hl path,svg.dk [data-k].hl polyline,svg.dk [data-k].hl rect,svg.dk [data-k].hl circle{stroke:#c62828!important}
+svg.dk [data-k].hl polygon{stroke:#c62828!important}
+svg.dk [data-k].hl polygon.ah{fill:#c62828!important}
+svg.dk [data-k].hl text{fill:#c62828!important;font-weight:700}`;
+  document.head.appendChild(st);
+  document.addEventListener('focusin',e=>{ const t=e.target; if(t&&t.id&&/INPUT|SELECT|TEXTAREA/.test(t.tagName)){ HLK=t.id; hlApply(); } });
+  document.addEventListener('focusout',()=>{ HLK=null; hlApply(); });
+})();
+function hlApply(){ document.querySelectorAll('svg.dk [data-k]').forEach(e=>e.classList.toggle('hl',!!HLK&&e.getAttribute('data-k').split(' ').includes(HLK)));
+  V3S.forEach(V=>{ if(V.hl!==HLK){ V.hl=HLK; V.draw(); } }); }
+function DK(svg,W,H,cfg){ const FS=(cfg&&cfg.fs)||1;
+  svg.innerHTML=''; svg.setAttribute('viewBox',`0 0 ${W} ${H}`); svg.classList.add('dk');
+  const id='dk'+(++DKN), NS='http://www.w3.org/2000/svg', K={svg,W,H,id};
+  const mk=(tag,a,par)=>{ const n=document.createElementNS(NS,tag); for(const k in a) if(a[k]!=null) n.setAttribute(k,a[k]); (par||svg).appendChild(n); return n; };
+  K.mk=mk;
+  const defs=mk('defs',{});
+  const pat=(nm,w,h,rot,fn)=>{ const p=mk('pattern',{id:id+nm,width:w,height:h,patternUnits:'userSpaceOnUse',patternTransform:rot?`rotate(${rot})`:null},defs); fn(p); };
+  pat('st',5,5,45,p=>mk('line',{x1:0,y1:0,x2:0,y2:5,stroke:'#111','stroke-width':0.55},p));
+  pat('st2',5,5,-45,p=>mk('line',{x1:0,y1:0,x2:0,y2:5,stroke:'#111','stroke-width':0.55},p));
+  pat('sw',9,9,45,p=>mk('line',{x1:0,y1:0,x2:0,y2:9,stroke:'#111','stroke-width':0.5},p));
+  pat('stx',6,6,45,p=>{ mk('line',{x1:0,y1:0,x2:0,y2:6,stroke:'#111','stroke-width':0.5},p); mk('line',{x1:0,y1:0,x2:6,y2:0,stroke:'#111','stroke-width':0.5},p); });
+  pat('cc',46,46,0,p=>{ [[6,8,3],[30,5,2.4],[18,24,3.2],[40,30,2.6],[8,38,2.2],[27,40,2.8]].forEach(([x,y,r],i)=>mk('polygon',{points:`${x},${y-r} ${x+r*0.95},${y+r*0.7} ${x-r*0.9},${y+r*0.6}`,fill:'none',stroke:'#444','stroke-width':0.5,transform:`rotate(${i*47} ${x} ${y})`},p));
+    [[14,14],[36,16],[22,33],[4,26],[42,42],[33,24],[12,44],[25,12]].forEach(([x,y])=>mk('circle',{cx:x,cy:y,r:0.7,fill:'#444'},p)); });
+  pat('gr',5,5,0,p=>{ mk('circle',{cx:1.2,cy:1.2,r:0.55,fill:'#333'},p); mk('circle',{cx:3.7,cy:3.7,r:0.55,fill:'#333'},p); });
+  pat('so',24,16,0,p=>{ [[2,12],[14,4]].forEach(([x,y])=>{ for(let i=0;i<3;i++) mk('line',{x1:x+i*2.6,y1:y,x2:x+i*2.6+3,y2:y-4,stroke:'#444','stroke-width':0.5},p); }); });
+  pat('wa',20,10,0,p=>{ mk('line',{x1:2,y1:3,x2:10,y2:3,stroke:'#555','stroke-width':0.5},p); mk('line',{x1:12,y1:8,x2:18,y2:8,stroke:'#555','stroke-width':0.5},p); });
+  K.H=nm=>`url(#${id+nm})`;
+  const groups={};
+  K.par=k=>{ if(!k) return svg; if(!groups[k]||svg.lastChild!==groups[k]) groups[k]=mk('g',{'data-k':k}); return groups[k]; };
+  const sty=(s)=>{ const d=DKS[s||'vis']||DKS.vis; return {stroke:'#111','stroke-width':d[0],'stroke-dasharray':d[1]||null,'vector-effect':'non-scaling-stroke','stroke-linecap':'round','stroke-linejoin':'round'}; };
+  K.ln=(x1,y1,x2,y2,s,o)=>mk('line',Object.assign({x1,y1,x2,y2},sty(s)),K.par(o&&o.k));
+  K.pl=(pts,s,fill,o)=>mk(o&&o.open?'polyline':'polygon',Object.assign({points:pts.map(p=>p[0].toFixed(2)+','+p[1].toFixed(2)).join(' '),fill:fill||'none'},s?sty(s):{stroke:'none'}),K.par(o&&o.k));
+  K.rc=(x,y,w,h,s,fill,o)=>{ if(w<0){ x+=w; w=-w; } if(h<0){ y+=h; h=-h; } return mk('rect',Object.assign({x,y,width:w,height:h,fill:fill||'none'},s?sty(s):{stroke:'none'}),K.par(o&&o.k)); };
+  K.ci=(cx,cy,r,s,fill,o)=>mk('circle',Object.assign({cx,cy,r,fill:fill||'none'},s?sty(s):{stroke:'none'}),K.par(o&&o.k));
+  K.pa=(d,s,fill,o)=>mk('path',Object.assign({d,fill:fill||'none'},s?sty(s):{stroke:'none'}),K.par(o&&o.k));
+  K.t=(x,y,t,o)=>{ o=o||{}; const n=mk('text',{x,y,'font-size':(o.s||12)*FS,'text-anchor':o.a||'middle','font-weight':o.b?700:null,transform:o.r?`rotate(${o.r} ${x} ${y})`:null,'paint-order':o.halo===false?null:'stroke',stroke:o.halo===false?null:'#fff','stroke-width':o.halo===false?null:3.2,'stroke-linejoin':'round'},K.par(o.k)); n.textContent=t; return n; };
+  K.ah=(x,y,ang,o,L,Wd)=>{ L=L||9; Wd=Wd||2.6; const c=Math.cos(ang), s=Math.sin(ang); const n=mk('polygon',{points:`${x},${y} ${x-L*c+Wd*s},${y-L*s-Wd*c} ${x-L*c-Wd*s},${y-L*s+Wd*c}`,fill:'#111',stroke:'none',class:'ah'},K.par(o&&o.k)); return n; };
+  K.dim=(p1,p2,off,txt,o)=>{ o=o||{}; const dx=p2[0]-p1[0], dy=p2[1]-p1[1], L=Math.hypot(dx,dy)||1, ux=dx/L, uy=dy/L, nx=uy, ny=-ux;
+    const q1=[p1[0]+nx*off,p1[1]+ny*off], q2=[p2[0]+nx*off,p2[1]+ny*off], sg=Math.sign(off)||1, g=3, ov=4;
+    if(o.ext!==false){ [[p1,q1],[p2,q2]].forEach(([p,q])=>{ if(Math.abs(off)>g+1) K.ln(p[0]+nx*g*sg,p[1]+ny*g*sg,q[0]+nx*ov*sg,q[1]+ny*ov*sg,'dim',o); }); }
+    const inside=L>24, ang=Math.atan2(uy,ux);
+    if(inside){ K.ln(q1[0],q1[1],q2[0],q2[1],'dim',o); K.ah(q1[0],q1[1],ang+Math.PI,o); K.ah(q2[0],q2[1],ang,o); }
+    else { K.ln(q1[0]-ux*16,q1[1]-uy*16,q2[0]+ux*16,q2[1]+uy*16,'dim',o); K.ah(q1[0],q1[1],ang,o); K.ah(q2[0],q2[1],ang+Math.PI,o); }
+    let a=ang*180/Math.PI; if(a>90.01) a-=180; if(a<=-90.01) a+=180; const ar=a*Math.PI/180, tnx=Math.sin(ar), tny=-Math.cos(ar);
+    let mx=(q1[0]+q2[0])/2, my=(q1[1]+q2[1])/2; if(o.tx!=null){ mx+=ux*o.tx; my+=uy*o.tx; }
+    const tw=(String(txt).length*5.6*FS+6);
+    if(!inside&&o.tx==null&&tw>L){ const sd=o.side||1; mx=(sd>0?q2[0]:q1[0])+ux*sd*(18+tw/2); my=(sd>0?q2[1]:q1[1])+uy*sd*(18+tw/2); }
+    K.t(mx+tnx*4,my+tny*4,txt,{r:Math.abs(a)>0.01?a:null,k:o.k,s:o.s||11.5});
+    return K; };
+  K.dh=(x1,x2,yf1,yf2,yd,txt,o)=>{ o=o||{}; const g=3, ov=4, s1=Math.sign(yd-yf1)||1, s2=Math.sign(yd-yf2)||1;
+    if(o.ext!==false){ if(Math.abs(yd-yf1)>g+1) K.ln(x1,yf1+s1*g,x1,yd+s1*ov,'dim',o); if(Math.abs(yd-yf2)>g+1) K.ln(x2,yf2+s2*g,x2,yd+s2*ov,'dim',o); }
+    K.dim([x1,yd],[x2,yd],0,txt,Object.assign({},o,{ext:false})); return K; };
+  K.dv=(y1,y2,xf1,xf2,xd,txt,o)=>{ o=o||{}; const g=3, ov=4, s1=Math.sign(xd-xf1)||1, s2=Math.sign(xd-xf2)||1;
+    if(o.ext!==false){ if(Math.abs(xd-xf1)>g+1) K.ln(xf1+s1*g,y1,xd+s1*ov,y1,'dim',o); if(Math.abs(xd-xf2)>g+1) K.ln(xf2+s2*g,y2,xd+s2*ov,y2,'dim',o); }
+    K.dim([xd,Math.max(y1,y2)],[xd,Math.min(y1,y2)],0,txt,Object.assign({},o,{ext:false})); return K; };
+  K.chainH=(xs,yf,yd,txts,o)=>{ for(let i=0;i<xs.length-1;i++) K.dh(xs[i],xs[i+1],yf,yf,yd,txts[i],Object.assign({},o,{k:(o&&o.ks)?o.ks[i]:(o&&o.k)})); return K; };
+  K.chainV=(ys,xf,xd,txts,o)=>{ for(let i=0;i<ys.length-1;i++) K.dv(ys[i],ys[i+1],xf,xf,xd,txts[i],Object.assign({},o,{k:(o&&o.ks)?o.ks[i]:(o&&o.k)})); return K; };
+  K.lead=(px,py,tx,ty,lines,o)=>{ o=o||{}; lines=[].concat(lines); const sd=o.side||(tx>=px?1:-1), sh=12;
+    K.ln(px,py,tx,ty,'thin',o); K.ln(tx,ty,tx+sd*sh,ty,'thin',o);
+    if(o.dot) K.ci(px,py,2.2,null,'#111',o); else K.ah(px,py,Math.atan2(py-ty,px-tx),o,8,2.4);
+    const n=lines.length; lines.forEach((l,i)=>K.t(tx+sd*(sh+3),ty+4+(i-(n-1)/2)*13,l,{a:sd>0?'start':'end',k:o.k,s:o.s||11.5,b:o.b&&i===0}));
+    return K; };
+  K.cl=(x1,y1,x2,y2,o)=>{ const dx=x2-x1, dy=y2-y1, L=Math.hypot(dx,dy)||1, e=10; return K.ln(x1-dx/L*e,y1-dy/L*e,x2+dx/L*e,y2+dy/L*e,'ctr',o); };
+  K.title=(x,y,t,sub)=>{ K.t(x,y,t.toUpperCase(),{s:13.5,b:true}); const w=t.length*7.4+10; K.ln(x-w/2,y+5,x+w/2,y+5,'cut'); K.ln(x-w/2,y+8.5,x+w/2,y+8.5,'thin'); if(sub) K.t(x,y+22,sub,{s:11}); return K; };
+  K.cut=(x1,y1,x2,y2,lbl,dir,o)=>{ const L=Math.hypot(x2-x1,y2-y1)||1, ux=(x2-x1)/L, uy=(y2-y1)/L, d=dir||[uy,-ux];
+    K.ln(x1,y1,x1+ux*16,y1+uy*16,'cut',o); K.ln(x2,y2,x2-ux*16,y2-uy*16,'cut',o); K.ln(x1,y1,x2,y2,'phan',o);
+    [[x1,y1],[x2,y2]].forEach(([x,y])=>{ K.ln(x,y,x+d[0]*16,y+d[1]*16,'vis',o); K.ah(x+d[0]*18,y+d[1]*18,Math.atan2(d[1],d[0]),o,9,3); K.t(x+d[0]*12-ux*10*(x===x1?1:-1),y+d[1]*12-uy*10*(x===x1?1:-1)+4,lbl,{b:true,s:13,k:o&&o.k}); }); return K; };
+  K.force=(x,y,dx,dy,len,lbl,o)=>{ o=o||{}; const L=Math.hypot(dx,dy)||1, ux=dx/L, uy=dy/L, x0=x-ux*len, y0=y-uy*len;
+    const n=mk('line',{x1:x0,y1:y0,x2:x-ux*8,y2:y-uy*8,stroke:'#111','stroke-width':1.8,'vector-effect':'non-scaling-stroke'},K.par(o.k)); K.ah(x,y,Math.atan2(uy,ux),o,12,4);
+    if(lbl&&o.at==='tip'){ K.t(x+ux*12+(o.lx||0),y+uy*12+(Math.abs(uy)>0.5?(uy>0?12:-2):4)+(o.ly||0),lbl,{a:Math.abs(ux)>0.5?(ux>0?'start':'end'):'middle',b:true,k:o.k}); return n; }
+    if(lbl) K.t(x0+(o.lx||0)+(Math.abs(uy)>0.5&&!o.a?6:0),y0+(o.ly||0)+(Math.abs(uy)>0.5?(uy>0?-6:14):-6),lbl,{a:o.a||(Math.abs(uy)>0.5?'start':'middle'),b:true,k:o.k}); return n; };
+  K.brk=(x1,y1,x2,y2,o)=>{ const L=Math.hypot(x2-x1,y2-y1), ux=(x2-x1)/L, uy=(y2-y1)/L, nx=-uy, ny=ux, m=[(x1+x2)/2,(y1+y2)/2], z=6;
+    return K.pl([[x1-ux*6,y1-uy*6],[m[0]-ux*6,m[1]-uy*6],[m[0]-ux*3+nx*z,m[1]-uy*3+ny*z],[m[0]+ux*3-nx*z,m[1]+uy*3-ny*z],[m[0]+ux*6,m[1]+uy*6],[x2+ux*6,y2+uy*6]],'thin',null,{open:true,k:o&&o.k}); };
+  K.weld=(px,py,tx,ty,o)=>{ o=o||{}; const sd=o.side||(tx>=px?1:-1), Lr=o.len||58, xe=tx+sd*Lr;
+    K.ln(px,py,tx,ty,'thin',o); K.ah(px,py,Math.atan2(py-ty,px-tx),o,8,2.4); K.ln(tx,ty,xe,ty,'thin',o);
+    const xs=tx+sd*16, h=9, tri=(dn)=>K.pl([[xs,ty],[xs,ty+dn*h],[xs+h*sd,ty]],'thin',null,o);
+    if(o.arrow!==false) tri(1); if(o.other||o.both) tri(-1);
+    if(o.all) K.ci(tx,ty,4,'thin',null,o);
+    if(o.field){ K.ln(tx,ty,tx,ty-16,'thin',o); K.pl([[tx,ty-16],[tx+sd*9,ty-12.5],[tx,ty-9]],'thin','#111',o); }
+    if(o.size!=null){ if(o.arrow!==false) K.t(xs-sd*3,ty+10,o.size,{a:sd>0?'end':'start',s:11,k:o.k}); if(o.other||o.both) K.t(xs-sd*3,ty-3,o.size,{a:sd>0?'end':'start',s:11,k:o.k}); }
+    if(o.len2) K.t(xs+sd*(h+4),ty+(o.arrow!==false?10:-3),o.len2,{a:sd>0?'start':'end',s:11,k:o.k});
+    if(o.note){ K.ln(xe,ty,xe+sd*8,ty-6,'thin',o); K.ln(xe,ty,xe+sd*8,ty+6,'thin',o); K.t(xe+sd*16,ty+4,o.note,{a:sd>0?'start':'end',s:11,k:o.k}); }
+    return K; };
+  K.nut=(x,y,w,h,s,o)=>{ K.rc(x-w/2,y-h/2,w,h,'vis','#fff',o); K.ln(x-w/2,y-h/2+h*0.0,x+w/2,y-h/2,'vis',o); K.ln(x-w*0.22,y-h/2,x-w*0.22,y+h/2,'thin',o); K.ln(x+w*0.22,y-h/2,x+w*0.22,y+h/2,'thin',o); return K; };
+  K.boltPlan=(x,y,r,o)=>{ o=o||{}; K.ci(x,y,r,'vis','#fff',o); const e=r+5; K.ln(x-e,y,x+e,y,'thin',o); K.ln(x,y-e,x,y+e,'thin',o); if(o.hex){ const R=o.hex; K.pl(Array.from({length:6},(_,i)=>[x+R*Math.cos(Math.PI/3*i),y+R*Math.sin(Math.PI/3*i)]),'thin',null,o); } return K; };
+  if(!DKRAF){ DKRAF=requestAnimationFrame(()=>{ DKRAF=0; hlApply(); }); }
+  return K;
+}
 const $=id=>document.getElementById(id);
 function num(id,def){ const x=parseFloat($(id).value); return isFinite(x)?x:def; }
 const f1=(x,d)=>isFinite(x)?x.toFixed(d):'-';
@@ -279,44 +372,102 @@ function analyze(p){
   return o;
 }
 
+function txtBoxes(svg){ try{ const M=svg.getScreenCTM(); if(!M) return []; const I=M.inverse(); return [...svg.querySelectorAll('text')].map(t=>{ const r=t.getBoundingClientRect(); if(!r.width) return null; const a=new DOMPoint(r.left,r.top).matrixTransform(I), b=new DOMPoint(r.right,r.bottom).matrixTransform(I); return [Math.min(a.x,b.x)-1.5,Math.min(a.y,b.y)-1.5,Math.max(a.x,b.x)+1.5,Math.max(a.y,b.y)+1.5]; }).filter(Boolean); }catch(e){ return []; } }
+function segHit(B,x1,y1,x2,y2){ const n=Math.ceil(Math.hypot(x2-x1,y2-y1)/3); for(let i=2;i<n;i++){ const x=x1+(x2-x1)*i/n, y=y1+(y2-y1)*i/n; if(B.some(b=>x>b[0]&&x<b[2]&&y>b[1]&&y<b[3])) return true; } return false; }
+function leadSet(K,L,tx,y0,step,gap){ const B=txtBoxes(K.svg); let prev=-1e9;
+  L.forEach((q,i)=>{ const nom=Math.max(y0+i*step,prev+gap); let ty=nom;
+    for(const d of [0,-6,6,-12,12,-18,18,-24,24,-30,30,-36,36]){ const t=nom+d; if(t<prev+gap) continue; if(!segHit(B,q[0],q[1],tx,t)){ ty=t; break; } }
+    prev=ty; K.lead(q[0],q[1],tx,ty,q[2],{k:q[3],dot:q[3]==='fc'}); }); }
 function cSVG(svg,o){
-  svg.innerHTML=''; svg.setAttribute('viewBox','0 0 760 420');
-  const p=o.p, cw=Math.max(p.ldisp+60,p.h*0.8), top=0;
-  const X0=-cw, X1=p.lc+80, Y0=-(p.h+p.h*0.9), Y1=p.h*0.6;
-  const W=760,H=420,m=40, sc=Math.min((W-2*m)/(X1-X0),(H-2*m)/(Y1-Y0));
-  const ox=m-X0*sc+((W-2*m)-(X1-X0)*sc)/2, oy=m+Y1*sc;
-  const X=x=>ox+x*sc, Y=y=>oy-y*sc;
-  const pl=(pts,a)=>svg.appendChild(el('polygon',Object.assign({points:pts.map(q=>`${X(q[0])},${Y(q[1])}`).join(' ')},a)));
-  pl([[-cw,Y1],[0,Y1],[0,Y0],[-cw,Y0]],{fill:'#e8e8e8',stroke:'none'});
-  svg.appendChild(el('line',{x1:X(0),y1:Y(Y1),x2:X(0),y2:Y(top),stroke:'#000','stroke-width':1.4}));
-  svg.appendChild(el('line',{x1:X(0),y1:Y(-p.h),x2:X(0),y2:Y(Y0),stroke:'#000','stroke-width':1.4}));
-  pl([[0,0],[p.lc,0],[p.lc,-p.he],[0,-p.h]],{fill:'#d9d9d9',stroke:'#000','stroke-width':1.4});
-  const yb=-p.dp, xe=p.lc-p.cov-p.dm/2;
-  const bar=[[xe,yb],[-p.ldisp+p.dm,yb]];
-  let path=`M${X(bar[0][0])},${Y(bar[0][1])} L${X(bar[1][0])},${Y(bar[1][1])}`;
-  if(p.anc==='hook') path+=` L${X(bar[1][0])},${Y(yb-12*p.dm)}`;
-  svg.appendChild(el('path',{d:path,fill:'none',stroke:'#000','stroke-width':2.2}));
-  svg.appendChild(el('line',{x1:X(xe),y1:Y(yb+p.dm),x2:X(xe),y2:Y(yb-p.dm*1.5),stroke:'#000','stroke-width':3}));
-  const zb=yb-2*o.d/3;
-  for(let i=1;i<=p.ns;i++){
-    const y=yb-i*(2*o.d/3)/p.ns;
-    const xrr=y<-p.he?Math.min(p.lc-p.cov,p.lc*(p.h+y)/Math.max(p.h-p.he,1e-6)-p.cov):p.lc-p.cov;
-    svg.appendChild(el('line',{x1:X(-p.ldisp*0.6),y1:Y(y),x2:X(Math.max(xrr,20)),y2:Y(y),stroke:'#000','stroke-width':1,'stroke-dasharray':'6,3'}));
-  }
-  svg.appendChild(tx(X(-p.ldisp*0.6)-6,Y(zb)+4,'2d/3',{'font-size':10,'text-anchor':'end'}));
-  svg.appendChild(el('rect',{x:X(p.av-p.lb/2),y:Y(0)-6,width:p.lb*sc,height:6,fill:'#555'}));
-  const ax=X(p.av), ay=Y(0)-7;
-  svg.appendChild(el('line',{x1:ax,y1:ay-60,x2:ax,y2:ay-2,stroke:'#000','stroke-width':2}));
-  svg.appendChild(el('polygon',{points:`${ax},${ay} ${ax-5},${ay-10} ${ax+5},${ay-10}`,fill:'#000'}));
-  svg.appendChild(tx(ax+6,ay-48,`Vu = ${f1(o.p.Vu,1)} kN`,{'text-anchor':'start','font-size':11}));
-  if(o.Nuc>0){ const y=ay-4; svg.appendChild(el('line',{x1:ax,y1:y,x2:ax+55,y2:y,stroke:'#000','stroke-width':1.6})); svg.appendChild(el('polygon',{points:`${ax+60},${y} ${ax+50},${y-5} ${ax+50},${y+5}`,fill:'#000'})); svg.appendChild(tx(ax+64,y+4,`Nuc = ${f1(o.Nuc,1)} kN`,{'text-anchor':'start','font-size':11})); }
-  const dimH=(x1,x2,y,t)=>{ svg.appendChild(el('line',{x1:X(x1),x2:X(x2),y1:y,y2:y,stroke:'#000','stroke-width':0.6})); [x1,x2].forEach(x=>svg.appendChild(el('line',{x1:X(x),x2:X(x),y1:y-4,y2:y+4,stroke:'#000','stroke-width':0.6}))); svg.appendChild(tx((X(x1)+X(x2))/2,y-4,t,{'font-size':10.5})); };
-  const dimV=(y1,y2,x,t,left)=>{ svg.appendChild(el('line',{x1:x,x2:x,y1:Y(y1),y2:Y(y2),stroke:'#000','stroke-width':0.6})); [y1,y2].forEach(y=>svg.appendChild(el('line',{x1:x-4,x2:x+4,y1:Y(y),y2:Y(y),stroke:'#000','stroke-width':0.6}))); svg.appendChild(tx(x+(left?-5:5),(Y(y1)+Y(y2))/2+4,t,{'font-size':10.5,'text-anchor':left?'end':'start'})); };
-  const yd=Y(-p.h)+28;
-  dimH(0,p.av,yd,`av = ${p.av}`); dimH(0,p.lc,yd+22,`lc = ${p.lc}`);
-  dimV(0,-p.h,X(p.lc)+44,`h = ${p.h}`); dimV(0,-p.he,X(p.lc)+14,`${p.he}`);
-  dimV(0,-p.dp,X(-cw)+40,`d' = ${p.dp}`,false);
-  svg.appendChild(tx(X(-cw/2),Y(Y0)-8,'Columna',{'font-size':11}));
+  const W=1300,H=660,K=DK(svg,W,H,{fs:1.05}), p=o.p, fl=v=>f1(v,0);
+  const sw=(n,w)=>{ n.setAttribute('stroke-width',w); return n; };
+  const nm=Math.max(0,Math.round(p.nm)), ns=Math.max(0,Math.round(p.ns)), hook=p.anc==='hook', hk=12*p.dm, d=o.d;
+  const sh=ns>0?(2*d/3)/ns:0, yst=Array.from({length:ns},(_,i)=>-p.dp-(i+1)*sh);
+  const xEnd=p.lc-p.cov-p.dm, xt=p.lc-p.cov-p.dm/2, xb=-p.ldisp+p.dm/2, xbk=-0.6*p.ldisp;
+  const yBot=x=>-(p.h-(p.h-p.he)*x/Math.max(p.lc,1));
+  const xFront=y=>(y<-p.he?Math.min(p.lc,(p.h+y)*p.lc/Math.max(p.h-p.he,1e-6)):p.lc)-p.cov-p.ds/2;
+  const ybars=nm<=1?[0]:Array.from({length:nm},(_,i)=>{ const yb=p.b/2-p.cov-p.ds-p.dm/2; return -yb+2*yb*i/(nm-1); });
+  /* CORTE A-A, elevación longitudinal */
+  const cw=Math.max(p.ldisp+60,0.8*p.h), yT=Math.max(0.5*p.h,120), yB=Math.min(-p.h,hook?-p.dp-hk:-p.h)-Math.max(0.4*p.h,100);
+  const sE=Math.min(470/(cw+p.lc),455/(-yB),540/(yT-yB));
+  const tR=Math.min(-yT*sE-34,-100), bR=Math.max(-yB*sE+6,p.h*sE+82), x0=60+cw*sE, y0=Math.max(30-tR,(640-tR-bR)/2), X=x=>x0+x*sE, Y=y=>y0-y*sE;
+  K.pl([[-cw,yT],[0,yT],[0,0],[p.lc,0],[p.lc,-p.he],[0,-p.h],[0,yB],[-cw,yB]].map(q=>[X(q[0]),Y(q[1])]),null,K.H('cc'));
+  K.ln(X(0),Y(yT),X(0),Y(0),'cut'); K.ln(X(0),Y(-p.h),X(0),Y(yB),'cut');
+  K.ln(X(0),Y(0),X(p.lc),Y(0),'cut',{k:'lc'}); K.ln(X(p.lc),Y(0),X(p.lc),Y(-p.he),'cut',{k:'he'}); K.ln(X(p.lc),Y(-p.he),X(0),Y(-p.h),'cut',{k:'h he lc'});
+  K.brk(X(-cw),Y(yT),X(0),Y(yT)); K.brk(X(-cw),Y(yB),X(0),Y(yB)); K.brk(X(-cw),Y(yT),X(-cw),Y(yB));
+  const tpl=6; K.rc(X(p.av-p.lb/2),Y(0)-tpl,p.lb*sE,tpl,'cut',K.H('st'),{k:'lb bb av'});
+  const wM=Math.max(2.6,Math.min(4.2,p.dm*sE*0.42)), wS=Math.max(1.7,Math.min(2.8,p.ds*sE*0.4));
+  yst.forEach(y=>{ const xf=xFront(y); sw(K.ln(X(xbk),Y(y),X(xf),Y(y),'cut',{k:'ns ds'}),wS); [xbk,xf].forEach(x=>K.ci(X(x),Y(y),Math.max(p.ds/2*sE,2.2),null,'#111',{k:'ns ds'})); });
+  const r=Math.min(4*p.dm*sE,hk*sE*0.5,(p.ldisp-p.dm)*sE*0.5);
+  let dpath=`M${X(xEnd)},${Y(-p.dp)} H${X(xb)+(hook?r:0)}`;
+  if(hook) dpath+=` Q${X(xb)},${Y(-p.dp)} ${X(xb)},${Y(-p.dp)+r} V${Y(-p.dp-hk)}`;
+  if(nm>0){ sw(K.pa(dpath,'cut',null,{k:'nm dm anc ldisp dp'}),wM); K.ci(X(xt),Y(-p.dp),Math.max(p.dm/2*sE,2.8),null,'#111',{k:'dm cov'}); }
+  K.ln(X(p.av),Y(0)-tpl-4,X(p.av),Y(-p.h)+56,'ctr',{k:'av'});
+  K.force(X(p.av),Y(0)-tpl-1,0,1,70,`Vu = ${f1(p.Vu,1)} kN`,{k:'Vu'});
+  if(o.Nuc>0) K.force(X(p.av)+8+44,Y(0)-tpl-6,1,0,44,`Nuc = ${f1(o.Nuc,1)} kN`,{k:'Nuc nmin',a:'start',lx:0,ly:-26});
+  const xbB=X(0)+7; K.cut(xbB,Y(0)-28,xbB,Y(-p.h)+22,'B',[1,0]);
+  /* cotas */
+  const xd=X(p.lc), lastY=yst.length?yst[yst.length-1]:null;
+  K.dv(Y(0),Y(-p.dp),X(p.lc),X(xt)+4,xd+24,fl(p.dp),{k:'dp'});
+  if(lastY!=null) K.dv(Y(-p.dp),Y(lastY),X(xt)+4,X(xFront(lastY)),xd+24,fl(2*d/3),{k:'h dp ns'});
+  K.dv(Y(0),Y(-p.he),X(p.lc),X(p.lc),xd+52,fl(p.he),{k:'he'});
+  K.dv(Y(0),Y(-p.h),X(p.lc),X(0),xd+80,fl(p.h),{k:'h'});
+  const yd1=Y(-p.h)+50, yd2=yd1+24;
+  K.dh(X(-p.ldisp),X(0),Y(-p.dp-(hook?hk:0)),Y(-p.h),yd1,fl(p.ldisp),{k:'ldisp'});
+  K.dh(X(0),X(p.av),Y(-p.h),yd1,yd1,fl(p.av),{k:'av'});
+  K.dh(X(p.av),X(p.lc),yd1,Y(-p.he),yd1,fl(p.lc-p.av),{k:'lc av'});
+  K.dh(X(0),X(p.lc),Y(-p.h),Y(-p.he),yd2,fl(p.lc),{k:'lc'});
+  if(hook&&nm>0) K.dv(Y(-p.dp-r/sE),Y(-p.dp-hk),X(xb),X(xb),X(xb)+18,fl(hk),{k:'dm anc'});
+  /* notas */
+  const tx=xd+118, L=[[X(p.av+p.lb/2)-1,Y(0)-3,[`PL APOYO ${p.lb}×${p.bb}`],'lb bb']];
+  
+  if(nm>0){ L.push([X(xt)+Math.max(p.dm/2*sE,2.8)*0.7,Y(-p.dp)+Math.max(p.dm/2*sE,2.8)*0.7,[`BARRA TRANSVERSAL φ${p.dm}`,'SOLDADA'],'dm']); }
+  if(ns>0) L.push([X(xFront(yst[0])*0.8),Y(yst[0]),[`${ns} ESTRIBOS CERRADOS φ${p.ds}`,`EN 2d/3 = ${fl(2*d/3)}`],'ns ds']);
+    const yTop=Y(0)-24, step=56;
+  leadSet(K,L,tx,yTop,step,32);
+  if(nm>0){ const hx=hook?X(xb)+r*0.3:X(xb), hy=hook?Y(-p.dp)+r*0.3:Y(-p.dp);
+    K.lead(hx,hy,X(xb)+34,Y(yT)-28,[`ARMADURA PRINCIPAL ${nm}φ${p.dm}`,hook?`GANCHO 90°, ℓdh = ${fl(o.ld)}`:`ANCLAJE RECTO, ℓd = ${fl(o.ld)}`],{k:'nm dm anc ldisp',side:1}); }
+  K.title((X(-cw)+X(p.lc))/2,H-28,'Corte A-A','S/E');
+  /* PLANTA */
+  const m=Math.max(0.25*p.b,50), cL=p.ldisp+30;
+  const sP=Math.min(330/(cL+p.lc),194/(p.b+2*m)), px0=1210-p.lc*sP, py0=96+(p.b/2+m)*sP;
+  const P=x=>px0+x*sP, Q=y=>py0-y*sP;
+  K.rc(P(-cL),Q(p.b/2+m),cL*sP,(p.b+2*m)*sP,null,K.H('cc'));
+  K.ln(P(0),Q(p.b/2+m),P(0),Q(p.b/2),'cut'); K.ln(P(0),Q(-p.b/2),P(0),Q(-p.b/2-m),'cut');
+  K.brk(P(-cL),Q(p.b/2+m),P(0),Q(p.b/2+m)); K.brk(P(-cL),Q(-p.b/2-m),P(0),Q(-p.b/2-m)); K.brk(P(-cL),Q(p.b/2+m),P(-cL),Q(-p.b/2-m));
+  K.pl([[0,p.b/2],[p.lc,p.b/2],[p.lc,-p.b/2],[0,-p.b/2]].map(q=>[P(q[0]),Q(q[1])]),'vis',null,{k:'b lc',open:true});
+  K.ln(P(0),Q(p.b/2),P(0),Q(-p.b/2),'hid');
+  if(ns>0){ const zy=p.b/2-p.cov-p.ds/2, xf=p.lc-p.cov-p.ds/2; const n=K.rc(P(xbk),Q(zy),(xf-xbk)*sP,2*zy*sP,'cut',null,{k:'ns ds cov'}); sw(n,wS*0.8); n.setAttribute('rx',3); }
+  if(nm>0){ ybars.forEach(y=>sw(K.ln(P(xEnd),Q(y),P(xb),Q(y),'cut',{k:'nm dm'}),wM*0.8)); const yy=Math.max(...ybars.map(Math.abs))+p.dm; sw(K.ln(P(xt),Q(yy),P(xt),Q(-yy),'cut',{k:'dm'}),wM*0.8); }
+  K.rc(P(p.av-p.lb/2),Q(p.bb/2),p.lb*sP,p.bb*sP,'vis',null,{k:'lb bb av'});
+  K.cl(P(p.av),Q(p.bb/2)+2,P(p.av),Q(-p.bb/2)-2,{k:'av'});
+  K.cut(P(-cL)-22,py0,P(p.lc)+62,py0,'A',[0,-1]);
+  const xsP=[...new Set([0,p.av-p.lb/2,p.av+p.lb/2,p.lc].map(v=>Math.max(0,Math.min(p.lc,v))))].sort((a,b)=>a-b);
+  const ytP=Q(p.b/2);
+  for(let i=0;i<xsP.length-1;i++){ const a=xsP[i], b=xsP[i+1]; if(b-a<1e-6) continue; const pl=a>=p.av-p.lb/2-1e-6&&b<=p.av+p.lb/2+1e-6; K.dh(P(a),P(b),pl?Q(p.bb/2):ytP,pl?Q(p.bb/2):ytP,ytP-22,fl(b-a),{k:pl?'lb':'av lb lc'}); }
+  K.dh(P(0),P(p.lc),ytP,ytP,ytP-46,fl(p.lc),{k:'lc'});
+  const xr=P(p.lc);
+  K.dv(Q(p.bb/2),Q(-p.bb/2),P(p.av+p.lb/2),P(p.av+p.lb/2),xr+22,fl(p.bb),{k:'bb'});
+  K.dv(Q(p.b/2),Q(-p.b/2),xr,xr,xr+46,fl(p.b),{k:'b'});
+  K.title((P(-cL)+P(p.lc))/2,318,'Planta','S/E');
+  /* CORTE B-B */
+  const sB=Math.min(150/p.b,185/p.h), bx0=1060, by0=374;
+  const U=z=>bx0+z*sB, V=y=>by0-y*sB;
+  K.rc(U(-p.b/2),V(0),p.b*sB,p.h*sB,'cut',K.H('cc'),{k:'b h'});
+  const zy=p.b/2-p.cov-p.ds/2, rS=Math.max(p.ds/2*sB,2.4), rM=Math.max(p.dm/2*sB,2.8);
+  yst.forEach(y=>[-zy,zy].forEach(z=>K.ci(U(z),V(y),rS,null,'#111',{k:'ns ds'})));
+  if(nm>0) ybars.forEach(z=>K.ci(U(z),V(-p.dp),rM,null,'#111',{k:'nm dm'}));
+  const xl=U(-p.b/2), ysB=[0,-p.dp,...yst,-p.h];
+  for(let i=0;i<ysB.length-1;i++){ const k=i===0?'dp':i===ysB.length-2?'h':'ns'; K.dv(V(ysB[i]),V(ysB[i+1]),xl,xl,xl-22,fl(ysB[i]-ysB[i+1]),{k}); }
+  K.dv(V(0),V(-p.h),xl,xl,xl-48,fl(p.h),{k:'h'});
+  if(ns>0){ const yl=V(yst[ns-1]); const xs=[U(-p.b/2),U(-zy-p.ds/2),U(zy+p.ds/2),U(p.b/2)], yd=V(-p.h)+24; K.dh(xs[0],xs[1],V(-p.h),V(-p.h),yd,fl(p.cov),{k:'cov',side:-1}); K.dh(xs[1],xs[2],V(-p.h),V(-p.h),yd,fl(p.b-2*p.cov),{k:'b cov'}); K.dh(xs[2],xs[3],V(-p.h),V(-p.h),yd,fl(p.cov),{k:'cov',side:1}); [-1,1].forEach(s=>K.ln(U(s*(zy+p.ds/2)),yl+rS+3,U(s*(zy+p.ds/2)),V(-p.h)+28,'dim',{k:'cov'})); }
+  K.dh(U(-p.b/2),U(p.b/2),V(-p.h),V(-p.h),V(-p.h)+(ns>0?48:24),fl(p.b),{k:'b'});
+  const txB=U(p.b/2)+40, LB=[];
+  if(nm>0) LB.push([U(ybars[ybars.length-1])+rM*0.7,V(-p.dp)-rM*0.7,[`${nm}φ${p.dm}`],'nm dm']);
+  if(ns>0) LB.push([U(zy)+rS*0.7,V(yst[0])+rS*0.7,[`${ns} E.C. φ${p.ds}`],'ns ds']);
+  LB.push([U(p.b/4),V(-p.h*0.82),[`H.A. f'c ${p.fc} MPa`],'fc']);
+  leadSet(K,LB,txB,V(0)+8,Math.max(30,(p.h*sB-8)/Math.max(1,LB.length-1)),28);
+  K.title(U(0),H-28,'Corte B-B','S/E');
 }
 
 function renderAll(o,T,svgs){
@@ -374,7 +525,7 @@ function buildReport(){
   ct.appendChild(pt);
   const addSec=(t,n)=>{ const s=document.createElement('div'); s.className='rpt-section'; s.innerHTML=`<h2>${t}</h2>`; if(n) s.appendChild(n); ct.appendChild(s); return s; };
   const T={chk:document.createElement('table'),calc:document.createElement('table')}; T.chk.className=T.calc.className='rpt-small';
-  const sv={c:el('svg',{width:'100%',style:'max-width:560px;height:auto;display:block;margin:0 auto;'})};
+  const sv={c:el('svg',{width:'100%',style:'max-width:100%;height:auto;display:block;margin:0 auto;'})};
   renderAll(R,T,sv);
   addSec('Geometría y armadura',sv.c); addSec('Desarrollo del cálculo',T.calc); addSec('Verificaciones',T.chk);
   const ft=document.createElement('div'); ft.className='rpt-foot'; ft.innerHTML=notesHtml(R); ct.appendChild(ft);
