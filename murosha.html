@@ -1,0 +1,2389 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Muros de hormigón armado | fddlebel</title>
+<style>
+:root{
+  --paper:#ffffff;--panel:#ffffff;--ink:#000000;--line:#9a9a9a;--line-strong:#7a7a7a;
+  --accent:#000000;--accent-soft:#e9e9e9;--grid:#d9d9d9;--conc:#c0c0c0;--conc-dark:#a8a8a8;
+  --fail:#b3261e;--focus:#4a4d24;
+  --sans:'Arial Narrow',Arial,Helvetica,sans-serif;
+}
+*{box-sizing:border-box;}
+[hidden]{display:none!important;}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);padding-block:20px 48px;padding-inline:max(16px,calc((100vw - 1400px)/2));}
+h1{font-size:22px;font-weight:700;margin:0;}
+.app-header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+.clause{font-size:12px;}
+.btn{font-family:var(--sans);font-weight:700;font-size:13px;color:#fff;background:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:7px 14px;cursor:pointer;}
+.btn.sec{background:var(--panel);color:var(--ink);border-color:var(--line-strong);}
+.grid{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;align-items:start;}
+@media (max-width:900px){.grid{grid-template-columns:1fr;}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:14px;}
+.panel+.panel{margin-top:12px;}
+.section-title{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:0 0 10px;}
+.field{margin-bottom:9px;min-width:0;}
+.field label{display:block;font-size:12px;margin-bottom:3px;}
+.unit{opacity:.75;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+input[type=number],input[type=text],select,textarea{width:100%;font-family:var(--sans);font-size:13px;color:var(--ink);background:#fff;border:1px solid var(--line-strong);border-radius:4px;padding:6px 7px;font-variant-numeric:tabular-nums;}
+textarea{font-size:12px;resize:vertical;}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--focus);outline-offset:1px;}
+details summary{cursor:pointer;font-size:13px;font-weight:700;margin-top:4px;user-select:none;}
+details[open] summary{margin-bottom:8px;}
+.chk{display:flex;align-items:center;gap:6px;font-size:12px;}
+.chk input{width:auto;margin:0;}
+.toolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px;}
+.tool{font-family:var(--sans);font-size:12.5px;font-weight:700;background:var(--panel);color:var(--ink);border:1px solid var(--line-strong);border-radius:4px;padding:6px 10px;cursor:pointer;}
+.tool.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.toolbar select{width:auto;}
+.toolbar .sep{width:1px;height:24px;background:var(--line);margin:0 4px;}
+#gridWrap{position:relative;border:1px solid var(--line);border-radius:4px;overflow:auto;max-height:560px;background:#fff;}
+#gridCanvas{display:block;cursor:crosshair;touch-action:none;}
+#gridInfo{font-size:12px;margin-top:6px;min-height:16px;}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 10px;}
+.tabs button{font-family:var(--sans);font-weight:700;font-size:13px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:7px 14px;cursor:pointer;}
+.tabs button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:12px;}
+.stat{border:1px solid var(--line);border-radius:4px;padding:8px 10px;}
+.stat .k{font-size:11px;text-transform:uppercase;letter-spacing:.04em;}
+.stat .v{font-size:16px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th,td{text-align:left;padding:5px 8px;border:1px solid var(--line);font-variant-numeric:tabular-nums;}
+th{font-size:11px;font-weight:700;background:var(--accent-soft);}
+td.num,th.num{text-align:right;}
+tr.fail td{color:var(--fail);font-weight:700;}
+.tablewrap{overflow-x:auto;}
+.chartwrap{border:1px solid var(--line);border-radius:4px;padding:10px;margin-bottom:12px;}
+.ctrls{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-bottom:10px;}
+.ctrls .field{margin:0;width:150px;}
+#glWrap{position:relative;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:#fff;}
+#glCanvas{display:block;width:100%;height:560px;cursor:grab;touch-action:none;}
+#glLabels{position:absolute;inset:0;pointer-events:none;font-size:11px;}
+#glLabels span{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;}
+.note{font-size:11.5px;line-height:1.5;}
+.warn{background:var(--accent-soft);border:1px solid var(--line-strong);border-radius:4px;padding:7px 10px;font-size:12px;margin-bottom:10px;}
+#busy{font-size:12px;margin-left:8px;}
+svg text{font-family:var(--sans);}
+#printReport{display:none;}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:11.5px;margin-top:4px;align-items:center;}
+.legend .sw{display:inline-block;width:14px;height:11px;border:1px solid #7a7a7a;vertical-align:-1px;margin-right:5px;}
+.legend .sw-conf{background:#a3a383;border:1.6px solid #5c5c22;}
+.legend .sw-bar{background:#000;border-radius:50%;width:9px;height:9px;}
+td input[type=number],td input[type=text]{padding:3px 4px;font-size:12px;min-width:52px;}
+.section-title+.tablewrap{margin-bottom:4px;}
+.rpt-header{margin-bottom:12px;}
+.rpt-header h1{font-size:20px;}
+.rpt-sub{font-size:11.5px;margin-top:2px;}
+.rpt-params{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:11px;}
+.rpt-params td{border:1px solid var(--line);padding:4px 7px;}
+.rpt-params td.k{font-weight:700;width:22%;background:var(--accent-soft);}
+.rpt-section{margin-bottom:16px;page-break-inside:avoid;break-inside:avoid;}
+.rpt-section h2{font-size:14px;font-weight:700;margin:0 0 8px;border-bottom:1px solid var(--line);padding-bottom:4px;break-after:avoid;}
+.rpt-section.allow-break{page-break-inside:auto;break-inside:auto;}
+.rpt-foot{font-size:10px;margin-top:14px;border-top:1px solid var(--line);padding-top:6px;}
+.rpt-small{font-size:10px;}
+.rpt-small td,.rpt-small th{padding:2px 5px;}
+@media print{
+  body *{visibility:hidden;}
+  #printReport,#printReport *{visibility:visible;}
+  #printReport{display:block;position:absolute;left:0;top:0;width:100%;}
+  @page{margin:12mm;}
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1><a href="index.html" style="color:inherit;text-decoration:none;font-weight:400;">fddlebel</a> / Muros de hormigón armado</h1>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+    <div class="clause">NCh430-2023 18.10, ACI 318-19. Análisis por fibras</div>
+    <button class="btn sec" id="saveBtn">Guardar proyecto</button>
+    <button class="btn sec" id="loadBtn">Abrir proyecto</button>
+    <input type="file" id="loadFile" accept=".json" hidden>
+    <select id="txtSel" style="width:auto;">
+      <option value="mc">TXT: momento-curvatura</option>
+      <option value="pm">TXT: interacción P-M</option>
+      <option value="surf">TXT: superficie P-Mx-My</option>
+      <option value="grid">TXT: grilla de la sección</option>
+      <option value="wall">TXT: verificación 18.10</option>
+    </select>
+    <button class="btn" id="txtBtn">Exportar TXT</button>
+    <button class="btn" id="pdfBtn">Exportar PDF</button>
+  </div>
+</div>
+
+<div id="printReport"></div>
+
+<div class="grid">
+  <div>
+    <div class="panel">
+      <div class="field"><label>Proyecto / elemento</label><input type="text" id="proj" value=""></div>
+      <div class="section-title" style="margin-top:12px">Grilla</div>
+      <div class="row2">
+        <div class="field"><label>N° celdas x</label><input type="number" id="nx" value="82" step="1" min="1"></div>
+        <div class="field"><label>N° celdas y</label><input type="number" id="ny" value="42" step="1" min="1"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Δx celda <span class="unit">[mm]</span></label><input type="number" id="dx" value="50" step="5"></div>
+        <div class="field"><label>Δy celda <span class="unit">[mm]</span></label><input type="number" id="dy" value="50" step="5"></div>
+      </div>
+
+      <div class="section-title" style="margin-top:12px">Hormigón</div>
+      <div class="row2">
+        <div class="field"><label>f'c <span class="unit">[MPa]</span></label><input type="number" id="fc" value="30" step="1"></div>
+        <div class="field"><label>Ec <span class="unit">[MPa]</span></label><input type="number" id="Ec" value="" step="100" placeholder="4700√f'c"></div>
+      </div>
+      <div class="field"><label>Curva para momento-curvatura</label>
+        <select id="ccurve">
+          <option value="hog">Hognestad (1951)</option>
+          <option value="cp" selected>Collins y Porasz (1989), Carreira y Chu</option>
+        </select>
+      </div>
+      <div class="field"><label>Hormigón para interacción</label>
+        <select id="pmConc">
+          <option value="whit" selected>Bloque de Whitney (ACI 22.2.2.4)</option>
+          <option value="curve">Curva constitutiva, εcu = 0,003</option>
+        </select>
+      </div>
+
+      <div class="section-title" style="margin-top:12px">Acero</div>
+      <div class="row2">
+        <div class="field"><label>fy <span class="unit">[MPa]</span></label><input type="number" id="fy" value="420" step="10"></div>
+        <div class="field"><label>Es <span class="unit">[MPa]</span></label><input type="number" id="Es" value="200000" step="1000"></div>
+      </div>
+      <div class="field"><label>Modelo para momento-curvatura</label>
+        <select id="smodel">
+          <option value="ep">Elastoplástico</option>
+          <option value="park" selected>Con endurecimiento (Park, 1975)</option>
+        </select>
+      </div>
+      <div class="row3" id="parkBox">
+        <div class="field"><label>fsu <span class="unit">[MPa]</span></label><input type="number" id="fsu" value="630" step="10"></div>
+        <div class="field"><label>εsh</label><input type="number" id="esh" value="0.008" step="0.001"></div>
+        <div class="field"><label>εsu</label><input type="number" id="esu" value="0.12" step="0.01"></div>
+      </div>
+
+      <div class="section-title" style="margin-top:12px">Momento-curvatura</div>
+      <div class="row2">
+        <div class="field"><label>P en dirección + <span class="unit">[kN]</span></label><input type="number" id="Pp" value="1500" step="50"></div>
+        <div class="field"><label>P en dirección − <span class="unit">[kN]</span></label><input type="number" id="Pn" value="1500" step="50"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>εc máx. no confinado</label><input type="number" id="ecmax" value="0.008" step="0.0005"></div>
+        <div class="field"><label>εs máx.</label><input type="number" id="esmax" value="0.05" step="0.005"></div>
+      </div>
+      <div class="field"><label>Control de la dirección</label>
+        <select id="mcMode">
+          <option value="res" selected>Momento resultante en α</option>
+          <option value="na">Eje neutro perpendicular a α</option>
+        </select>
+      </div>
+
+      <details>
+        <summary>Parámetros avanzados</summary>
+        <div class="row2">
+          <div class="field"><label>Tamaño fibra máx. <span class="unit">[mm]</span></label><input type="number" id="fib" value="25" step="5"></div>
+          <div class="field"><label>Referencia de momentos</label>
+            <select id="refpt"><option value="pc">Centroide plástico</option><option value="gc">Centroide geométrico</option></select>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Meridianos superficie</label><input type="number" id="nmer" value="72" step="12"></div>
+          <div class="field"><label>Factor φPn,máx</label><input type="number" id="pcapf" value="0.80" step="0.05"></div>
+        </div>
+        <div class="field"><label class="chk"><input type="checkbox" id="mpr"> Momento probable: fs = 1,25 fy y φ = 1</label></div>
+      </details>
+    </div>
+    <div class="panel">
+      <div class="section-title">Hormigón confinado</div>
+      <div class="field"><label>Modelo para celdas confinadas</label>
+        <select id="confModel">
+          <option value="mander" selected>Mander, Priestley y Park (1988)</option>
+          <option value="kp">Kent y Park (1971)</option>
+          <option value="none">Sin confinamiento</option>
+        </select>
+      </div>
+      <div class="row3">
+        <div class="field"><label>Ø estribo <span class="unit">[mm]</span></label><input type="number" id="hDb" value="12" step="1"></div>
+        <div class="field"><label>s <span class="unit">[mm]</span></label><input type="number" id="hS" value="75" step="5"></div>
+        <div class="field"><label>fyt <span class="unit">[MPa]</span></label><input type="number" id="hFy" value="420" step="10"></div>
+      </div>
+      <div class="row3">
+        <div class="field"><label>hx máx. <span class="unit">[mm]</span></label><input type="number" id="hHx" value="150" step="10"></div>
+        <div class="field"><label>ke</label><input type="number" id="hKe" value="0.75" step="0.05"></div>
+        <div class="field"><label>Recubr. <span class="unit">[mm]</span></label><input type="number" id="hRc" value="40" step="5"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>εsp descascaramiento</label><input type="number" id="hEsp" value="0.005" step="0.0005"></div>
+        <label class="chk" style="margin-top:14px;"><input type="checkbox" id="hSpall" checked> σ = 0 en no confinado si ε &gt; εsp</label>
+      </div>
+      <details>
+        <summary>Valores manuales (vacío = automático)</summary>
+        <div class="row2">
+          <div class="field"><label>N° ramas paralelas a x</label><input type="number" id="hNx" value="" step="1" placeholder="hc/hx + 1"></div>
+          <div class="field"><label>N° ramas paralelas a y</label><input type="number" id="hNy" value="" step="1" placeholder="bc/hx + 1"></div>
+        </div>
+        <div class="row3">
+          <div class="field"><label>bc (x) <span class="unit">[mm]</span></label><input type="number" id="hBc" value="" step="10" placeholder="pintado"></div>
+          <div class="field"><label>hc (y) <span class="unit">[mm]</span></label><input type="number" id="hHc" value="" step="10" placeholder="pintado"></div>
+          <div class="field"><label>εcu conf.</label><input type="number" id="hEcu" value="" step="0.001" placeholder="modelo"></div>
+        </div>
+      </details>
+    </div>
+    <div class="panel">
+      <div class="section-title">Muro especial, NCh430 18.10</div>
+      <div class="row2">
+        <div class="field"><label>ht sobre sección crítica <span class="unit">[m]</span></label><input type="number" id="wHt" value="30" step="0.5"></div>
+        <div class="field"><label>hw altura del muro <span class="unit">[m]</span></label><input type="number" id="wHw" value="30" step="0.5"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>hwcs <span class="unit">[m]</span></label><input type="number" id="wHwcs" value="30" step="0.5"></div>
+        <div class="field"><label>hu altura de piso <span class="unit">[m]</span></label><input type="number" id="wHu" value="2.6" step="0.1"></div>
+      </div>
+      <div class="field"><label>Desplazamiento de diseño δu, NCh433 <span class="unit">[mm]</span></label>
+        <div class="row2"><div class="field"><label>Sentido α</label><input type="number" id="du1" value="120" step="5"></div><div class="field"><label>Sentido α + 180°</label><input type="number" id="du2" value="120" step="5"></div></div>
+        <div class="row2"><div class="field"><label>Sentido α + 90°</label><input type="number" id="du3" value="120" step="5"></div><div class="field"><label>Sentido α + 270°</label><input type="number" id="du4" value="120" step="5"></div></div>
+        <label class="chk"><input type="checkbox" id="wPerp" checked> Analizar también α + 90° y α + 270°</label>
+      </div>
+      <div class="field"><label>Deformaciones 18.10.5.5</label>
+        <select id="wEq"><option value="ac" selected>(a) y (c), εc = 2δu·c/(ht·lw)</option><option value="bd">(b) y (d), con lp, δy y φy</option></select></div>
+      <div class="row3">
+        <div class="field"><label>lp <span class="unit">[mm]</span></label><input type="number" id="wLp" value="" step="50" placeholder="0,3lw"></div>
+        <div class="field"><label>δy <span class="unit">[mm]</span></label><input type="number" id="wDy" value="" step="5" placeholder="0"></div>
+        <div class="field"><label>φy <span class="unit">[1/m]</span></label><input type="number" id="wPhiy" value="" step="0.0001" placeholder="2εy/lw"></div>
+      </div>
+      <div class="field"><label>Profundidad c para cada Pu sísmico</label>
+        <select id="wCm"><option value="mc" selected>Compatibilidad en la curvatura de demanda (M-φ)</option><option value="nom">Resistencia nominal, εcu = 0,003, bloque ACI</option></select></div>
+      <div class="row3">
+        <div class="field"><label>ωv</label><input type="number" id="wOmv" value="1.0" step="0.05" min="1"></div>
+        <div class="field"><label>Pa = PD + k·PL</label><select id="paK"><option value="0.25" selected>k = 0,25</option><option value="0.5">k = 0,50</option><option value="o">Otro</option></select></div>
+        <div class="field"><label>k otro</label><input type="number" id="paKo" value="0.25" step="0.05"></div>
+      </div>
+      <label class="chk" style="margin-bottom:8px;"><input type="checkbox" id="wCap5" checked> Limitar 2/3·Mpr,cs/Mu,cs a 5 (Tabla 18.10.3.1.2)</label>
+      <div class="row2">
+        <div class="field"><label>Necesidad de elementos de borde</label>
+          <select id="wBeM"><option value="auto" selected>Automático según hw/lw</option><option value="d">18.10.6.2, desplazamientos</option><option value="s">18.10.6.3, tensiones</option></select></div>
+        <div class="field"><label>Largo horizontal requerido</label>
+          <select id="wLbe"><option value="nch" selected>NCh430, zona con ε &gt; 0,003</option><option value="aci">ACI 318-19, máx(c − 0,1lw, c/2)</option></select></div>
+      </div>
+      <div class="row3">
+        <div class="field"><label>λ</label><input type="number" id="wLam" value="1" step="0.05"></div>
+        <div class="field"><label>fyt corte <span class="unit">[MPa]</span></label><input type="number" id="wFyt" value="420" step="10"></div>
+        <div class="field"><label>f'c losa <span class="unit">[MPa]</span></label><input type="number" id="wFcs" value="25" step="1"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="section-title">Propiedades de la sección</div>
+      <div class="tablewrap"><table id="propTable"></table></div>
+    </div>
+    <div class="panel">
+      <div class="section-title">Notas</div>
+      <div class="note" id="notes"></div>
+    </div>
+  </div>
+
+  <div style="min-width:0;">
+    <div class="panel">
+      <div class="toolbar" id="tools">
+        <button class="tool active" data-t="conc">Hormigón</button>
+        <button class="tool" data-t="rect">Rectángulo</button>
+        <button class="tool" data-t="erase">Borrar</button>
+        <button class="tool" data-t="conf" title="Pintar o quitar hormigón confinado, solo sobre celdas de hormigón">Confinado</button>
+        <button class="tool" data-t="confr">Rect. confinado</button>
+        <button class="tool" id="paintReq2" title="Pinta el largo confinado requerido en los extremos comprimidos">Pintar EB requeridos</button>
+        <span class="sep"></span>
+        <button class="tool" data-t="bar">Barra</button>
+        <button class="tool" data-t="line">Línea de barras</button>
+        <select id="diam" title="Diámetro de barra">
+          <option>8</option><option>10</option><option>12</option><option selected>16</option><option>18</option><option>22</option><option>25</option><option>28</option><option>32</option><option>36</option>
+        </select>
+        <label class="chk">cada <input type="number" id="lineStep" value="5" min="1" step="1" style="width:52px;"> celdas</label>
+        <span class="sep"></span>
+        <select id="tpl" title="Plantilla">
+          <option value="">Plantilla...</option>
+          <option value="rect">Muro rectangular</option>
+          <option value="L">Muro L</option>
+          <option value="T">Muro T</option>
+          <option value="C">Muro C</option>
+        </select>
+        <button class="tool" id="pasteBtn">Pegar grilla</button>
+        <button class="tool" id="clearBtn">Limpiar</button>
+        <span class="sep"></span>
+        <button class="tool" id="zoomOut" title="Alejar">−</button>
+        <span id="zoomLbl" style="font-size:12px;min-width:38px;text-align:center;">100%</span>
+        <button class="tool" id="zoomIn" title="Acercar">+</button>
+        <button class="tool" id="zoomFit">Ajustar</button>
+        <label class="chk"><input type="checkbox" id="showDiam" checked> Mostrar Ø</label>
+      </div>
+      <div id="tplBox" class="ctrls" hidden>
+        <div class="field"><label>Largo alma <span class="unit">[mm]</span></label><input type="number" id="tLw" value="2000" step="50"></div>
+        <div class="field"><label>Largo ala <span class="unit">[mm]</span></label><input type="number" id="tLf" value="1000" step="50"></div>
+        <div class="field"><label>Espesor <span class="unit">[mm]</span></label><input type="number" id="tT" value="200" step="10"></div>
+        <div class="field"><label>Ø malla / Ø borde</label><div class="row2"><input type="number" id="tDm" value="10"><input type="number" id="tDb" value="18"></div></div>
+        <div class="field"><label>Separación malla <span class="unit">[celdas]</span></label><input type="number" id="tS" value="5" step="1"></div>
+        <button class="btn" id="tplGo">Generar</button>
+      </div>
+      <div id="pasteBox" hidden>
+        <textarea id="pasteTxt" rows="5" placeholder="Pegar celdas desde Excel. Número = diámetro de barra (con hormigón), x o 0 = hormigón, vacío = sin sección. Sufijo c = hormigón confinado (xc, 0c, 16c)."></textarea>
+        <div style="display:flex;gap:6px;margin-top:6px;"><button class="btn" id="pasteGo">Aplicar</button><button class="btn sec" id="pasteCancel">Cancelar</button></div>
+      </div>
+      <div id="gridWrap"><canvas id="gridCanvas"></canvas></div>
+      <div id="gridInfo"></div>
+      <div class="legend"><span><i class="sw" style="background:var(--conc)"></i>Hormigón no confinado</span><span><i class="sw sw-conf"></i>Hormigón confinado, elemento de borde</span><span><i class="sw sw-bar"></i>Barra longitudinal</span><span>Cruz: punto de referencia de momentos</span></div>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <button data-tab="mc" class="active">Momento-curvatura</button>
+      <button data-tab="pm">Interacción P-M</button>
+      <button data-tab="s3d">Superficie 3D</button>
+      <button data-tab="loads">Cargas</button>
+      <button data-tab="wall">Verificación 18.10</button>
+      <button data-tab="legs">Pilas y corte</button>
+      <button data-tab="conf">Confinamiento</button>
+      <button data-tab="sheet">Lámina</button>
+      <span id="busy"></span>
+    </div>
+
+    <div class="tabpane" data-pane="mc">
+      <div class="ctrls">
+        <div class="field"><label>Ángulo α <span class="unit">[°]</span></label><input type="number" id="alphaMC" value="0" step="5"></div>
+        <div class="field" style="width:230px;"><label>P para M-φ</label><select id="mcP"><option value="pa" selected>Pa = PD + k·PL</option><option value="pu">Pu sísmico máximo de cada sentido</option><option value="man">Manual, panel izquierdo</option></select></div>
+        <div class="note" style="max-width:420px;">α = 0° comprime el lado +x, α = 90° comprime el lado +y. La rama negativa corresponde a α + 180°. Líneas verticales: demanda φu = 2δu/(ht·lw) y fluencia φy.</div>
+      </div>
+      <div class="stat-row" id="mcStats"></div>
+      <div class="chartwrap"><svg id="mcChart" viewBox="0 0 760 420" width="100%" style="display:block;height:auto"></svg></div>
+      <div class="tablewrap"><table id="mcTable"></table></div>
+    </div>
+
+    <div class="tabpane" data-pane="pm" hidden>
+      <div class="ctrls">
+        <div class="field"><label>Ángulo α <span class="unit">[°]</span></label><input type="number" id="alphaPM" value="0" step="5"></div>
+        <div class="field"><label>P contorno Mx-My <span class="unit">[kN]</span></label><input type="number" id="Pring" value="1500" step="50"></div>
+        <label class="chk" style="margin-bottom:6px;"><input type="checkbox" id="pmLoads" checked> Mostrar cargas</label>
+      </div>
+      <div class="stat-row" id="pmStats"></div>
+      <div class="chartwrap"><svg id="pmChart" viewBox="0 0 760 460" width="100%" style="display:block;height:auto"></svg></div>
+      <div class="chartwrap"><svg id="ringChart" viewBox="0 0 760 460" width="100%" style="display:block;height:auto"></svg></div>
+    </div>
+
+    <div class="tabpane" data-pane="s3d" hidden>
+      <div class="ctrls">
+        <label class="chk"><input type="checkbox" id="showNom" checked> Superficie nominal</label>
+        <label class="chk"><input type="checkbox" id="showDes" checked> Superficie de diseño</label>
+        <label class="chk"><input type="checkbox" id="showLoads3" checked> Cargas</label>
+        <button class="tool" id="viewReset">Vista inicial</button>
+        <span class="note">Arrastrar para rotar, rueda para acercar.</span>
+      </div>
+      <div id="glWrap"><canvas id="glCanvas"></canvas><div id="glLabels"></div></div>
+    </div>
+
+    <div class="tabpane" data-pane="loads" hidden>
+      <div class="ctrls">
+        <label class="chk"><input type="checkbox" id="etabsSign" checked> Compresión negativa (convención ETABS)</label>
+        <div class="field"><label>Eje local 2 de la pila</label><select id="ax2"><option value="+x" selected>+x de la sección</option><option value="-x">−x de la sección</option><option value="+y">+y de la sección</option><option value="-y">−y de la sección</option></select></div>
+        <label class="chk"><input type="checkbox" id="flip3"> Invertir V2 y M3</label>
+        <label class="chk"><input type="checkbox" id="flip2"> Invertir V3 y M2</label>
+        <div class="field" style="width:190px;"><label>Sísmica si el nombre contiene</label><input type="text" id="seisPat" value="E, SIS, SX, SY"></div>
+      </div>
+      <div class="ctrls">
+        <div class="field"><label>Combinación PD</label><input type="text" id="pdName" value="PP" list="combList"></div>
+        <div class="field"><label>PD manual <span class="unit">[kN]</span></label><input type="number" id="pdVal" value="" step="50" placeholder="de la comb."></div>
+        <div class="field"><label>Combinación PL</label><input type="text" id="plName" value="SC" list="combList"></div>
+        <div class="field"><label>PL manual <span class="unit">[kN]</span></label><input type="number" id="plVal" value="" step="50" placeholder="de la comb."></div>
+        <datalist id="combList"></datalist>
+        <div class="note" id="paNote" style="max-width:300px;"></div>
+      </div>
+      <div class="field"><label>Muro completo, una fila por combinación: Comb P V2 V3 T M2 M3 [kN, kN·m]. Se aceptan filas de ETABS (Story, Pier, Output Case, Case Type, Step Type, Location, P a M3): se usan los últimos 6 números y el nombre del caso más el tipo de paso. Si hay filas Top y Bottom se usan solo las Bottom.</label>
+        <textarea id="loadsTxt" rows="9"></textarea></div>
+      <div class="tablewrap"><table id="loadsTable"></table></div>
+      <div class="note" id="loadsNote" style="margin-top:6px;"></div>
+    </div>
+
+    <div class="tabpane" data-pane="wall" hidden>
+      <div class="ctrls">
+        <div class="field"><label>Ángulo α <span class="unit">[°]</span></label><input type="number" id="alphaW" value="0" step="5"></div>
+        <button class="btn" id="paintReq">Pintar largo requerido</button>
+        <div class="note" style="max-width:520px;">α es el mismo de la pestaña Momento-curvatura. Pintar largo requerido marca como confinadas las celdas interiores, fuera del recubrimiento, dentro del largo requerido en cada extremo comprimido.</div>
+      </div>
+      <div class="stat-row" id="wallStats"></div>
+      <div class="section-title">Resumen de verificaciones</div>
+      <div class="tablewrap"><table id="wallChk"></table></div>
+      <div class="section-title" style="margin-top:14px">Sobrerresistencia y corte de diseño por sentido, 18.10.3</div>
+      <div class="tablewrap"><table id="wallSense"></table></div>
+      <div class="section-title" style="margin-top:14px">Deformaciones unitarias por combinación sísmica, 18.10.5.5</div>
+      <div class="tablewrap"><table id="wallStrain"></table></div>
+      <div class="section-title" style="margin-top:14px">Elementos de borde por extremo, 18.10.6</div>
+      <div class="tablewrap"><table id="wallBE"></table></div>
+      <div class="note" id="wallNote" style="margin-top:8px;"></div>
+    </div>
+
+    <div class="tabpane" data-pane="legs" hidden>
+      <div class="field"><label>Pilas o alas del muro, una fila por combinación: Pier Comb P V2 V3 T M2 M3 [kN, kN·m]. Se aceptan filas completas de ETABS. V2 es el corte en el plano de la pila.</label>
+        <textarea id="legTxt" rows="8"></textarea></div>
+      <label class="chk" style="margin-bottom:8px;"><input type="checkbox" id="legSign" checked> Compresión negativa (convención ETABS)</label>
+      <div class="section-title">Geometría y armadura de cada pila</div>
+      <div class="tablewrap"><table id="legGeo"></table></div>
+      <div class="note" style="margin:6px 0 12px;">θ: dirección del eje local 2 de la pila en la sección (0° = +x, 90° = +y). Un V2 positivo actúa en el sentido θ y toma el Ωv de ese sentido, un V2 negativo el de θ + 180°. Las pilas nuevas se crean al aparecer su nombre en la tabla.</div>
+      <div class="section-title">Diseño al corte por capacidad, 18.10.3 y 18.10.4</div>
+      <div class="tablewrap"><table id="legTable"></table></div>
+      <div class="section-title" style="margin-top:14px">Verificaciones por pila</div>
+      <div class="tablewrap"><table id="legChk"></table></div>
+    </div>
+
+    <div class="tabpane" data-pane="conf" hidden>
+      <div class="chartwrap"><svg id="confChart" viewBox="0 0 760 360" width="100%" style="display:block;height:auto"></svg></div>
+      <div class="section-title">Hormigón confinado por elemento de borde</div>
+      <div class="tablewrap"><table id="beTable"></table></div>
+      <div class="section-title" style="margin-top:14px">Detallamiento de elementos de borde, 18.10.6.4 y 18.10.6.5</div>
+      <div class="tablewrap"><table id="beChk"></table></div>
+      <div class="note" id="confNote" style="margin-top:8px;"></div>
+    </div>
+
+    <div class="tabpane" data-pane="sheet" hidden>
+      <div class="chartwrap"><svg id="sheetSvg" viewBox="0 0 1300 780" width="100%" style="display:block;height:auto"></svg></div>
+      <div class="note">Al enfocar una entrada se destaca en rojo la cota o el elemento que controla. Planta a escala, elevación y detalle esquemáticos.</div>
+    </div>
+  </div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const DEG=Math.PI/180;
+function num(id,def){ const x=parseFloat($(id).value); return isFinite(x)?x:def; }
+const clamp=(x,a,b)=>x<a?a:x>b?b:x;
+
+let S={nx:52,ny:27,dx:40,dy:40,conc:new Uint8Array(52*27),bars:new Float32Array(52*27),conf:new Uint8Array(52*27)};
+
+function readMat(){
+  const fc=Math.max(num('fc',30),5);
+  const Ec=num('Ec',NaN)>0?num('Ec',0):4700*Math.sqrt(fc);
+  const fy=Math.max(num('fy',420),1), Es=Math.max(num('Es',200000),1);
+  const m={fc,Ec,fy,Es,ey:fy/Es,
+    ccurve:$('ccurve').value, smodel:$('smodel').value,
+    fsu:Math.max(num('fsu',1.5*fy),fy), esh:Math.max(num('esh',0.008),fy/Es), esu:Math.max(num('esu',0.12),0.01),
+    pmConc:$('pmConc').value, mpr:$('mpr').checked,
+    fib:Math.max(num('fib',20),2), refpt:$('refpt').value, nmer:clamp(Math.round(num('nmer',72)),12,360),
+    pcapf:clamp(num('pcapf',0.8),0.1,1),
+    ecmax:Math.max(num('ecmax',0.008),0.001), esmax:Math.max(num('esmax',0.05),0.003),
+    Pp:num('Pp',0), Pn:num('Pn',0), mcMode:$('mcMode').value,
+    conf:$('confModel').value, dh:Math.max(num('hDb',10),4), hs:Math.max(num('hS',100),20), fyt:Math.max(num('hFy',420),1),
+    hx:Math.max(num('hHx',150),20), ke:clamp(num('hKe',0.75),0.1,1), rc:Math.max(num('hRc',40),0), esp:Math.max(num('hEsp',0.005),0.002),
+    spall:$('hSpall').checked, nlxO:Math.round(num('hNx',0)), nlyO:Math.round(num('hNy',0)), bcO:num('hBc',0), hcO:num('hHc',0), ecuO:num('hEcu',0)};
+  if(m.esu<=m.esh) m.esu=m.esh+0.01;
+  m.beta1=fc<=28?0.85:Math.max(0.65,0.85-0.05*(fc-28)/7);
+  m.fyD=m.mpr?1.25*fy:fy;
+  if(m.ccurve==='cp'){
+    m.n=fc>29.4?0.8+fc/17:1.55+Math.pow(fc/32.4,3);
+    m.e0=fc/Ec*m.n/(m.n-1); m.kpost=0.67+fc/62;
+  } else m.e0=2*fc/Ec;
+  return m;
+}
+
+function concStress(e,m){
+  if(e<=0) return 0;
+  if(m.ccurve==='cp'){
+    const r=e/m.e0, k=e<=m.e0?1:m.kpost;
+    return m.fc*m.n*r/(m.n-1+Math.pow(r,m.n*k));
+  }
+  if(e<=m.e0){ const r=e/m.e0; return m.fc*(2*r-r*r); }
+  const ecu=Math.max(0.0038,m.e0*1.2);
+  return Math.max(0,m.fc*(1-0.15*(e-m.e0)/(ecu-m.e0)));
+}
+function steelStress(e,m){
+  if(m.smodel!=='park'){ const s=m.Es*e; return s>m.fy?m.fy:s<-m.fy?-m.fy:s; }
+  const a=Math.abs(e), sg=e<0?-1:1;
+  if(a<=m.ey) return m.Es*e;
+  if(a<=m.esh) return sg*m.fy;
+  if(a<=m.esu){
+    const r=m.esu-m.esh, x=a-m.esh, q=(30*r+1)*(30*r+1);
+    const mm=((m.fsu/m.fy)*q-60*r-1)/(15*r*r);
+    return sg*m.fy*((mm*x+2)/(60*x+2)+x*(60-mm)/(2*q));
+  }
+  return sg*m.fsu;
+}
+
+function buildFibers(S,m){
+  const {nx,ny,dx,dy}=S;
+  const sub=Math.max(1,Math.ceil(Math.max(dx,dy)/m.fib));
+  const fdx=dx/sub, fdy=dy/sub, fa=fdx*fdy;
+  let ncell=0; for(let k=0;k<nx*ny;k++) if(S.conc[k]) ncell++;
+  const cx=new Float64Array(ncell*sub*sub), cy=new Float64Array(ncell*sub*sub), fmat=new Int16Array(ncell*sub*sub);
+  const BEI=beComponents(S,m), cmat=BEI.cmat;
+  const kx=[],ky=[];
+  const bx=[],by=[],ba=[],bd=[],bin=[],bmat=[];
+  let f=0, Ac=0, Sx=0, Sy=0, Ixx=0, Iyy=0;
+  for(let j=0;j<ny;j++) for(let i=0;i<nx;i++){
+    const k=j*nx+i, x0=i*dx, y0=(ny-1-j)*dy;
+    if(S.conc[k]){
+      for(let a=0;a<sub;a++) for(let b=0;b<sub;b++){ cx[f]=x0+(a+0.5)*fdx; cy[f]=y0+(b+0.5)*fdy; fmat[f]=cmat[k]; f++; }
+      kx.push(x0,x0+dx,x0,x0+dx); ky.push(y0,y0,y0+dy,y0+dy);
+      const A=dx*dy, xc=x0+dx/2, yc=y0+dy/2;
+      Ac+=A; Sx+=A*xc; Sy+=A*yc; Ixx+=A*yc*yc+dx*dy*dy*dy/12; Iyy+=A*xc*xc+dy*dx*dx*dx/12;
+    }
+    if(S.bars[k]>0){ bx.push(x0+dx/2); by.push(y0+dy/2); bd.push(S.bars[k]); ba.push(Math.PI*S.bars[k]*S.bars[k]/4); bin.push(S.conc[k]?1:0); bmat.push(S.conc[k]?cmat[k]:0); }
+  }
+  const F={n:f,cx,cy,fa,fdx,fdy,kx:Float64Array.from(kx),ky:Float64Array.from(ky),
+    nb:bx.length,bx:Float64Array.from(bx),by:Float64Array.from(by),ba:Float64Array.from(ba),bd,bin:Uint8Array.from(bin),Ac};
+  F.fmat=fmat; F.bmat=Int16Array.from(bmat); F.BE=BEI.list; F.cmat=cmat; F.hullU=BEI.hullU;
+  F.confOn=m.conf!=='none'&&F.BE.length>0; F.spallOn=F.confOn&&m.spall;
+  F.cm=F.BE.map(b=>b.cp);
+  F.As=ba.reduce((s,a)=>s+a,0);
+  F.AsIn=ba.reduce((s,a,i)=>s+(bin[i]?a:0),0);
+  F.xg=Ac?Sx/Ac:0; F.yg=Ac?Sy/Ac:0;
+  F.Ixg=Ixx-Ac*F.yg*F.yg; F.Iyg=Iyy-Ac*F.xg*F.xg;
+  const c85=0.85*m.fc;
+  let N=c85*Ac, Mx=c85*Sx, My=c85*Sy;
+  for(let i=0;i<F.nb;i++){ const w=m.fyD-(F.bin[i]?c85:0); N+=w*F.ba[i]; Mx+=w*F.ba[i]*F.bx[i]; My+=w*F.ba[i]*F.by[i]; }
+  F.xp=N?Mx/N:F.xg; F.yp=N?My/N:F.yg;
+  F.rx=m.refpt==='gc'?F.xg:F.xp; F.ry=m.refpt==='gc'?F.yg:F.yp;
+  F.Po=(c85*(Ac-F.AsIn)+m.fyD*F.As)/1e3;
+  F.Pt=-m.fyD*F.As/1e3;
+  F.rho=Ac?F.As/Ac:0;
+  return F;
+}
+
+function extent(F,ux,uy){
+  let smax=-1e18,smin=1e18;
+  for(let i=0;i<F.kx.length;i++){ const s=(F.kx[i]-F.rx)*ux+(F.ky[i]-F.ry)*uy; if(s>smax) smax=s; if(s<smin) smin=s; }
+  return [smax,smin];
+}
+
+function pmPoint(F,m,th,c,smax){
+  const ux=Math.cos(th), uy=Math.sin(th), ecu=0.003, c85=0.85*m.fc;
+  const whit=m.pmConc==='whit', sb=smax-m.beta1*c;
+  const hs=(Math.abs(ux)*F.fdx+Math.abs(uy)*F.fdy)/2;
+  let P=0,X=0,Y=0;
+  for(let i=0;i<F.n;i++){
+    const ddx=F.cx[i]-F.rx, ddy=F.cy[i]-F.ry, s=ddx*ux+ddy*uy;
+    let sc;
+    if(whit){ const fr=(s+hs-sb)/(2*hs); sc=fr<=0?0:fr>=1?c85:c85*fr; }
+    else sc=concStress(ecu*(s-(smax-c))/c,m);
+    if(sc){ const fF=sc*F.fa; P+=fF; X+=fF*ddx; Y+=fF*ddy; }
+  }
+  let emin=1e9;
+  for(let i=0;i<F.nb;i++){
+    const ddx=F.bx[i]-F.rx, ddy=F.by[i]-F.ry, s=ddx*ux+ddy*uy;
+    const e=ecu*(s-(smax-c))/c;
+    if(e<emin) emin=e;
+    let fs=m.Es*e; fs=fs>m.fyD?m.fyD:fs<-m.fyD?-m.fyD:fs;
+    let fcb=0;
+    if(F.bin[i]) fcb=whit?(s>=sb?c85:0):concStress(e,m);
+    const fF=(fs-fcb)*F.ba[i]; P+=fF; X+=fF*ddx; Y+=fF*ddy;
+  }
+  const et=-emin;
+  const phi=m.mpr?1:(et<=m.ey?0.65:et>=m.ey+0.003?0.9:0.65+0.25*(et-m.ey)/0.003);
+  return {P:P/1e3,X:X/1e6,Y:Y/1e6,phi,c,et};
+}
+function endPoints(F,m){
+  const c85=0.85*m.fc;
+  let Xo=0,Yo=0;
+  for(let i=0;i<F.n;i++){ Xo+=c85*F.fa*(F.cx[i]-F.rx); Yo+=c85*F.fa*(F.cy[i]-F.ry); }
+  let Xt=0,Yt=0;
+  for(let i=0;i<F.nb;i++){
+    const w=m.fyD-(F.bin[i]?c85:0);
+    Xo+=w*F.ba[i]*(F.bx[i]-F.rx); Yo+=w*F.ba[i]*(F.by[i]-F.ry);
+    Xt+=-m.fyD*F.ba[i]*(F.bx[i]-F.rx); Yt+=-m.fyD*F.ba[i]*(F.by[i]-F.ry);
+  }
+  return {o:{P:F.Po,X:Xo/1e6,Y:Yo/1e6,phi:m.mpr?1:0.65},t:{P:F.Pt,X:Xt/1e6,Y:Yt/1e6,phi:m.mpr?1:0.9}};
+}
+
+function buildSurface(F,m){
+  const K=m.nmer, Nc=70, ends=endPoints(F,m);
+  const Pcap=m.pcapf*(m.mpr?1:0.65)*F.Po;
+  const mers=[];
+  for(let k=0;k<K;k++){
+    const th=2*Math.PI*k/K, ux=Math.cos(th), uy=Math.sin(th);
+    const [smax,smin]=extent(F,ux,uy), D=Math.max(smax-smin,1);
+    const pts=[ends.t];
+    for(let j=0;j<Nc;j++){ const c=D*Math.exp(Math.log(0.01)+(Math.log(4)-Math.log(0.01))*j/(Nc-1)); pts.push(pmPoint(F,m,th,c,smax)); }
+    pts.push(ends.o);
+    const nom=pts.map(p=>[p.P,p.X,p.Y]);
+    const des=pts.map(p=>[p.phi*p.P,p.phi*p.X,p.phi*p.Y]);
+    const cut=[];
+    for(let i=0;i<des.length;i++){
+      if(des[i][0]<=Pcap) cut.push(des[i]);
+      else{
+        if(i>0){ const a=des[i-1],b=des[i],t=(Pcap-a[0])/(b[0]-a[0]); cut.push([Pcap,a[1]+t*(b[1]-a[1]),a[2]+t*(b[2]-a[2])]); }
+        break;
+      }
+    }
+    mers.push({th,nom,des:cut});
+  }
+  const sf={K,mers,Pcap,Po:F.Po,Pt:F.Pt,phiPt:(m.mpr?1:0.9)*F.Pt,ends};
+  sf.levN=levels(F.Pt,F.Po,48); sf.levD=levels(sf.phiPt,Pcap,48);
+  sf.ringsN=sf.levN.map(P=>ringAt(sf,P,'nom'));
+  sf.ringsD=sf.levD.map(P=>ringAt(sf,P,'des'));
+  let Ms=0; sf.ringsN.forEach(r=>r&&r.forEach(q=>{ const v=Math.hypot(q[0],q[1]); if(v>Ms) Ms=v; }));
+  sf.Ms=Ms||1;
+  return sf;
+}
+function levels(a,b,n){ const out=[]; for(let i=0;i<=n;i++){ const t=i/n, s=0.5-0.5*Math.cos(Math.PI*t); out.push(a+(b-a)*s); } return out; }
+function interpArr(arr,P){
+  const n=arr.length; if(!n) return null;
+  if(Math.abs(P-arr[0][0])<1e-9) return [arr[0][1],arr[0][2]];
+  if(Math.abs(P-arr[n-1][0])<1e-9) return [arr[n-1][1],arr[n-1][2]];
+  let best=null, bestR=Infinity;
+  for(let i=1;i<n;i++){
+    const a=arr[i-1],b=arr[i];
+    if((P-a[0])*(P-b[0])<=0&&a[0]!==b[0]){
+      const t=(P-a[0])/(b[0]-a[0]), q=[a[1]+t*(b[1]-a[1]),a[2]+t*(b[2]-a[2])], rr=Math.hypot(q[0],q[1]);
+      if(rr<bestR){ bestR=rr; best=q; }
+    }
+  }
+  return best;
+}
+function ringAt(sf,P,key){
+  const r=[];
+  for(const me of sf.mers){ const q=interpArr(me[key],P); if(!q) return null; r.push(q); }
+  return r;
+}
+function rayR(ring,a){
+  if(!ring) return 0;
+  const dx=Math.cos(a), dy=Math.sin(a); let best=0;
+  for(let i=0;i<ring.length;i++){
+    const p=ring[i], q=ring[(i+1)%ring.length], ex=q[0]-p[0], ey=q[1]-p[1];
+    const den=dx*ey-dy*ex; if(Math.abs(den)<1e-14) continue;
+    const r=(p[0]*ey-p[1]*ex)/den, t=(p[0]*dy-p[1]*dx)/den;
+    if(t>=-1e-9&&t<=1+1e-9&&r>best) best=r;
+  }
+  return best;
+}
+function pmCurve(sf,alpha,key){
+  const lev=key==='nom'?sf.levN:sf.levD, rings=key==='nom'?sf.ringsN:sf.ringsD;
+  const R=[],L=[];
+  const ca=Math.cos(alpha), sa=Math.sin(alpha);
+  const f=key==='nom'?1:null;
+  const endT=key==='nom'?sf.ends.t:{P:sf.phiPt,X:sf.ends.t.X*sf.ends.t.phi,Y:sf.ends.t.Y*sf.ends.t.phi};
+  R.push([endT.X*ca+endT.Y*sa,endT.P]); L.push([endT.X*ca+endT.Y*sa,endT.P]);
+  for(let i=1;i<lev.length-1;i++){
+    const rg=rings[i]; if(!rg) continue;
+    R.push([rayR(rg,alpha),lev[i]]); L.push([-rayR(rg,alpha+Math.PI),lev[i]]);
+  }
+  if(key==='nom'){ const o=sf.ends.o, pr=o.X*ca+o.Y*sa; R.push([pr,o.P]); L.push([pr,o.P]); }
+  else{ const rg=rings[lev.length-1]; R.push([rayR(rg,alpha),sf.Pcap]); L.push([-rayR(rg,alpha+Math.PI),sf.Pcap]); }
+  return {R,L,f};
+}
+function dcr(sf,P,X,Y){
+  const Mu=Math.hypot(X,Y);
+  if(P>sf.Pcap+1e-9||P<sf.phiPt-1e-9) return {d:Infinity,R:0};
+  const rg=ringAt(sf,P,'des');
+  if(Mu<1e-9) return {d:P>=0?P/sf.Pcap:P/sf.phiPt,R:0};
+  const R=rayR(rg,Math.atan2(Y,X));
+  return {d:R>0?Mu/R:Infinity,R};
+}
+
+function mcEval(F,m,th,e0,kap){
+  const ux=Math.cos(th), uy=Math.sin(th);
+  let P=0,X=0,Y=0;
+  for(let i=0;i<F.n;i++){
+    const ddx=F.cx[i]-F.rx, ddy=F.cy[i]-F.ry, e=e0+kap*(ddx*ux+ddy*uy);
+    if(e>0){ const fF=fibStress(e,F.fmat[i],F,m)*F.fa; P+=fF; X+=fF*ddx; Y+=fF*ddy; }
+  }
+  let emin=1e9, emax=-1e9;
+  for(let i=0;i<F.nb;i++){
+    const ddx=F.bx[i]-F.rx, ddy=F.by[i]-F.ry, e=e0+kap*(ddx*ux+ddy*uy);
+    if(e<emin) emin=e; if(e>emax) emax=e;
+    const fF=(steelStress(e,m)-(F.bin[i]&&e>0?fibStress(e,F.bmat[i],F,m):0))*F.ba[i]; P+=fF; X+=fF*ddx; Y+=fF*ddy;
+  }
+  return {P:P/1e3,X:X/1e6,Y:Y/1e6,esT:-emin,esC:emax};
+}
+function solveE0(F,m,th,kap,Pt,g){
+  const f=e=>mcEval(F,m,th,e,kap).P-Pt;
+  let a=g-2e-4,b=g+2e-4,fa=f(a),fb=f(b),st=4e-4,it=0;
+  while(fa>0&&it<60){ b=a; fb=fa; a-=st; st*=2; fa=f(a); it++; }
+  while(fb<0&&it<120){ a=b; fa=fb; b+=st; st*=2; fb=f(b); it++; }
+  if(fa>0||fb<0) return null;
+  let side=0, c=a, fc=fa;
+  const tol=Math.max(1e-3,Math.abs(Pt)*1e-6);
+  for(let k=0;k<60;k++){
+    c=(a*fb-b*fa)/(fb-fa); fc=f(c);
+    if(Math.abs(fc)<tol||Math.abs(b-a)<1e-12) break;
+    if(fc*fb>0){ b=c; fb=fc; if(side===-1) fa/=2; side=-1; }
+    else{ a=c; fa=fc; if(side===1) fb/=2; side=1; }
+  }
+  return c;
+}
+function mcState(F,m,alpha,th,kap,Pt,g){
+  const e0=solveE0(F,m,th,kap,Pt,g); if(e0===null) return null;
+  const r=mcEval(F,m,th,e0,kap);
+  const [smax]=extent(F,Math.cos(th),Math.sin(th));
+  r.e0=e0; r.ec=e0+kap*smax; r.th=th; r.kap=kap;
+  r.M=r.X*Math.cos(alpha)+r.Y*Math.sin(alpha);
+  r.Mp=-r.X*Math.sin(alpha)+r.Y*Math.cos(alpha);
+  r.cna=kap>0?r.ec/kap:Infinity;
+  return r;
+}
+function mcSolveStep(F,m,alpha,kap,Pt,prev){
+  const g=prev?prev.e0:0, th0=prev?prev.th:alpha;
+  if(m.mcMode==='na') return mcState(F,m,alpha,alpha,kap,Pt,g);
+  let t0=th0, s0=mcState(F,m,alpha,t0,kap,Pt,g); if(!s0) return null;
+  const tol=s=>Math.abs(s.Mp)<=1e-4*Math.abs(s.M)+1e-3;
+  if(tol(s0)) return s0;
+  let t1=t0+0.01, s1=mcState(F,m,alpha,t1,kap,Pt,s0.e0); if(!s1) return s0;
+  for(let i=0;i<12;i++){
+    if(tol(s1)) return s1;
+    const d=s1.Mp-s0.Mp; if(Math.abs(d)<1e-12) break;
+    let t2=t1-s1.Mp*(t1-t0)/d;
+    if(Math.abs(t2-alpha)>1.2) t2=alpha+Math.sign(t2-alpha)*1.2;
+    const s2=mcState(F,m,alpha,t2,kap,Pt,s1.e0); if(!s2) break;
+    t0=t1; s0=s1; t1=t2; s1=s2;
+  }
+  return s1;
+}
+function mcRun(F,m,alpha,Pt){
+  const ux=Math.cos(alpha), uy=Math.sin(alpha), [smax,smin]=extent(F,ux,uy), D=Math.max(smax-smin,1);
+  const ratio=s=>limState(F,m,s).r;
+  const eLim=F.confOn?Math.max(m.ecmax,...F.cm.map(c=>c.ecu)):m.ecmax;
+  const out={pts:[[0,0]],states:[],alpha,P:Pt,ok:true};
+  if(Pt>F.Po*0.98||Pt<F.Pt*0.98){ out.ok=false; out.msg='P fuera del rango axial de la sección'; return out; }
+  let dk=Math.min(eLim,m.ecmax)/(0.1*D)/300, kap=0, prev=null, yld=null, nom=null, n=0;
+  let s0=mcSolveStep(F,m,alpha,1e-12,Pt,null); prev=s0;
+  while(n<2000){
+    n++; const kNew=kap+dk;
+    const s=mcSolveStep(F,m,alpha,kNew,Pt,prev);
+    if(!s){ out.end='Sin equilibrio axial'; break; }
+    if(!yld&&s.esT>=m.ey){ const a=prev, t=(m.ey-a.esT)/(s.esT-a.esT); yld={kap:a.kap+t*(s.kap-a.kap),M:a.M+t*(s.M-a.M),ec:a.ec+t*(s.ec-a.ec),c:s.cna}; }
+    if(!nom&&(s.ec>=0.004||s.esT>=0.015)){ const a=prev; const fa=Math.max(a.ec/0.004,a.esT/0.015)-1, fb=Math.max(s.ec/0.004,s.esT/0.015)-1, t=-fa/(fb-fa); nom={kap:a.kap+t*(s.kap-a.kap),M:a.M+t*(s.M-a.M),ctrl:s.ec/0.004>=s.esT/0.015?'εc = 0,004':'εs = 0,015'}; }
+    if(ratio(s)>=1){
+      let lo=prev, hi=s;
+      for(let i=0;i<14;i++){ const km=(lo.kap+hi.kap)/2, sm=mcSolveStep(F,m,alpha,km,Pt,lo); if(!sm) break; if(ratio(sm)>=1) hi=sm; else lo=sm; }
+      out.pts.push([hi.kap,hi.M]); out.states.push(hi);
+      out.ult=hi; out.end=limState(F,m,hi).ctrl;
+      break;
+    }
+    out.pts.push([s.kap,s.M]); out.states.push(s);
+    prev=s; kap=kNew;
+    if(n===300||n===600||n===1000) dk*=2;
+  }
+  if(!out.ult&&out.states.length){ out.ult=out.states[out.states.length-1]; out.end=out.end||'Límite de pasos'; }
+  out.yld=yld; out.nom=nom;
+  out.Mmax=out.pts.reduce((a,p)=>Math.max(a,p[1]),0);
+  if(yld&&nom){ out.kyId=yld.kap*nom.M/yld.M; }
+  if(out.ult&&out.kyId) out.mu=out.ult.kap/out.kyId;
+  return out;
+}
+/* Hormigón confinado: elementos de borde pintados en la grilla (S.conf), modelos de Mander et al. (1988) y Kent y Park (1971) */
+function hull2(pts){
+  if(pts.length<=3) return pts.slice();
+  pts=pts.slice().sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
+  const cr=(o,a,b)=>(a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]);
+  const lo=[],up=[];
+  for(const p of pts){ while(lo.length>=2&&cr(lo[lo.length-2],lo[lo.length-1],p)<=0) lo.pop(); lo.push(p); }
+  for(let i=pts.length-1;i>=0;i--){ const p=pts[i]; while(up.length>=2&&cr(up[up.length-2],up[up.length-1],p)<=0) up.pop(); up.push(p); }
+  up.pop(); lo.pop(); return lo.concat(up);
+}
+function cellCorners(S,list){
+  const P=[], seen=new Set();
+  list.forEach(k=>{ const i=k%S.nx, j=(k-i)/S.nx;
+    [[i,j],[i+1,j],[i,j+1],[i+1,j+1]].forEach(([a,b])=>{ const key=a*100000+b; if(seen.has(key)) return; seen.add(key); P.push([a*S.dx,(S.ny-b)*S.dy]); }); });
+  return P;
+}
+function confParams(bc,hc,m){
+  const Ab=Math.PI*m.dh*m.dh/4, s=m.hs, fc=m.fc;
+  const nly=m.nlyO>0?m.nlyO:Math.max(2,Math.ceil(bc/m.hx-1e-9)+1);
+  const nlx=m.nlxO>0?m.nlxO:Math.max(2,Math.ceil(hc/m.hx-1e-9)+1);
+  const rx=nlx*Ab/(s*hc), ry=nly*Ab/(s*bc), rs=rx+ry;
+  const fl=m.ke*rs*m.fyt/2;
+  const c={model:m.conf==='kp'?'kp':'mander',Ab,nlx,nly,rx,ry,rs,fl,fc,bc,hc,hxX:bc/(nly-1),hxY:hc/(nlx-1)};
+  /* Mander, Priestley y Park (1988) */
+  c.fcc=fc*(-1.254+2.254*Math.sqrt(1+7.94*fl/fc)-2*fl/fc);
+  c.ecc=0.002*(1+5*(c.fcc/fc-1));
+  c.Esec=c.fcc/c.ecc; c.Ec=m.Ec; c.r=c.Ec/Math.max(c.Ec-c.Esec,1);
+  c.ecuM=0.004+0.075*rs*m.fyt/fc;
+  c.ecuP=0.004+1.4*rs*m.fyt*m.esu/c.fcc;
+  /* Kent y Park (1971), ε50u en MPa */
+  c.e0=0.002;
+  c.e50u=(3+0.29*fc)/(145*fc-1000);
+  c.e50h=0.75*rs*Math.sqrt(Math.min(bc,hc)/s);
+  c.e50c=c.e50u+c.e50h;
+  c.e20u=1.6*c.e50u-0.6*c.e0; c.e20c=1.6*c.e50c-0.6*c.e0;
+  c.Z=0.5/Math.max(c.e50c-c.e0,1e-6);
+  c.ecuS=0.004+0.9*rs*m.fyt/300;
+  c.ecu=m.ecuO>0?m.ecuO:(c.model==='kp'?c.ecuS:c.ecuM);
+  c.fpk=c.model==='kp'?fc:c.fcc;
+  return c;
+}
+function confStress(e,c){
+  if(e<=0) return 0;
+  if(c.model==='kp'){
+    if(e<=c.e0){ const x=e/c.e0; return c.fc*(2*x-x*x); }
+    return Math.max(0.2*c.fc,c.fc*(1-c.Z*(e-c.e0)));
+  }
+  const x=e/c.ecc; return c.fcc*x*c.r/(c.r-1+Math.pow(x,c.r));
+}
+function fibStress(e,t,F,m){
+  if(e<=0) return 0;
+  if(F.confOn&&t>0) return confStress(e,F.cm[t-1]);
+  if(F.spallOn&&e>m.esp) return 0;
+  return concStress(e,m);
+}
+/* Componentes conexas de celdas confinadas, recubrimiento y geometría de cada elemento de borde */
+function beComponents(S,m){
+  const {nx,ny,dx,dy}=S, N=nx*ny, conf=S.conf||new Uint8Array(N), cmat=new Int16Array(N), lab=new Int32Array(N).fill(-1), list=[];
+  const isC=k=>S.conc[k]&&conf[k];
+  for(let k0=0;k0<N;k0++){
+    if(!isC(k0)||lab[k0]>=0) continue;
+    const id=list.length, cells=[k0], q=[k0]; lab[k0]=id;
+    while(q.length){ const k=q.pop(), i=k%nx, j=(k-i)/nx;
+      [[i-1,j],[i+1,j],[i,j-1],[i,j+1]].forEach(([a,b])=>{ if(a<0||b<0||a>=nx||b>=ny) return; const kk=b*nx+a; if(isC(kk)&&lab[kk]<0){ lab[kk]=id; cells.push(kk); q.push(kk); } }); }
+    let i0=nx,i1=-1,j0=ny,j1=-1; cells.forEach(k=>{ const i=k%nx, j=(k-i)/nx; i0=Math.min(i0,i); i1=Math.max(i1,i); j0=Math.min(j0,j); j1=Math.max(j1,j); });
+    list.push({id,cells,i0,i1,j0,j1});
+  }
+  const kcx=Math.max(1,Math.ceil(m.rc/dx-1e-9)), kcy=Math.max(1,Math.ceil(m.rc/dy-1e-9));
+  for(let j=0;j<ny;j++) for(let i=0;i<nx;i++){
+    const k=j*nx+i; if(!S.conc[k]) continue;
+    if(lab[k]>=0){ cmat[k]=lab[k]+1; continue; }
+    let cov=false;
+    for(let b=Math.max(0,j-kcy);b<=Math.min(ny-1,j+kcy)&&!cov;b++) for(let a=Math.max(0,i-kcx);a<=Math.min(nx-1,i+kcx);a++) if(lab[b*nx+a]>=0){ cov=true; break; }
+    cmat[k]=cov?-1:0;
+  }
+  const conc=(i,j)=>i>=0&&j>=0&&i<nx&&j<ny&&S.conc[j*nx+i];
+  list.forEach(b=>{
+    const colAll=(i,j0,j1)=>{ for(let j=j0;j<=j1;j++) if(!conc(i,j)) return false; return true; };
+    const rowAll=(j,i0,i1)=>{ for(let i=i0;i<=i1;i++) if(!conc(i,j)) return false; return true; };
+    const strip=(isCol,n)=>isCol?colAll(n,b.j0,b.j1):rowAll(n,b.i0,b.i1);
+    const side=(step,isCol,start,kc)=>{ let t=0; while(t<kc&&strip(isCol,start+step*t)) t++; return strip(isCol,start+step*t)?0:t; };
+    const eL=side(-1,true,b.i0-1,kcx), eR=side(1,true,b.i1+1,kcx), eT=side(-1,false,b.j0-1,kcy), eB=side(1,false,b.j1+1,kcy);
+    b.e={L:eL,R:eR,T:eT,B:eB};
+    const I0=b.i0-eL, I1=b.i1+eR, J0=b.j0-eT, J1=b.j1+eB;
+    let nc=0; const db=[];
+    for(let j=J0;j<=J1;j++) for(let i=I0;i<=I1;i++){ if(conc(i,j)) nc++; const d=S.bars[j*nx+i]; if(d>0&&conc(i,j)) db.push(d); }
+    b.bc=m.bcO>0?m.bcO:(b.i1-b.i0+1)*dx; b.hc=m.hcO>0?m.hcO:(b.j1-b.j0+1)*dy;
+    b.Bx=(I1-I0+1)*dx; b.By=(J1-J0+1)*dy; b.Ag=nc*dx*dy; b.Ach=b.bc*b.hc; b.Acells=b.cells.length*dx*dy;
+    b.box={I0,I1,J0,J1}; b.nbars=db.length; b.dbMin=db.length?Math.min(...db):NaN; b.dbMax=db.length?Math.max(...db):NaN;
+    b.xc=((b.i0+b.i1+1)/2)*dx; b.yc=(ny-(b.j0+b.j1+1)/2)*dy;
+    b.hull=hull2(cellCorners(S,b.cells));
+    b.cp=confParams(b.bc,b.hc,m);
+    b.name='EB-'+(b.id+1);
+  });
+  const un=[]; for(let k=0;k<N;k++) if(S.conc[k]&&cmat[k]===0) un.push(k);
+  return {cmat,list,hullU:hull2(cellCorners(S,un))};
+}
+/* Estado límite de la curva M-φ: εcu del hormigón confinado, εc máx. del no confinado que no es recubrimiento, εs máx. */
+function limState(F,m,s){
+  const rs=s.esT/m.esmax;
+  if(!F.confOn){ const rc=s.ec/m.ecmax; return rc>=rs?{r:rc,ctrl:'εc máx.'}:{r:rs,ctrl:'εs máx.'}; }
+  const ux=Math.cos(s.th), uy=Math.sin(s.th);
+  const ext=h=>{ let mx=-1e18; for(const p of h){ const v=(p[0]-F.rx)*ux+(p[1]-F.ry)*uy; if(v>mx) mx=v; } return mx; };
+  let best={r:rs,ctrl:'εs máx.'};
+  F.BE.forEach((b,k)=>{ const e=s.e0+s.kap*ext(b.hull), r=e/F.cm[k].ecu; if(r>best.r) best={r,ctrl:'εcu confinado '+b.name}; });
+  if(F.hullU.length){ const e=s.e0+s.kap*ext(F.hullU), r=e/m.ecmax; if(r>best.r) best={r,ctrl:'εc máx. no confinado'}; }
+  return best;
+}
+function confStrainsAt(F,s){
+  const ux=Math.cos(s.th), uy=Math.sin(s.th);
+  return F.BE.map(b=>{ let mx=-1e18; for(const p of b.hull){ const v=(p[0]-F.rx)*ux+(p[1]-F.ry)*uy; if(v>mx) mx=v; } return s.e0+s.kap*mx; });
+}
+
+/* Curvas tensión-deformación */
+function renderConfChart(svgEl){
+  const m=ST.m, F=ST.F; if(!F) return;
+  const series=[], emaxU=Math.max(m.ecmax,0.006);
+  const lim=F.BE.length?Math.max(emaxU,...F.cm.map(c=>c.ecu))*1.08:emaxU*1.1;
+  const unc=[]; for(let i=0;i<=240;i++){ const e=lim*i/240; let s=concStress(e,m); if(F.BE.length&&m.conf!=='none'&&m.spall&&e>m.esp) s=0; unc.push([e*1e3,s]); }
+  series.push({name:`No confinado, ${m.ccurve==='cp'?'Collins y Porasz':'Hognestad'}`,pts:unc,w:1.4,dash:'6,4'});
+  const dashes=['none','2,3','9,3,2,3','12,4'];
+  const pts=[], groups=[];
+  if(m.conf!=='none') F.BE.forEach(b=>{ const c=b.cp, key=[c.model,c.rs.toFixed(6),c.ecu.toFixed(6),Math.min(c.bc,c.hc),Math.max(c.bc,c.hc)].join('|'); let g=groups.find(q=>q.key===key); if(!g){ g={key,c,names:[]}; groups.push(g); } g.names.push(b.name); });
+  let ymax=m.fc;
+  groups.slice(0,4).forEach((g,i)=>{ const c=g.c, a=[]; for(let k=0;k<=240;k++){ const e=Math.min(lim,c.ecu*1.05)*k/240; const v=confStress(e,c); if(v>ymax) ymax=v; a.push([e*1e3,v]); }
+    const nm=g.names.length>2?g.names[0]+' a '+g.names[g.names.length-1]:g.names.join(', ');
+    series.push({name:`${nm}, ${c.model==='kp'?'Kent y Park':'Mander'}`,pts:a,w:1.8,dash:dashes[i]});
+    pts.push({x:c.ecu*1e3,y:confStress(c.ecu,c),label:'εcu'});
+    if(c.model!=='kp') pts.push({x:c.ecc*1e3,y:c.fcc,ring:true,label:i===0?"f'cc":''}); });
+  series.push({pts:[[0,ymax*1.5]],color:'none',w:0});
+  chart(svgEl||$('confChart'),{H:360,xlabel:'Deformación unitaria ε [‰]',ylabel:'Tensión σ [MPa]',series,points:pts,zeroX:true,zeroY:true,legendRight:true});
+}
+const cv=$('gridCanvas'), cx2=cv.getContext('2d');
+const ED={zoom:1,tool:'conc',scale:1,cw:10,ch:10,drag:null,hover:null,undo:[],F:null};
+
+function snapshot(){ ED.undo.push({nx:S.nx,ny:S.ny,dx:S.dx,dy:S.dy,conc:S.conc.slice(),bars:S.bars.slice(),conf:S.conf.slice()}); if(ED.undo.length>60) ED.undo.shift(); }
+function undo(){ const u=ED.undo.pop(); if(!u) return; S=u; $('nx').value=S.nx; $('ny').value=S.ny; $('dx').value=S.dx; $('dy').value=S.dy; layoutGrid(); changed('geom'); }
+
+function resizeGrid(nx,ny){
+  nx=clamp(Math.round(nx),1,400); ny=clamp(Math.round(ny),1,400);
+  if(nx===S.nx&&ny===S.ny) return;
+  snapshot();
+  const c=new Uint8Array(nx*ny), b=new Float32Array(nx*ny), q=new Uint8Array(nx*ny);
+  for(let j=0;j<Math.min(ny,S.ny);j++) for(let i=0;i<Math.min(nx,S.nx);i++){ c[j*nx+i]=S.conc[j*S.nx+i]; b[j*nx+i]=S.bars[j*S.nx+i]; q[j*nx+i]=S.conf[j*S.nx+i]; }
+  S.nx=nx; S.ny=ny; S.conc=c; S.bars=b; S.conf=q;
+}
+
+function layoutGrid(){
+  const wrapW=Math.max($('gridWrap').clientWidth-2,200);
+  const sc=Math.min(wrapW/(S.nx*S.dx),520/(S.ny*S.dy));
+  const minCell=4/Math.min(S.dx,S.dy);
+  ED.scale=Math.max(sc*ED.zoom,minCell);
+  $('zoomLbl').textContent=Math.round(ED.zoom*100)+'%';
+  ED.cw=S.dx*ED.scale; ED.ch=S.dy*ED.scale;
+  const dpr=window.devicePixelRatio||1;
+  const W=Math.ceil(S.nx*ED.cw)+1, H=Math.ceil(S.ny*ED.ch)+1;
+  cv.width=W*dpr; cv.height=H*dpr; cv.style.width=W+'px'; cv.style.height=H+'px';
+  cx2.setTransform(dpr,0,0,dpr,0,0);
+  drawGrid();
+}
+
+function drawGrid(){
+  const {cw,ch}=ED, W=S.nx*cw, H=S.ny*ch;
+  cx2.clearRect(0,0,W+2,H+2);
+  cx2.fillStyle='#fff'; cx2.fillRect(0,0,W,H);
+  const css=getComputedStyle(document.documentElement);
+  cx2.fillStyle=css.getPropertyValue('--conc').trim()||'#c0c0c0';
+  for(let j=0;j<S.ny;j++) for(let i=0;i<S.nx;i++) if(S.conc[j*S.nx+i]) cx2.fillRect(i*cw,j*ch,cw,ch);
+  const isQ=(i,j)=>i>=0&&j>=0&&i<S.nx&&j<S.ny&&S.conf[j*S.nx+i]&&S.conc[j*S.nx+i];
+  cx2.fillStyle='rgba(138,138,60,0.45)';
+  for(let j=0;j<S.ny;j++) for(let i=0;i<S.nx;i++) if(isQ(i,j)) cx2.fillRect(i*cw,j*ch,cw,ch);
+  cx2.strokeStyle='#5c5c22'; cx2.lineWidth=1.6; cx2.beginPath();
+  for(let j=0;j<S.ny;j++) for(let i=0;i<S.nx;i++){ if(!isQ(i,j)) continue;
+    if(!isQ(i-1,j)){ cx2.moveTo(i*cw,j*ch); cx2.lineTo(i*cw,(j+1)*ch); } if(!isQ(i+1,j)){ cx2.moveTo((i+1)*cw,j*ch); cx2.lineTo((i+1)*cw,(j+1)*ch); }
+    if(!isQ(i,j-1)){ cx2.moveTo(i*cw,j*ch); cx2.lineTo((i+1)*cw,j*ch); } if(!isQ(i,j+1)){ cx2.moveTo(i*cw,(j+1)*ch); cx2.lineTo((i+1)*cw,(j+1)*ch); } }
+  cx2.stroke();
+  cx2.strokeStyle='#e2e2e2'; cx2.lineWidth=0.5; cx2.beginPath();
+  if(cw>=4){ for(let i=0;i<=S.nx;i++){ cx2.moveTo(i*cw+0.25,0); cx2.lineTo(i*cw+0.25,H); } }
+  if(ch>=4){ for(let j=0;j<=S.ny;j++){ cx2.moveTo(0,j*ch+0.25); cx2.lineTo(W,j*ch+0.25); } }
+  cx2.stroke();
+  const showD=$('showDiam').checked, cmin=Math.min(cw,ch);
+  const fs=clamp(cmin*0.6,9,13);
+  const labels=[];
+  for(let j=0;j<S.ny;j++) for(let i=0;i<S.nx;i++){
+    const d=S.bars[j*S.nx+i]; if(!(d>0)) continue;
+    const r=Math.max(2,Math.min(d*ED.scale/2,cmin*0.42));
+    const x=(i+0.5)*cw, y=(j+0.5)*ch;
+    cx2.fillStyle='#000'; cx2.beginPath(); cx2.arc(x,y,r,0,2*Math.PI); cx2.fill();
+    if(showD) labels.push([x,y,r,String(d)]);
+  }
+  if(labels.length){
+    cx2.font=`bold ${fs}px Arial Narrow, Arial`; cx2.textAlign='center'; cx2.textBaseline='bottom';
+    cx2.lineJoin='round'; cx2.lineWidth=3; cx2.strokeStyle='rgba(255,255,255,0.9)'; cx2.fillStyle='#000';
+    labels.forEach(([x,y,r,t])=>{ const ty=y-r-1; cx2.strokeText(t,x,ty); cx2.fillText(t,x,ty); });
+    cx2.textBaseline='alphabetic';
+  }
+  if(ED.F&&ED.F.Ac>0){
+    const F=ED.F, px=F.rx*ED.scale, py=H-F.ry*ED.scale;
+    cx2.strokeStyle='#000'; cx2.lineWidth=1.2; cx2.beginPath();
+    cx2.moveTo(px-7,py); cx2.lineTo(px+7,py); cx2.moveTo(px,py-7); cx2.lineTo(px,py+7); cx2.stroke();
+    cx2.beginPath(); cx2.arc(px,py,4,0,2*Math.PI); cx2.stroke();
+  }
+  cx2.strokeStyle='#000'; cx2.lineWidth=1.2; cx2.beginPath();
+  cx2.moveTo(4,H-4); cx2.lineTo(34,H-4); cx2.moveTo(4,H-4); cx2.lineTo(4,H-34); cx2.stroke();
+  cx2.fillStyle='#000'; cx2.font='bold 11px Arial Narrow, Arial'; cx2.textAlign='left';
+  cx2.fillText('x',37,H-1); cx2.fillText('y',1,H-38);
+  const d=ED.drag;
+  if(d&&(d.tool==='rect'||d.tool==='confr'||d.tool==='line')&&d.cur){
+    cx2.strokeStyle='#000'; cx2.lineWidth=1.5; cx2.setLineDash([4,3]);
+    if(d.tool==='rect'||d.tool==='confr'){
+      const i0=Math.min(d.i0,d.cur.i), i1=Math.max(d.i0,d.cur.i), j0=Math.min(d.j0,d.cur.j), j1=Math.max(d.j0,d.cur.j);
+      cx2.strokeRect(i0*cw,j0*ch,(i1-i0+1)*cw,(j1-j0+1)*ch);
+    } else {
+      cx2.beginPath(); cx2.moveTo((d.i0+0.5)*cw,(d.j0+0.5)*ch); cx2.lineTo((d.cur.i+0.5)*cw,(d.cur.j+0.5)*ch); cx2.stroke();
+    }
+    cx2.setLineDash([]);
+  }
+}
+
+function cellAt(ev){
+  const r=cv.getBoundingClientRect();
+  const i=Math.floor((ev.clientX-r.left)/ED.cw), j=Math.floor((ev.clientY-r.top)/ED.ch);
+  if(i<0||j<0||i>=S.nx||j>=S.ny) return null;
+  return {i,j};
+}
+function applyCell(c,tool){
+  const k=c.j*S.nx+c.i, d=parseFloat($('diam').value);
+  if(tool==='conc') S.conc[k]=1;
+  else if(tool==='erase'){ S.conc[k]=0; S.bars[k]=0; S.conf[k]=0; }
+  else if(tool==='conf'){ if(S.conc[k]) S.conf[k]=1; }
+  else if(tool==='confOff'){ S.conf[k]=0; }
+  else if(tool==='bar'){ S.bars[k]=d; S.conc[k]=1; }
+  else if(tool==='barOff'){ S.bars[k]=0; }
+}
+function lineCells(a,b){
+  const out=[]; let x0=a.i,y0=a.j; const x1=b.i,y1=b.j, dx=Math.abs(x1-x0), dy=-Math.abs(y1-y0), sx=x0<x1?1:-1, sy=y0<y1?1:-1; let err=dx+dy;
+  while(true){ out.push({i:x0,j:y0}); if(x0===x1&&y0===y1) break; const e2=2*err; if(e2>=dy){ err+=dy; x0+=sx; } if(e2<=dx){ err+=dx; y0+=sy; } }
+  return out;
+}
+cv.addEventListener('pointerdown',ev=>{
+  const c=cellAt(ev); if(!c) return;
+  cv.setPointerCapture(ev.pointerId);
+  snapshot();
+  let tool=ED.tool;
+  if(tool==='bar'){ const k=c.j*S.nx+c.i; if(S.bars[k]===parseFloat($('diam').value)) tool='barOff'; }
+  if(tool==='conf'){ const k=c.j*S.nx+c.i; if(S.conf[k]) tool='confOff'; }
+  ED.drag={tool,i0:c.i,j0:c.j,cur:c,last:c};
+  if(tool==='conc'||tool==='erase'||tool==='bar'||tool==='barOff'||tool==='conf'||tool==='confOff'){ applyCell(c,tool); drawGrid(); }
+});
+cv.addEventListener('pointermove',ev=>{
+  const c=cellAt(ev);
+  if(c){
+    const k=c.j*S.nx+c.i, x=(c.i+0.5)*S.dx, y=(S.ny-c.j-0.5)*S.dy;
+    $('gridInfo').textContent=`Celda (${c.i+1}, ${c.j+1}), centro x = ${x.toFixed(0)} mm, y = ${y.toFixed(0)} mm`+(S.bars[k]>0?`, barra Ø${S.bars[k]}`:'')+(S.conc[k]?(S.conf[k]?', hormigón confinado':', hormigón'):'');
+  }
+  const d=ED.drag; if(!d||!c) return;
+  d.cur=c;
+  if(d.tool==='conc'||d.tool==='erase'||d.tool==='bar'||d.tool==='barOff'||d.tool==='conf'||d.tool==='confOff'){ lineCells(d.last,c).forEach(q=>applyCell(q,d.tool)); d.last=c; }
+  drawGrid();
+});
+function endDrag(){
+  const d=ED.drag; if(!d) return;
+  ED.drag=null;
+  if(d.tool==='rect'&&d.cur){
+    const i0=Math.min(d.i0,d.cur.i), i1=Math.max(d.i0,d.cur.i), j0=Math.min(d.j0,d.cur.j), j1=Math.max(d.j0,d.cur.j);
+    for(let j=j0;j<=j1;j++) for(let i=i0;i<=i1;i++) S.conc[j*S.nx+i]=1;
+  }
+  if(d.tool==='confr'&&d.cur){
+    const i0=Math.min(d.i0,d.cur.i), i1=Math.max(d.i0,d.cur.i), j0=Math.min(d.j0,d.cur.j), j1=Math.max(d.j0,d.cur.j);
+    for(let j=j0;j<=j1;j++) for(let i=i0;i<=i1;i++){ const k=j*S.nx+i; if(S.conc[k]) S.conf[k]=1; }
+  }
+  if(d.tool==='line'&&d.cur){
+    const st=Math.max(1,Math.round(num('lineStep',5))), cells=lineCells({i:d.i0,j:d.j0},d.cur);
+    cells.forEach((q,idx)=>{ if(idx%st===0||idx===cells.length-1) applyCell(q,'bar'); });
+  }
+  drawGrid(); changed('geom');
+}
+cv.addEventListener('pointerup',endDrag);
+cv.addEventListener('pointercancel',endDrag);
+cv.addEventListener('pointerleave',()=>{ if(!ED.drag) $('gridInfo').textContent=''; });
+
+document.querySelectorAll('#tools .tool[data-t]').forEach(b=>b.addEventListener('click',()=>{
+  ED.tool=b.dataset.t;
+  document.querySelectorAll('#tools .tool[data-t]').forEach(x=>x.classList.toggle('active',x===b));
+}));
+document.addEventListener('keydown',ev=>{ if((ev.ctrlKey||ev.metaKey)&&ev.key.toLowerCase()==='z'&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)){ ev.preventDefault(); undo(); } });
+
+$('clearBtn').addEventListener('click',()=>{ snapshot(); S.conc.fill(0); S.bars.fill(0); S.conf.fill(0); drawGrid(); changed('geom'); });
+['nx','ny'].forEach(id=>$(id).addEventListener('change',()=>{ resizeGrid(num('nx',S.nx),num('ny',S.ny)); layoutGrid(); changed('geom'); }));
+['dx','dy'].forEach(id=>$(id).addEventListener('change',()=>{ snapshot(); S.dx=Math.max(num('dx',40),1); S.dy=Math.max(num('dy',40),1); layoutGrid(); changed('geom'); }));
+function setZoom(z){ ED.zoom=clamp(z,0.25,8); layoutGrid(); }
+$('zoomIn').addEventListener('click',()=>setZoom(ED.zoom*1.25));
+$('zoomOut').addEventListener('click',()=>setZoom(ED.zoom/1.25));
+$('zoomFit').addEventListener('click',()=>setZoom(1));
+$('showDiam').addEventListener('change',drawGrid);
+cv.addEventListener('wheel',ev=>{
+  if(!(ev.ctrlKey||ev.metaKey)) return;
+  ev.preventDefault();
+  const wrap=$('gridWrap'), r=cv.getBoundingClientRect(), fx=(ev.clientX-r.left)/r.width, fy=(ev.clientY-r.top)/r.height;
+  setZoom(ED.zoom*(ev.deltaY<0?1.15:1/1.15));
+  const r2=cv.getBoundingClientRect();
+  wrap.scrollLeft+=fx*r2.width-(ev.clientX-r.left);
+  wrap.scrollTop+=fy*r2.height-(ev.clientY-r.top);
+},{passive:false});
+window.addEventListener('resize',()=>{ clearTimeout(ED.rt); ED.rt=setTimeout(layoutGrid,150); });
+
+$('tpl').addEventListener('change',()=>{ $('tplBox').hidden=!$('tpl').value; });
+$('tplGo').addEventListener('click',()=>{ genTemplate($('tpl').value); });
+function genTemplate(type,silent){
+  const dx=S.dx, dy=S.dy;
+  const lw=num('tLw',2000), lf=num('tLf',1000), t=num('tT',200), dm=num('tDm',10), db=num('tDb',18), s=Math.max(1,Math.round(num('tS',5)));
+  const nwx=Math.max(1,Math.round(lw/dx)), tw=Math.max(1,Math.round(t/dy)), tfx=Math.max(1,Math.round(t/dx)), nfy=Math.max(1,Math.round(lf/dy));
+  let nx,ny; const legs=[];
+  if(type==='rect'){ nx=nwx+2; ny=tw+2; legs.push({i:1,j:1,w:nwx,h:tw,dir:'x',ends:[0,1]}); }
+  else if(type==='L'){ nx=nwx+2; ny=nfy+2; legs.push({i:1,j:1+nfy-tw,w:nwx,h:tw,dir:'x',ends:[1]}); legs.push({i:1,j:1,w:tfx,h:nfy,dir:'y',ends:[0]}); }
+  else if(type==='T'){ nx=nwx+2; ny=nfy+2; const jm=1+Math.round((nfy-tw)/2); legs.push({i:1,j:jm,w:nwx,h:tw,dir:'x',ends:[1]}); legs.push({i:1,j:1,w:tfx,h:nfy,dir:'y',ends:[0,1]}); }
+  else if(type==='C'){ nx=nwx+2; ny=nfy+2; legs.push({i:1,j:1+nfy-tw,w:nwx,h:tw,dir:'x',ends:[]}); legs.push({i:1,j:1,w:tfx,h:nfy,dir:'y',ends:[0]}); legs.push({i:nwx+1-tfx,j:1,w:tfx,h:nfy,dir:'y',ends:[0]}); }
+  else return;
+  snapshot();
+  S.nx=nx; S.ny=ny; S.conc=new Uint8Array(nx*ny); S.bars=new Float32Array(nx*ny); S.conf=new Uint8Array(nx*ny);
+  $('nx').value=nx; $('ny').value=ny;
+  const set=(i,j,d)=>{ if(i<0||j<0||i>=nx||j>=ny) return; S.conc[j*nx+i]=1; if(d) S.bars[j*nx+i]=d; };
+  legs.forEach(L=>{ for(let j=L.j;j<L.j+L.h;j++) for(let i=L.i;i<L.i+L.w;i++) set(i,j,0); });
+  legs.forEach(L=>{
+    const len=L.dir==='x'?L.w:L.h, th=L.dir==='x'?L.h:L.w;
+    const across=th>=4?[1,th-2]:[Math.floor(th/2)];
+    const along=[]; for(let p=1;p<=len-2;p+=s) along.push(p); if(len>=3&&along[along.length-1]!==len-2) along.push(len-2);
+    const endZone=p=>L.ends.some(e=>e===0?p<=5:p>=len-6);
+    along.forEach(p=>across.forEach(q=>{ const i=L.dir==='x'?L.i+p:L.i+q, j=L.dir==='x'?L.j+q:L.j+p; set(i,j,endZone(p)?db:dm); }));
+    L.ends.forEach(e=>{ [1,3,5].forEach(p0=>{ const p=e===0?p0:len-1-p0; if(p<1||p>len-2) return; across.forEach(q=>{ const i=L.dir==='x'?L.i+p:L.i+q, j=L.dir==='x'?L.j+q:L.j+p; set(i,j,db); }); }); });
+  });
+  if(type!=='rect'){
+    const W=legs[0];
+    legs.slice(1).forEach(L=>{
+      for(let j=0;j<ny;j++) for(let i=0;i<nx;i++){
+        const k=j*nx+i; if(!S.bars[k]) continue;
+        const inWeb=j>=W.j&&j<W.j+W.h&&i>=L.i-4&&i<L.i+L.w+4;
+        const inFl=i>=L.i&&i<L.i+L.w&&j>=W.j-4&&j<W.j+W.h+4;
+        if(inWeb||inFl) S.bars[k]=db;
+      }
+    });
+  }
+  $('tpl').value=''; $('tplBox').hidden=true;
+  if(!silent){ layoutGrid(); changed('geom'); }
+  return legs;
+}
+
+$('pasteBtn').addEventListener('click',()=>{ $('pasteBox').hidden=false; $('pasteTxt').focus(); });
+$('pasteCancel').addEventListener('click',()=>{ $('pasteBox').hidden=true; });
+$('pasteGo').addEventListener('click',()=>{
+  const rows=$('pasteTxt').value.replace(/\r/g,'').split('\n');
+  while(rows.length&&!rows[rows.length-1].trim()) rows.pop();
+  if(!rows.length) return;
+  const cells=rows.map(r=>r.split('\t'));
+  const nx=Math.max(...cells.map(r=>r.length)), ny=cells.length;
+  snapshot();
+  S.nx=nx; S.ny=ny; S.conc=new Uint8Array(nx*ny); S.bars=new Float32Array(nx*ny); S.conf=new Uint8Array(nx*ny);
+  cells.forEach((r,j)=>r.forEach((tk,i)=>{
+    tk=tk.trim().replace(',','.'); if(!tk) return;
+    const k=j*nx+i;
+    if(/[cC]$/.test(tk)){ S.conf[k]=1; tk=tk.slice(0,-1); if(!tk||/^[xX]$/.test(tk)){ S.conc[k]=1; return; } }
+    if(/^[xX]$/.test(tk)){ S.conc[k]=1; return; }
+    const v=parseFloat(tk); if(!isFinite(v)) return;
+    S.conc[k]=1; if(v>0) S.bars[k]=v;
+  }));
+  $('nx').value=nx; $('ny').value=ny;
+  $('pasteBox').hidden=true; $('pasteTxt').value='';
+  layoutGrid(); changed('geom');
+});
+function gridText(){
+  const L=[];
+  for(let j=0;j<S.ny;j++){ const r=[]; for(let i=0;i<S.nx;i++){ const k=j*S.nx+i; r.push((S.bars[k]>0?String(S.bars[k]):S.conc[k]?'x':'')+(S.conc[k]&&S.conf[k]?'c':'')); } L.push(r.join('\t')); }
+  return L.join('\r\n')+'\r\n';
+}
+
+const INPUT_IDS=['proj','confModel','hDb','hS','hFy','hHx','hKe','hRc','hEsp','hSpall','hNx','hNy','hBc','hHc','hEcu',
+  'wHt','wHw','wHwcs','wHu','du1','du2','du3','du4','wPerp','wLp','wDy','wPhiy','wEq','wCm','wOmv','paK','paKo','wCap5','wBeM','wLbe','wLam','wFcs','wFyt',
+  'mcP','ax2','flip2','flip3','seisPat','pdName','plName','pdVal','plVal','legTxt','legSign','nx','ny','dx','dy','fc','Ec','ccurve','pmConc','fy','Es','smodel','fsu','esh','esu','Pp','Pn','ecmax','esmax','mcMode','fib','refpt','nmer','pcapf','mpr','alphaMC','alphaPM','Pring','loadsTxt','etabsSign'];
+function projectData(){
+  const inp={}; INPUT_IDS.forEach(id=>{ const e=$(id); if(!e) return; inp[id]=e.type==='checkbox'?e.checked:e.value; });
+  const bars=[]; for(let k=0;k<S.nx*S.ny;k++) if(S.bars[k]>0) bars.push([k,S.bars[k]]);
+  const conc=[]; for(let k=0;k<S.nx*S.ny;k++) if(S.conc[k]) conc.push(k);
+  const conf=[]; for(let k=0;k<S.nx*S.ny;k++) if(S.conf[k]&&S.conc[k]) conf.push(k);
+  return {app:'fddlebel-murosha',v:1,grid:{nx:S.nx,ny:S.ny,dx:S.dx,dy:S.dy,conc,bars,conf},inputs:inp,extra:{seisOv:ST.seisOv,legGeo:ST.legGeo}};
+}
+function loadProject(d){
+  if(!d||!d.grid) return false;
+  const g=d.grid;
+  S={nx:g.nx,ny:g.ny,dx:g.dx,dy:g.dy,conc:new Uint8Array(g.nx*g.ny),bars:new Float32Array(g.nx*g.ny),conf:new Uint8Array(g.nx*g.ny)};
+  (g.conc||[]).forEach(k=>{ if(k<S.conc.length) S.conc[k]=1; });
+  (g.conf||[]).forEach(k=>{ if(k<S.conf.length) S.conf[k]=1; });
+  if(d.extra){ ST.seisOv=d.extra.seisOv||{}; ST.legGeo=d.extra.legGeo||{}; }
+  (g.bars||[]).forEach(([k,v])=>{ if(k<S.bars.length) S.bars[k]=v; });
+  Object.entries(d.inputs||{}).forEach(([id,v])=>{ const e=$(id); if(!e) return; if(e.type==='checkbox') e.checked=!!v; else e.value=v; });
+  $('nx').value=S.nx; $('ny').value=S.ny; $('dx').value=S.dx; $('dy').value=S.dy;
+  return true;
+}
+function autosave(){ try{ localStorage.setItem('fdd_muros_v1',JSON.stringify(projectData())); }catch(e){} }
+function download(name,text,type){
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text],{type:type||'text/plain'})); a.download=name;
+  document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500);
+}
+function baseName(){ const p=$('proj').value.trim().replace(/[^\w\-]+/g,'_'); return p||'muro'; }
+$('saveBtn').addEventListener('click',()=>download(baseName()+'.json',JSON.stringify(projectData()),'application/json'));
+$('loadBtn').addEventListener('click',()=>$('loadFile').click());
+$('loadFile').addEventListener('change',ev=>{
+  const f=ev.target.files[0]; if(!f) return;
+  const r=new FileReader(); r.onload=()=>{ try{ if(loadProject(JSON.parse(r.result))){ snapshot(); layoutGrid(); changed('all'); } }catch(e){ alertBox('El archivo no es un proyecto válido.'); } };
+  r.readAsText(f); ev.target.value='';
+});
+function alertBox(msg){ $('gridInfo').textContent=msg; }
+const svgNS='http://www.w3.org/2000/svg';
+function el(tag,attrs){ const n=document.createElementNS(svgNS,tag); for(const k in attrs) n.setAttribute(k,attrs[k]); return n; }
+function tx(x,y,s,o){ const t=el('text',Object.assign({x,y,'font-size':11,'text-anchor':'middle',fill:'#000'},o||{})); t.textContent=s; return t; }
+function niceStep(range,count){ const raw=Math.max(range,1e-12)/count, m=Math.pow(10,Math.floor(Math.log10(raw))), f=raw/m; return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*m; }
+function fmtTick(v,st){ const d=st>=1?0:Math.min(6,Math.ceil(-Math.log10(st))); return (Math.abs(v)<st*1e-6?0:v).toFixed(d); }
+const fmt=(x,d)=>isFinite(x)?x.toFixed(d):'-';
+const fmtk=x=>isFinite(x)?String(Math.round(x)):'-';
+const FAIL='#b3261e';
+
+function chart(svg,cfg){
+  svg.innerHTML='';
+  const W=760,H=cfg.H||420,L=70,R=18,T=16,B=46;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const xs=[],ys=[];
+  cfg.series.forEach(s=>s.pts.forEach(p=>{ if(isFinite(p[0])&&isFinite(p[1])){ xs.push(p[0]); ys.push(p[1]); } }));
+  (cfg.points||[]).forEach(p=>{ xs.push(p.x); ys.push(p.y); });
+  (cfg.vlines||[]).forEach(v=>{ if(isFinite(v.x)) xs.push(v.x); });
+  if(!xs.length){ svg.appendChild(tx(W/2,H/2,'Sin datos')); return; }
+  let x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+  if(cfg.zeroX){ x0=Math.min(x0,0); x1=Math.max(x1,0); } if(cfg.zeroY){ y0=Math.min(y0,0); y1=Math.max(y1,0); }
+  if(cfg.equal){ const c=(x0+x1)/2, d=(y0+y1)/2, h=Math.max(x1-x0,(y1-y0)*(W-L-R)/(H-T-B))/2; x0=c-h; x1=c+h; const hv=h*(H-T-B)/(W-L-R); y0=d-hv; y1=d+hv; }
+  const px=(x1-x0)*0.06||1, py=(y1-y0)*0.08||1; x0-=px; x1+=px; y0-=py; y1+=py;
+  const sx=niceStep(x1-x0,8), sy=niceStep(y1-y0,7);
+  x0=Math.floor(x0/sx)*sx; x1=Math.ceil(x1/sx)*sx; y0=Math.floor(y0/sy)*sy; y1=Math.ceil(y1/sy)*sy;
+  const X=x=>L+(x-x0)/(x1-x0)*(W-L-R), Y=y=>H-B-(y-y0)/(y1-y0)*(H-T-B);
+  const g=el('g',{});
+  for(let y=y0;y<=y1+sy*1e-6;y+=sy){ g.appendChild(el('line',{x1:L,x2:W-R,y1:Y(y),y2:Y(y),stroke:'#dcdcdc','stroke-width':0.6})); g.appendChild(tx(L-6,Y(y)+4,fmtTick(y,sy),{'text-anchor':'end'})); }
+  for(let x=x0;x<=x1+sx*1e-6;x+=sx){ g.appendChild(el('line',{x1:X(x),x2:X(x),y1:T,y2:H-B,stroke:'#dcdcdc','stroke-width':0.6})); g.appendChild(tx(X(x),H-B+15,fmtTick(x,sx))); }
+  svg.appendChild(g);
+  if(x0<0&&x1>0) svg.appendChild(el('line',{x1:X(0),x2:X(0),y1:T,y2:H-B,stroke:'#555','stroke-width':0.9}));
+  if(y0<0&&y1>0) svg.appendChild(el('line',{x1:L,x2:W-R,y1:Y(0),y2:Y(0),stroke:'#555','stroke-width':0.9}));
+  svg.appendChild(el('rect',{x:L,y:T,width:W-L-R,height:H-T-B,fill:'none',stroke:'#7a7a7a','stroke-width':1}));
+  svg.appendChild(tx((L+W-R)/2,H-8,cfg.xlabel,{'font-weight':700}));
+  const yl=tx(14,(T+H-B)/2,cfg.ylabel,{'font-weight':700}); yl.setAttribute('transform',`rotate(-90 14 ${(T+H-B)/2})`); svg.appendChild(yl);
+  const clipId='c'+Math.random().toString(36).slice(2);
+  const cp=el('clipPath',{id:clipId}); cp.appendChild(el('rect',{x:L,y:T,width:W-L-R,height:H-T-B})); svg.appendChild(cp);
+  const gc=el('g',{'clip-path':`url(#${clipId})`});
+  cfg.series.forEach(s=>{
+    const d=s.pts.filter(p=>isFinite(p[0])&&isFinite(p[1])).map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)).join(' ')+(s.close?'Z':'');
+    gc.appendChild(el('path',{d,fill:'none',stroke:s.color||'#000','stroke-width':s.w||1.4,'stroke-dasharray':s.dash||'none','stroke-linejoin':'round'}));
+  });
+  (cfg.points||[]).forEach(p=>{
+    const col=p.fail?FAIL:'#000';
+    if(p.ring) gc.appendChild(el('circle',{cx:X(p.x),cy:Y(p.y),r:3.5,fill:'#fff',stroke:col,'stroke-width':1.4}));
+    else gc.appendChild(el('circle',{cx:X(p.x),cy:Y(p.y),r:3.2,fill:col}));
+    if(p.label) gc.appendChild(tx(X(p.x)+6,Y(p.y)-6,p.label,{'text-anchor':'start','font-size':10.5,'font-weight':700,fill:col}));
+  });
+  (cfg.vlines||[]).forEach((v,i)=>{ if(!isFinite(v.x)) return; const xx=X(v.x);
+    gc.appendChild(el('line',{x1:xx,x2:xx,y1:T,y2:H-B,stroke:v.color||'#000','stroke-width':v.w||1.2,'stroke-dasharray':v.dash||'5,3'}));
+    const ty=v.bottom?H-B-6-(v.row||0)*13:T+12+(v.row||0)*13; gc.appendChild(tx(xx+(v.x<0?-4:4),ty,v.label,{'text-anchor':v.x<0?'end':'start','font-size':10.5,'font-weight':700,fill:v.color||'#000'})); });
+  svg.appendChild(gc);
+  const named=cfg.series.filter(s=>s.name);
+  if(named.length){
+    const lx=cfg.legendRight?W-R-220:L+12; let ly=T+16;
+    svg.appendChild(el('rect',{x:lx-6,y:T+4,width:214,height:named.length*16+6,fill:'#fff',stroke:'#cfcfcf','stroke-width':0.6}));
+    named.forEach(s=>{
+      svg.appendChild(el('line',{x1:lx,x2:lx+28,y1:ly-4,y2:ly-4,stroke:s.color||'#000','stroke-width':s.w||1.4,'stroke-dasharray':s.dash||'none'}));
+      svg.appendChild(tx(lx+36,ly,s.name,{'text-anchor':'start','font-size':11}));
+      ly+=16;
+    });
+  }
+}
+
+const ST={m:null,F:null,sf:null,sfPr:null,mc:null,loads:[],timer:null,pending:new Set(),seisOv:{},legGeo:{},legNames:[],W:null,mcP:null};
+
+function evalLoads(){
+  ST.loads=parseLoads().map(L=>{ const r=dcr(ST.sf,L.P,L.X,L.Y); return Object.assign(L,{d:r.d,R:r.R,ang:Math.atan2(L.Y,L.X)/DEG}); });
+}
+
+function mcLoadsP(){
+  const mode=$('mcP').value, a=num('alphaMC',0)*DEG, ux=Math.cos(a), uy=Math.sin(a);
+  if(mode==='pa'){ const P=gravP().Pa; return [P,P]; }
+  if(mode==='pu'){ const sz=ST.loads.filter(l=>l.seis); const pick=sg=>{ const c=sz.filter(l=>sg*(l.X*ux+l.Y*uy)>0); const q=c.length?c:sz; return q.length?Math.max(...q.map(l=>l.P)):0; }; return [pick(1),pick(-1)]; }
+  return null;
+}
+function computeAll(kinds){
+  const t0=performance.now();
+  const all=kinds.has('all')||kinds.has('geom');
+  if(all||kinds.has('surf')||kinds.has('mc')) ST.m=readMat();
+  if(all){ ST.F=buildFibers(S,ST.m); ED.F=ST.F; drawGrid(); renderProps(); }
+  const F=ST.F;
+  if(!F||F.Ac<=0||F.n===0){ $('busy').textContent='Dibuja la sección de hormigón para calcular.'; return; }
+  ST.loads=parseLoads();
+  if(all||kinds.has('surf')){ ST.sf=buildSurface(F,ST.m); const mPr=Object.assign({},ST.m,{mpr:true,fyD:1.25*ST.m.fy,nmer:36}); ST.sfPr=buildSurface(F,mPr); }
+  evalLoads();
+  const pm=mcLoadsP();
+  if(pm){ $('Pp').value=Math.round(pm[0]); $('Pn').value=Math.round(pm[1]); ST.m.Pp=Math.round(pm[0]); ST.m.Pn=Math.round(pm[1]); }
+  $('Pp').disabled=$('Pn').disabled=!!pm;
+  const key=num('alphaMC',0)+'|'+ST.m.Pp+'|'+ST.m.Pn;
+  if(all||kinds.has('mc')||key!==ST.mcKey){
+    const a=num('alphaMC',0)*DEG;
+    ST.mc={pos:mcRun(F,ST.m,a,ST.m.Pp),neg:mcRun(F,ST.m,a+Math.PI,ST.m.Pn)};
+    ST.mcKey=key;
+  }
+  ST.W=wallRun();
+  renderMC(); renderPM(); renderLoads(); GL.update();
+  renderWall(); renderLegs(); renderConf(); drawSheet();
+  renderNotes();
+  $('busy').textContent=`Calculado en ${Math.round(performance.now()-t0)} ms, ${F.n} fibras de hormigón, ${F.nb} barras.`;
+  autosave();
+}
+function changed(kind){
+  ST.pending.add(kind);
+  clearTimeout(ST.timer);
+  $('busy').textContent='Calculando...';
+  ST.timer=setTimeout(()=>{ const k=new Set(ST.pending); ST.pending.clear(); try{ computeAll(k); }catch(e){ $('busy').textContent='Error: '+e.message; console.error(e); } },220);
+}
+
+function renderProps(){
+  const F=ST.F, m=ST.m;
+  const rows=[
+    ['Ag','mm²',fmtk(F.Ac)],['As','mm²',fmtk(F.As)],['ρ = As/Ag','%',fmt(F.rho*100,3)],['N° barras','',String(F.nb)],
+    ['Centroide geométrico x, y','mm',fmt(F.xg,1)+', '+fmt(F.yg,1)],['Centroide plástico x, y','mm',fmt(F.xp,1)+', '+fmt(F.yp,1)],
+    ['Ix, Iy (centroide geom.)','10⁹ mm⁴',fmt(F.Ixg/1e9,3)+', '+fmt(F.Iyg/1e9,3)],
+    ['Ec','MPa',fmtk(m.Ec)],['β1','',fmt(m.beta1,3)],['εy','',fmt(m.ey,5)],
+    ['Po = 0,85f\'c(Ag−As)+fy·As','kN',fmtk(F.Po)],['φPn,máx = '+m.pcapf+'·φ·Po','kN',fmtk(m.pcapf*(m.mpr?1:0.65)*F.Po)],['Pt = −fy·As','kN',fmtk(F.Pt)],
+  ];
+  if(F.nb&&F.bin.some(b=>!b)) rows.push(['Barras fuera del hormigón','',String(F.bin.filter(b=>!b).length)]);
+  $('propTable').innerHTML=`<tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td class="num">${r[2]}</td></tr>`).join('')}</tbody>`;
+}
+
+function mcSummary(r){
+  if(!r.ok) return null;
+  return {ky:r.yld?r.yld.kap*1e3:NaN,My:r.yld?r.yld.M:NaN,kn:r.nom?r.nom.kap*1e3:NaN,Mn:r.nom?r.nom.M:NaN,
+    kyId:r.kyId?r.kyId*1e3:NaN,ku:r.ult?r.ult.kap*1e3:NaN,Mu:r.ult?r.ult.M:NaN,Mmax:r.Mmax,mu:r.mu,end:r.end||'-',
+    ecu:r.ult?r.ult.ec:NaN,esu:r.ult?r.ult.esT:NaN,c:r.ult?r.ult.cna:NaN,nomCtrl:r.nom?r.nom.ctrl:'-'};
+}
+function renderMC(svgEl,tableEl,statsEl){
+  const p=ST.mc.pos, n=ST.mc.neg;
+  const sp=mcSummary(p), sn=mcSummary(n);
+  const series=[], pts=[];
+  if(p.ok) series.push({name:`α = ${num('alphaMC',0)}°, P = ${ST.m.Pp} kN`,pts:p.pts.map(q=>[q[0]*1e3,q[1]]),w:1.8});
+  if(n.ok) series.push({name:`α + 180°, P = ${ST.m.Pn} kN`,pts:n.pts.map(q=>[-q[0]*1e3,-q[1]]),w:1.8,dash:'6,4'});
+  [[sp,1],[sn,-1]].forEach(([s,sg])=>{ if(!s) return;
+    if(isFinite(s.ky)) pts.push({x:sg*s.ky,y:sg*s.My,label:'φy',ring:true});
+    if(isFinite(s.kn)) pts.push({x:sg*s.kn,y:sg*s.Mn,label:'Mn',ring:true});
+    if(isFinite(s.ku)) pts.push({x:sg*s.ku,y:sg*s.Mu,label:'φc'});
+  });
+  const vl=[], Wv=ST.W;
+  if(Wv&&Wv.senses.length>=2){ const s0=Wv.senses[0], s1=Wv.senses[1];
+    vl.push({x:s0.phiu*1e3,label:'φu = '+fmt(s0.phiu*1e3,5),w:1.6,dash:'7,3'});
+    vl.push({x:-s1.phiu*1e3,label:'φu = '+fmt(s1.phiu*1e3,5),w:1.6,dash:'7,3'});
+    if(Wv.W.eq==='bd'){ vl.push({x:s0.phiB*1e3,label:'φ (18.10.5.5b)',w:1,dash:'2,2',row:1}); vl.push({x:-s1.phiB*1e3,label:'φ (18.10.5.5b)',w:1,dash:'2,2',row:1}); }
+  }
+  if(sp&&isFinite(sp.ky)) vl.push({x:sp.ky,label:'φy',w:0.8,dash:'2,3',color:'#555',bottom:true});
+  if(sn&&isFinite(sn.ky)) vl.push({x:-sn.ky,label:'φy',w:0.8,dash:'2,3',color:'#555',bottom:true});
+  chart(svgEl||$('mcChart'),{xlabel:'Curvatura φ [1/m]',ylabel:'M [kN·m]',series,points:pts,zeroX:true,zeroY:true,vlines:vl});
+  const f2=(s,k,d)=>s?fmt(s[k],d):(k==='end'?'-':'-');
+  const rows=[
+    ['Primera fluencia φy','1/m','ky',5],['My','kN·m','My',0],['Punto nominal ('+(sp?sp.nomCtrl:'-')+')','1/m','kn',5],['Mn','kN·m','Mn',0],
+    ["φy' = φy·Mn/My",'1/m','kyId',5],['Curvatura de capacidad φc','1/m','ku',5],['M en φc','kN·m','Mu',0],['M máx.','kN·m','Mmax',0],
+    ["Ductilidad μφ = φc/φy'",'','mu',2],['εc en φc, fibra extrema','','ecu',5],['εs en φc','','esu',5],['c en φc','mm','c',0],['Control último','','end',0],
+    ['Demanda φu = 2δu/(ht·lw)','1/m','phiu',5],['φc/φu','','cu',2],
+  ];
+  const Wv2=ST.W;
+  if(sp&&Wv2){ sp.phiu=Wv2.senses[0].phiu*1e3; sp.cu=sp.ku/sp.phiu; }
+  if(sn&&Wv2){ sn.phiu=Wv2.senses[1].phiu*1e3; sn.cu=sn.ku/sn.phiu; }
+  const tb=tableEl||$('mcTable');
+  tb.innerHTML=`<thead><tr><th>Parámetro</th><th>Unidad</th><th class="num">α</th><th class="num">α + 180°</th></tr></thead><tbody>${
+    rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td class="num">${r[2]==='end'?(sp?sp.end:'-'):f2(sp,r[2],r[3])}</td><td class="num">${r[2]==='end'?(sn?sn.end:'-'):f2(sn,r[2],r[3])}</td></tr>`).join('')}</tbody>`;
+  if(!statsEl) statsEl=$('mcStats');
+  const st=[
+    {k:'My + / −',v:(sp?fmt(sp.My,0):'-')+' / '+(sn?fmt(sn.My,0):'-')+' kN·m'},
+    {k:'Mn + / −',v:(sp?fmt(sp.Mn,0):'-')+' / '+(sn?fmt(sn.Mn,0):'-')+' kN·m'},
+    {k:'φc + / −',v:(sp?fmt(sp.ku,4):'-')+' / '+(sn?fmt(sn.ku,4):'-')+' 1/m'},
+    {k:'φc/φu + / −',v:(sp?fmt(sp.cu,2):'-')+' / '+(sn?fmt(sn.cu,2):'-'),bad:(sp&&sp.cu<1)||(sn&&sn.cu<1)},
+  ];
+  statsEl.innerHTML=st.map(s=>`<div class="stat"><div class="k">${s.k}</div><div class="v"${s.bad?` style="color:${FAIL}"`:''}>${s.v}</div></div>`).join('');
+  const msg=[p,n].filter(r=>!r.ok).map(r=>r.msg);
+  if(msg.length) statsEl.insertAdjacentHTML('beforeend',`<div class="warn" style="grid-column:1/-1">${msg[0]}</div>`);
+}
+
+function renderPM(svgPM,svgRing,statsEl){
+  const sf=ST.sf; if(!sf) return;
+  const a=num('alphaPM',0)*DEG;
+  const cN=pmCurve(sf,a,'nom'), cD=pmCurve(sf,a,'des');
+  const nomPts=cN.L.slice().reverse().concat(cN.R), desPts=cD.L.slice().reverse().concat(cD.R); if(desPts.length) desPts.push(desPts[0]);
+  const pts=[];
+  if($('pmLoads').checked) ST.loads.forEach(L=>pts.push({x:L.X*Math.cos(a)+L.Y*Math.sin(a),y:L.P,fail:!(L.d<=1)}));
+  chart(svgPM||$('pmChart'),{H:460,xlabel:`M en α = ${num('alphaPM',0)}° [kN·m]`,ylabel:'P [kN], compresión +',zeroX:true,zeroY:true,legendRight:true,
+    series:[{name:'Nominal Pn, Mn',pts:nomPts,dash:'6,4',w:1.2},{name:ST.m.mpr?'Probable, fs = 1,25fy':'Diseño φPn, φMn',pts:desPts,w:1.8}],points:pts});
+  const Pr=num('Pring',0);
+  const rn=ringAt(sf,Pr,'nom'), rd=ringAt(sf,Pr,'des');
+  const series=[];
+  if(rn) series.push({name:'Nominal',pts:rn.map(q=>[q[0],q[1]]),close:true,dash:'6,4',w:1.2});
+  if(rd) series.push({name:'Diseño',pts:rd.map(q=>[q[0],q[1]]),close:true,w:1.8});
+  const rp=[];
+  if($('pmLoads').checked) ST.loads.forEach(L=>rp.push({x:L.X,y:L.Y,fail:!(L.d<=1),label:L.name}));
+  const R=Math.max(...(rn||[[1,1]]).map(q=>Math.hypot(q[0],q[1])));
+  series.push({pts:[[0,0],[1.1*R*Math.cos(a),1.1*R*Math.sin(a)]],w:0.8,dash:'2,3',color:'#777'});
+  chart(svgRing||$('ringChart'),{H:460,xlabel:'My [kN·m], comprime +x',ylabel:'Mx [kN·m], comprime +y',equal:true,zeroX:true,zeroY:true,legendRight:true,series,points:rp});
+  if(!rn&&!rd&&svgRing!==undefined){}
+  const M0n=rayR(ringAt(sf,0,'nom'),a), M0d=rayR(ringAt(sf,0,'des'),a);
+  const st=[
+    {k:'φPn,máx',v:fmtk(sf.Pcap)+' kN'},{k:'Po / Pt',v:fmtk(sf.Po)+' / '+fmtk(sf.Pt)+' kN'},
+    {k:'Mn (P = 0) en α',v:fmtk(M0n)+' kN·m'},{k:'φMn (P = 0) en α',v:fmtk(M0d)+' kN·m'},
+  ];
+  (statsEl||$('pmStats')).innerHTML=st.map(s=>`<div class="stat"><div class="k">${s.k}</div><div class="v">${s.v}</div></div>`).join('')+(rn?'':`<div class="warn" style="grid-column:1/-1">P = ${Pr} kN fuera del rango de la superficie.</div>`);
+}
+
+function renderLoads(tableEl){
+  const t=tableEl||$('loadsTable'), a=num('alphaMC',0)*DEG, ux=Math.cos(a), uy=Math.sin(a), pr=!!tableEl;
+  t.innerHTML=`<thead><tr><th>Combinación</th><th>Sísmica</th><th class="num">P</th><th class="num">V2</th><th class="num">V3</th><th class="num">T</th><th class="num">M2</th><th class="num">M3</th><th class="num">P comp. + [kN]</th><th class="num">Mx [kN·m]</th><th class="num">My [kN·m]</th><th class="num">M en α [kN·m]</th><th class="num">V en α [kN]</th><th class="num">φMn [kN·m]</th><th class="num">D/C</th></tr></thead><tbody>${
+    ST.loads.map((L,i)=>{ const r=L.raw; return `<tr class="${L.d<=1?'':'fail'}"><td>${L.name}</td><td>${pr?(L.seis?'Sí':'No'):`<input type="checkbox" class="seisT" data-n="${L.name.replace(/"/g,'&quot;')}"${L.seis?' checked':''}>`}</td><td class="num">${fmt(r.P,1)}</td><td class="num">${fmt(r.V2,1)}</td><td class="num">${fmt(r.V3,1)}</td><td class="num">${fmt(r.T,1)}</td><td class="num">${fmt(r.M2,1)}</td><td class="num">${fmt(r.M3,1)}</td><td class="num">${fmt(L.P,1)}</td><td class="num">${fmt(L.Y,1)}</td><td class="num">${fmt(L.X,1)}</td><td class="num">${fmt(L.X*ux+L.Y*uy,1)}</td><td class="num">${fmt(L.Vx*ux+L.Vy*uy,1)}</td><td class="num">${L.R>0?fmt(L.R,1):'-'}</td><td class="num">${isFinite(L.d)?fmt(L.d,3):'Fuera'}</td></tr>`; }).join('')}</tbody>`;
+  if(pr) return;
+  t.querySelectorAll('.seisT').forEach(c=>c.addEventListener('change',()=>{ ST.seisOv[c.dataset.n]=c.checked; changed('loads'); }));
+  $('combList').innerHTML=ST.loads.map(l=>`<option value="${l.name.replace(/"/g,'&quot;')}">`).join('');
+  const G=gravP();
+  $('paNote').innerHTML=`PD = ${fmtk(G.PD)} kN, PL = ${fmtk(G.PL)} kN, Pa = ${fmtk(G.Pa)} kN`+(G.ok?'':`<br><b style="color:${FAIL}">No se encontró la combinación PD.</b>`);
+  const u2=$('ax2').value;
+  $('loadsNote').innerHTML=`Eje local 2 de la pila = ${u2} de la sección, eje 3 = 1 × 2. M3 positivo comprime el lado +2 y M2 positivo comprime el lado −3 (convención de ETABS en la cara positiva). V2 y V3 positivos actúan en +2 y +3. Mx comprime +y y My comprime +x, referidos al punto de referencia. Sísmica: nombre que contiene ${seisPats().join(', ')} (sin distinguir mayúsculas), salvo PD y PL, la casilla de cada fila manda.`;
+}
+
+function renderNotes(){
+  const m=ST.m;
+  $('notes').innerHTML=`Convención: x horizontal, y vertical, origen en la esquina inferior izquierda de la grilla. P de compresión positiva. Mx comprime el lado +y y My comprime el lado +x, referidos al ${m.refpt==='gc'?'centroide geométrico':'centroide plástico'}.<br>
+  Interacción: εcu = 0,003, ${m.pmConc==='whit'?`bloque de Whitney con β1 = ${m.beta1.toFixed(3)}`:'curva constitutiva del hormigón'}, acero elastoplástico${m.mpr?' con 1,25fy':''}. φ según εt (ACI 318-19 Tabla 21.2.2, estribos), φPn,máx = ${m.pcapf}·φ·Po.<br>
+  Momento-curvatura: hormigón ${m.ccurve==='cp'?`Collins y Porasz, n = ${m.n.toFixed(2)}, ε0 = ${m.e0.toFixed(5)}`:`Hognestad, ε0 = ${m.e0.toFixed(5)}`}, sin tracción. Acero ${m.smodel==='park'?`Park, fsu = ${m.fsu} MPa, εsh = ${m.esh}, εsu = ${m.esu}`:'elastoplástico'}. Límite εc = ${m.ecmax}, εs = ${m.esmax}.<br>
+  Punto nominal en εc = 0,004 o εs = 0,015, lo que ocurra primero. Las barras descuentan el área de hormigón que ocupan.<br>
+  D/C: capacidad de diseño en la dirección del momento resultante de la carga, al mismo P.<br>
+  Hormigón confinado: ${m.conf==='none'?'sin modelo, las celdas confinadas usan la curva no confinada':m.conf==='kp'?'Kent y Park (1971)':'Mander, Priestley y Park (1988)'} en las celdas pintadas en oliva. ${ST.F&&ST.F.confOn?`Término de M-φ en el primero de: εcu del hormigón confinado, εc máx. en hormigón no confinado que no es recubrimiento, εs máx. ${m.spall?`El no confinado se descascara (σ = 0) sobre εsp = ${m.esp}.`:''}`:''} La superficie P-M usa el bloque rectangular de ACI 318 sin confinamiento.<br>
+  Muro especial: NCh430-2023 18.10, que modifica ACI 318-19. Ωv según Tabla 18.10.3.1.2 por dirección y sentido, Ve = Ωv·ωv·Vu,env ≤ 3Vu,env, Vn según 18.10.4.1 con φ = ${ST.W?fmt(ST.W.legs.phi,2):'0,75'} (21.2.4.1 no aplica a muros diseñados con 18.10.6.2, 18.10.4.6).`;
+}
+
+document.querySelectorAll('#tabs button[data-tab]').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#tabs button[data-tab]').forEach(x=>x.classList.toggle('active',x===b));
+  document.querySelectorAll('.tabpane').forEach(p=>p.hidden=p.dataset.pane!==b.dataset.tab);
+  if(b.dataset.tab==='s3d') GL.resize();
+  if(b.dataset.tab==='sheet') drawSheet();
+  try{ localStorage.setItem('fdd_muros_tab',b.dataset.tab); }catch(e){}
+}));
+
+const KIND={fc:'all',Ec:'all',fy:'all',Es:'all',fib:'all',refpt:'all',pmConc:'surf',nmer:'surf',pcapf:'surf',mpr:'all',
+  ccurve:'mc',smodel:'mc',fsu:'mc',esh:'mc',esu:'mc',ecmax:'mc',esmax:'mc',Pp:'mc',Pn:'mc',mcMode:'mc',alphaMC:'mc',
+  alphaPM:'pm',Pring:'pm',pmLoads:'pm',loadsTxt:'loads',etabsSign:'loads',proj:'pm',
+  confModel:'all',hDb:'all',hS:'all',hFy:'all',hHx:'all',hKe:'all',hRc:'all',hEsp:'all',hSpall:'all',hNx:'all',hNy:'all',hBc:'all',hHc:'all',hEcu:'all',
+  wHt:'wall',wHw:'wall',wHwcs:'wall',wHu:'wall',du1:'wall',du2:'wall',du3:'wall',du4:'wall',wPerp:'wall',wLp:'wall',wDy:'wall',wPhiy:'wall',wEq:'wall',wCm:'wall',
+  wOmv:'wall',paK:'wall',paKo:'wall',wCap5:'wall',wBeM:'wall',wLbe:'wall',wLam:'wall',wFyt:'wall',wFcs:'wall',mcP:'wall',
+  ax2:'loads',flip2:'loads',flip3:'loads',seisPat:'loads',pdName:'loads',plName:'loads',pdVal:'loads',plVal:'loads',legTxt:'wall',legSign:'wall'};
+Object.entries(KIND).forEach(([id,k])=>{ const e=$(id); if(!e) return; const ev=e.tagName==='SELECT'||e.type==='checkbox'?'change':'input'; e.addEventListener(ev,()=>changed(k)); });
+$('smodel').addEventListener('change',()=>{ $('parkBox').hidden=$('smodel').value!=='park'; });
+['showNom','showDes','showLoads3'].forEach(id=>$(id).addEventListener('change',()=>GL.draw()));
+$('viewReset').addEventListener('click',()=>{ GL.reset(); });
+
+$('legGeo').addEventListener('input',ev=>{ const t=ev.target; if(!t.dataset||!t.dataset.leg) return; const g=ST.legGeo[t.dataset.leg]; if(!g) return; const v=parseFloat(t.value); if(isFinite(v)){ g[t.dataset.f]=v; changed('wall'); } });
+$('alphaW').addEventListener('input',()=>{ $('alphaMC').value=$('alphaW').value; changed('mc'); });
+$('alphaMC').addEventListener('input',()=>{ $('alphaW').value=$('alphaMC').value; });
+$('paintReq').addEventListener('click',paintRequired);
+$('paintReq2').addEventListener('click',paintRequired);
+const GL=(()=>{
+  const canvas=$('glCanvas'), labels=$('glLabels');
+  let gl=null, progLit=null, progFlat=null, bufs={}, cam={az:0.75,el:0.42,r:4.4}, map=null, ok=true;
+  function sh(type,src){ const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s); if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; }
+  function prog(vs,fs){ const p=gl.createProgram(); gl.attachShader(p,sh(gl.VERTEX_SHADER,vs)); gl.attachShader(p,sh(gl.FRAGMENT_SHADER,fs)); gl.linkProgram(p); if(!gl.getProgramParameter(p,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p)); return p; }
+  function init(){
+    try{ gl=canvas.getContext('webgl',{antialias:true,preserveDrawingBuffer:true,premultipliedAlpha:false}); }catch(e){ gl=null; }
+    if(!gl){ ok=false; labels.innerHTML='<span style="left:50%;top:50%">WebGL no disponible en este navegador.</span>'; return; }
+    progLit=prog(`attribute vec3 p;attribute vec3 n;uniform mat4 mvp;varying vec3 vn;void main(){vn=n;gl_Position=mvp*vec4(p,1.0);}`,
+      `precision mediump float;varying vec3 vn;uniform vec4 col;uniform vec3 L;void main(){float d=abs(dot(normalize(vn),L));gl_FragColor=vec4(col.rgb*(0.38+0.62*d),col.a);}`);
+    progFlat=prog(`attribute vec3 p;uniform mat4 mvp;uniform float ps;void main(){gl_Position=mvp*vec4(p,1.0);gl_PointSize=ps;}`,
+      `precision mediump float;uniform vec4 col;uniform float rnd;void main(){if(rnd>0.5){vec2 c=gl_PointCoord-0.5;if(dot(c,c)>0.25)discard;}gl_FragColor=col;}`);
+    let drag=null;
+    canvas.addEventListener('pointerdown',e=>{ drag={x:e.clientX,y:e.clientY,az:cam.az,el:cam.el}; canvas.setPointerCapture(e.pointerId); canvas.style.cursor='grabbing'; });
+    canvas.addEventListener('pointermove',e=>{ if(!drag) return; cam.az=drag.az-(e.clientX-drag.x)*0.008; cam.el=clamp(drag.el+(e.clientY-drag.y)*0.008,-1.45,1.45); draw(); });
+    const up=()=>{ drag=null; canvas.style.cursor='grab'; };
+    canvas.addEventListener('pointerup',up); canvas.addEventListener('pointercancel',up);
+    canvas.addEventListener('wheel',e=>{ e.preventDefault(); cam.r=clamp(cam.r*Math.exp(e.deltaY*0.001),1.5,15); draw(); },{passive:false});
+  }
+  const M4={
+    persp(f,a,n,fa){ const t=1/Math.tan(f/2); return [t/a,0,0,0, 0,t,0,0, 0,0,(fa+n)/(n-fa),-1, 0,0,2*fa*n/(n-fa),0]; },
+    look(e,c,u){ let z=[e[0]-c[0],e[1]-c[1],e[2]-c[2]]; let l=Math.hypot(...z); z=z.map(v=>v/l);
+      let x=[u[1]*z[2]-u[2]*z[1],u[2]*z[0]-u[0]*z[2],u[0]*z[1]-u[1]*z[0]]; l=Math.hypot(...x); x=x.map(v=>v/l);
+      const y=[z[1]*x[2]-z[2]*x[1],z[2]*x[0]-z[0]*x[2],z[0]*x[1]-z[1]*x[0]];
+      return [x[0],y[0],z[0],0, x[1],y[1],z[1],0, x[2],y[2],z[2],0, -(x[0]*e[0]+x[1]*e[1]+x[2]*e[2]),-(y[0]*e[0]+y[1]*e[1]+y[2]*e[2]),-(z[0]*e[0]+z[1]*e[1]+z[2]*e[2]),1]; },
+    mul(a,b){ const o=new Array(16); for(let i=0;i<4;i++) for(let j=0;j<4;j++){ let s=0; for(let k=0;k<4;k++) s+=a[k*4+j]*b[i*4+k]; o[i*4+j]=s; } return o; }
+  };
+  function buf(data){ const b=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,b); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.STATIC_DRAW); return {b,n:data.length/3}; }
+  function free(){ Object.values(bufs).forEach(o=>{ if(o&&o.b) gl.deleteBuffer(o.b); if(o&&o.nb) gl.deleteBuffer(o.nb); }); bufs={}; }
+  function W(X,Y,P){ return [X/map.Ms,(P-map.Pm)/map.Ph,-Y/map.Ms]; }
+  function surfMesh(rings,lev,topCenter){
+    const K=rings[0].length, V=[], idx=(i,k)=>[i,k%K];
+    const pos=rings.map((r,i)=>r.map(q=>W(q[0],q[1],lev[i])));
+    const nrm=pos.map(r=>r.map(()=>[0,0,0]));
+    const tris=[];
+    for(let i=0;i<rings.length-1;i++) for(let k=0;k<K;k++){ const a=[i,k],b=[i,(k+1)%K],c=[i+1,(k+1)%K],d=[i+1,k]; tris.push([a,b,c],[a,c,d]); }
+    tris.forEach(t=>{ const p=t.map(q=>pos[q[0]][q[1]]); const u=[p[1][0]-p[0][0],p[1][1]-p[0][1],p[1][2]-p[0][2]], v=[p[2][0]-p[0][0],p[2][1]-p[0][1],p[2][2]-p[0][2]];
+      const nn=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]]; t.forEach(q=>{ const a=nrm[q[0]][q[1]]; a[0]+=nn[0]; a[1]+=nn[1]; a[2]+=nn[2]; }); });
+    const P=[],N=[];
+    tris.forEach(t=>t.forEach(q=>{ P.push(...pos[q[0]][q[1]]); const a=nrm[q[0]][q[1]], l=Math.hypot(...a)||1; N.push(a[0]/l,a[1]/l,a[2]/l); }));
+    if(topCenter){ const i=rings.length-1, c=W(0,0,lev[i]); for(let k=0;k<K;k++){ P.push(...c,...pos[i][k],...pos[i][(k+1)%K]); N.push(0,1,0,0,1,0,0,1,0); } }
+    return {P,N};
+  }
+  function wire(rings,lev,stepR,stepM){
+    const L=[], K=rings[0].length;
+    for(let i=0;i<rings.length;i+=stepR){ const r=rings[i]; for(let k=0;k<K;k++){ L.push(...W(r[k][0],r[k][1],lev[i]),...W(r[(k+1)%K][0],r[(k+1)%K][1],lev[i])); } }
+    for(let k=0;k<K;k+=stepM) for(let i=0;i<rings.length-1;i++){ L.push(...W(rings[i][k][0],rings[i][k][1],lev[i]),...W(rings[i+1][k][0],rings[i+1][k][1],lev[i+1])); }
+    return L;
+  }
+  function update(){
+    if(!ok) return; if(!gl) init(); if(!ok) return;
+    const sf=ST.sf; if(!sf) return;
+    free();
+    map={Ms:sf.Ms*1.0,Pm:(sf.Po+sf.Pt)/2,Ph:(sf.Po-sf.Pt)/2/1.15};
+    const rN=sf.ringsN.filter(Boolean), lN=sf.levN.filter((_,i)=>sf.ringsN[i]);
+    const rD=sf.ringsD.filter(Boolean), lD=sf.levD.filter((_,i)=>sf.ringsD[i]);
+    if(rD.length>1){ const m=surfMesh(rD,lD,true); bufs.des=buf(m.P); bufs.des.nb=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,bufs.des.nb); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(m.N),gl.STATIC_DRAW); bufs.desW=buf(wire(rD,lD,4,Math.max(1,Math.round(rD[0].length/24)))); }
+    if(rN.length>1) bufs.nomW=buf(wire(rN,lN,3,Math.max(1,Math.round(rN[0].length/36))));
+    const ax=[], yb=(sf.Pt-map.Pm)/map.Ph*1.08, yt=(sf.Po-map.Pm)/map.Ph*1.08, y0=(0-map.Pm)/map.Ph;
+    ax.push(0,yb,0, 0,yt,0, -1.25,y0,0, 1.25,y0,0, 0,y0,-1.25, 0,y0,1.25);
+    bufs.ax=buf(ax);
+    const ok1=[],bad=[];
+    ST.loads.forEach(L=>{ (L.d<=1?ok1:bad).push(...W(L.X,L.Y,L.P)); });
+    bufs.lok=buf(ok1.length?ok1:[0,0,0]); bufs.lok.n=ok1.length/3;
+    bufs.lbad=buf(bad.length?bad:[0,0,0]); bufs.lbad.n=bad.length/3;
+    resize();
+  }
+  function resize(){
+    if(!gl) return;
+    const dpr=window.devicePixelRatio||1, w=canvas.clientWidth||600, h=canvas.clientHeight||500;
+    canvas.width=Math.round(w*dpr); canvas.height=Math.round(h*dpr);
+    draw();
+  }
+  function mvpMat(){
+    const w=canvas.clientWidth||600, h=canvas.clientHeight||500;
+    const e=[cam.r*Math.cos(cam.el)*Math.sin(cam.az),cam.r*Math.sin(cam.el),cam.r*Math.cos(cam.el)*Math.cos(cam.az)];
+    return M4.mul(M4.persp(38*DEG,w/h,0.1,100),M4.look(e,[0,0,0],[0,1,0]));
+  }
+  function drawFlat(o,mode,col,mvp,ps){
+    if(!o||!o.n) return;
+    gl.useProgram(progFlat);
+    const lp=gl.getAttribLocation(progFlat,'p');
+    gl.bindBuffer(gl.ARRAY_BUFFER,o.b); gl.enableVertexAttribArray(lp); gl.vertexAttribPointer(lp,3,gl.FLOAT,false,0,0);
+    gl.uniformMatrix4fv(gl.getUniformLocation(progFlat,'mvp'),false,mvp);
+    gl.uniform4fv(gl.getUniformLocation(progFlat,'col'),col);
+    gl.uniform1f(gl.getUniformLocation(progFlat,'ps'),ps||1);
+    gl.uniform1f(gl.getUniformLocation(progFlat,'rnd'),mode===gl.POINTS?1:0);
+    gl.drawArrays(mode,0,o.n);
+  }
+  function draw(){
+    if(!gl||!map) return;
+    gl.viewport(0,0,canvas.width,canvas.height);
+    gl.clearColor(1,1,1,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.enable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+    const mvp=mvpMat();
+    drawFlat(bufs.ax,gl.LINES,[0,0,0,1],mvp);
+    if($('showLoads3').checked){ const dpr=window.devicePixelRatio||1; drawFlat(bufs.lok,gl.POINTS,[0,0,0,1],mvp,9*dpr); drawFlat(bufs.lbad,gl.POINTS,[0.70,0.15,0.12,1],mvp,10*dpr); }
+    if($('showNom').checked) drawFlat(bufs.nomW,gl.LINES,[0.55,0.55,0.55,0.55],mvp);
+    if($('showDes').checked&&bufs.des){
+      drawFlat(bufs.desW,gl.LINES,[0.15,0.15,0.15,0.8],mvp);
+      gl.depthMask(false);
+      gl.useProgram(progLit);
+      const lp=gl.getAttribLocation(progLit,'p'), ln=gl.getAttribLocation(progLit,'n');
+      gl.bindBuffer(gl.ARRAY_BUFFER,bufs.des.b); gl.enableVertexAttribArray(lp); gl.vertexAttribPointer(lp,3,gl.FLOAT,false,0,0);
+      gl.bindBuffer(gl.ARRAY_BUFFER,bufs.des.nb); gl.enableVertexAttribArray(ln); gl.vertexAttribPointer(ln,3,gl.FLOAT,false,0,0);
+      gl.uniformMatrix4fv(gl.getUniformLocation(progLit,'mvp'),false,mvp);
+      gl.uniform4fv(gl.getUniformLocation(progLit,'col'),[0.62,0.62,0.62,0.45]);
+      const e=[Math.cos(cam.el)*Math.sin(cam.az),Math.sin(cam.el),Math.cos(cam.el)*Math.cos(cam.az)];
+      gl.uniform3fv(gl.getUniformLocation(progLit,'L'),e);
+      gl.drawArrays(gl.TRIANGLES,0,bufs.des.n);
+      gl.disableVertexAttribArray(ln);
+      gl.depthMask(true);
+    }
+    drawLabels(mvp);
+  }
+  function proj(mvp,p){
+    const x=p[0],y=p[1],z=p[2];
+    const cx=mvp[0]*x+mvp[4]*y+mvp[8]*z+mvp[12], cy=mvp[1]*x+mvp[5]*y+mvp[9]*z+mvp[13], cw=mvp[3]*x+mvp[7]*y+mvp[11]*z+mvp[15];
+    if(cw<=0) return null;
+    return [(cx/cw*0.5+0.5)*canvas.clientWidth,(1-(cy/cw*0.5+0.5))*canvas.clientHeight];
+  }
+  function drawLabels(mvp){
+    const sf=ST.sf; if(!sf) return;
+    const out=[], add=(p,t,b)=>{ const s=proj(mvp,p); if(s) out.push(`<span style="left:${s[0].toFixed(1)}px;top:${s[1].toFixed(1)}px;${b?'font-weight:700;':''}">${t}</span>`); };
+    const y0=(0-map.Pm)/map.Ph;
+    const stP=niceStep(sf.Po-sf.Pt,6);
+    for(let P=Math.ceil(sf.Pt/stP)*stP;P<=sf.Po;P+=stP){ add([0.06,(P-map.Pm)/map.Ph,0.06],fmtk(P)); }
+    const stM=niceStep(map.Ms*2,6);
+    for(let M=stM;M<=map.Ms*1.2;M+=stM){ add([M/map.Ms,y0,0],fmtk(M)); add([0,y0,-M/map.Ms],fmtk(M)); }
+    add([0,(sf.Po-map.Pm)/map.Ph*1.14,0],'P [kN]',1);
+    add([1.38,y0,0],'My [kN·m]',1); add([0,y0,-1.38],'Mx [kN·m]',1);
+    labels.innerHTML=out.join('');
+  }
+  function reset(){ cam={az:0.75,el:0.42,r:4.4}; draw(); }
+  function image(){ if(!gl) return null; draw(); return canvas.toDataURL('image/png'); }
+  return {update,draw,resize,reset,image};
+})();
+/* Muros estructurales especiales, NCh430-2023 18.10 (modifica ACI 318-19) */
+const isNumTok=t=>/^[-+−]?(\d+([.,]\d*)?|[.,]\d+)([eE][-+]?\d+)?$/.test(t);
+const tokNum=t=>parseFloat(t.replace('−','-').replace(',','.'));
+function splitLine(l){ return (l.includes('\t')?l.split('\t'):l.split(/[\s;]+/)).map(t=>t.trim()).filter(Boolean); }
+function parseForceRows(txt,withPier){
+  const out=[];
+  (txt||'').replace(/\r/g,'').split('\n').forEach(line=>{
+    const t=splitLine(line); if(t.length<7) return;
+    const nums=t.slice(-6); if(!nums.every(isNumTok)) return;
+    const lab=t.slice(0,-6); if(!lab.length) return;
+    const v=nums.map(tokNum);
+    let name, pier='', loc='';
+    if(lab.length>=5){ pier=lab[1]; name=lab[2]+(lab.length>=6?' '+lab[4]:''); loc=lab[lab.length-1]; }
+    else if(withPier){ pier=lab[0]; name=lab.slice(1).join(' ')||lab[0]; }
+    else name=lab.join(' ');
+    out.push({name,pier,loc,P:v[0],V2:v[1],V3:v[2],T:v[3],M2:v[4],M3:v[5]});
+  });
+  if(out.some(r=>/^bot/i.test(r.loc))) return out.filter(r=>!/^top/i.test(r.loc));
+  return out;
+}
+function axisVec(ax){ return {'+x':[1,0],'-x':[-1,0],'+y':[0,1],'-y':[0,-1]}[ax]||[1,0]; }
+function mapRow(r){
+  const u2=axisVec($('ax2').value), u3=[-u2[1],u2[0]];
+  const f3=$('flip3').checked?-1:1, f2=$('flip2').checked?-1:1, sg=$('etabsSign').checked?-1:1;
+  const M3=f3*r.M3, V2=f3*r.V2, M2=f2*r.M2, V3=f2*r.V3;
+  return {name:r.name,raw:r,P:sg*r.P,X:M3*u2[0]-M2*u3[0],Y:M3*u2[1]-M2*u3[1],Vx:V2*u2[0]+V3*u3[0],Vy:V2*u2[1]+V3*u3[1]};
+}
+function seisPats(){ return $('seisPat').value.split(',').map(t=>t.trim().toUpperCase()).filter(Boolean); }
+function isSeisName(n){
+  if(ST.seisOv&&Object.prototype.hasOwnProperty.call(ST.seisOv,n)) return !!ST.seisOv[n];
+  const u=n.toUpperCase(); if(u===$('pdName').value.trim().toUpperCase()||u===$('plName').value.trim().toUpperCase()) return false;
+  return seisPats().some(p=>u.includes(p));
+}
+function parseLoads(){
+  const rows=parseForceRows($('loadsTxt').value,false);
+  return rows.map(r=>{ const L=mapRow(r); L.seis=isSeisName(r.name); return L; });
+}
+function gravP(){
+  const find=n=>{ n=n.trim().toUpperCase(); const L=ST.loads.find(l=>l.name.toUpperCase()===n); return L?L.P:NaN; };
+  const pdv=num('pdVal',NaN), plv=num('plVal',NaN);
+  const PD=isFinite(pdv)?pdv:find($('pdName').value), PL=isFinite(plv)?plv:find($('plName').value);
+  const k=$('paK').value==='o'?num('paKo',0.25):parseFloat($('paK').value);
+  const Pa=(isFinite(PD)?PD:0)+k*(isFinite(PL)?PL:0);
+  return {PD,PL,k,Pa,ok:isFinite(PD)};
+}
+function wallIn(){
+  return {ht:Math.max(num('wHt',30),0.1)*1e3,hw:Math.max(num('wHw',30),0.1)*1e3,hwcs:Math.max(num('wHwcs',30),0.1)*1e3,hu:Math.max(num('wHu',2.6),0.1)*1e3,
+    du:['du1','du2','du3','du4'].map(id=>Math.max(num(id,0),0)),perp:$('wPerp').checked,
+    lpIn:num('wLp',0),dy:Math.max(num('wDy',0),0),phiyO:num('wPhiy',0)/1e3,eq:$('wEq').value,cm:$('wCm').value,
+    omv:Math.max(num('wOmv',1),1),cap5:$('wCap5').checked,beM:$('wBeM').value,lbe:$('wLbe').value,lam:Math.max(num('wLam',1),0.1),
+    fyt:Math.max(num('wFyt',420),1),fcs:num('wFcs',25)};
+}
+/* Perfil de ancho de la sección a lo largo de u, desde el extremo comprimido */
+function widthProfile(F,ux,uy,smax,smin){
+  const h=Math.max(Math.min(F.fdx,F.fdy),5), n=Math.ceil((smax-smin)/h)+1, w=new Float64Array(n);
+  for(let i=0;i<F.n;i++){ const s=(F.cx[i]-F.rx)*ux+(F.cy[i]-F.ry)*uy, k=Math.floor((smax-s)/h); if(k>=0&&k<n) w[k]+=F.fa; }
+  for(let k=0;k<n;k++) w[k]/=h;
+  return {h,w,n};
+}
+function endGeom(pr,lw){
+  const {h,w,n}=pr, nz=Math.max(1,Math.round(60/h)), w0=Array.from(w.slice(0,nz)).reduce((a,b)=>a+b,0)/nz;
+  const mid=Array.from(w.slice(Math.floor(n*0.3),Math.ceil(n*0.7))).filter(v=>v>0).sort((a,b)=>a-b), wWeb=mid.length?mid[Math.floor(mid.length/2)]:w0;
+  let flanged=w0>2*wWeb&&wWeb>0, tf=0;
+  if(flanged){ let k=0; while(k<n&&w[k]>1.5*wWeb) k++; tf=k*h; if(tf>0.5*lw) flanged=false; }
+  const minW=(L)=>{ let mn=Infinity; for(let k=0;k*h<L&&k<n;k++) if(w[k]>0&&w[k]<mn) mn=w[k]; return isFinite(mn)?mn:w0; };
+  const te=ST.teq||w0, t=flanged?tf:(w0>=0.5*te&&w0<=2*te?w0:te);
+  return {w0,wWeb,flanged,tf,t,minW};
+}
+/* Profundidad del eje neutro con la curvatura dada (compatibilidad, curvas constitutivas) */
+function cAtCurv(F,m,ang,kap,P){
+  const s=mcSolveStep(F,m,ang,kap,P,null); if(!s) return null;
+  const L=limState(F,m,s);
+  return {c:s.cna,ec:s.ec,es:s.esT,beyond:L.r>1,ctrl:L.ctrl,th:s.th};
+}
+/* Profundidad del eje neutro para la resistencia nominal, εcu = 0,003 y bloque de Whitney */
+function cNominal(F,m,ang,P){
+  const mN=Object.assign({},m,{mpr:false,fyD:m.fy,pmConc:'whit'}), ux=Math.cos(ang), uy=Math.sin(ang), [smax,smin]=extent(F,ux,uy), D=smax-smin;
+  const f=c=>pmPoint(F,mN,ang,c,smax).P-P;
+  let a=D*1e-3, b=D*3; if(f(a)>0) return {c:a}; if(f(b)<0) return {c:NaN};
+  for(let i=0;i<60;i++){ const c=(a+b)/2; if(f(c)>0) b=c; else a=c; }
+  return {c:(a+b)/2};
+}
+function sectionInertia(){
+  let A=0,Sx=0,Sy=0; const {nx,ny,dx,dy}=S;
+  for(let j=0;j<ny;j++) for(let i=0;i<nx;i++) if(S.conc[j*nx+i]){ const x=(i+0.5)*dx, y=(ny-j-0.5)*dy; A+=dx*dy; Sx+=dx*dy*x; Sy+=dx*dy*y; }
+  const xg=Sx/A, yg=Sy/A; let Ixx=0,Iyy=0,Ixy=0;
+  for(let j=0;j<ny;j++) for(let i=0;i<nx;i++) if(S.conc[j*nx+i]){ const x=(i+0.5)*dx-xg, y=(ny-j-0.5)*dy-yg; Iyy+=dx*dy*x*x+dy*dx*dx*dx/12; Ixx+=dx*dy*y*y+dx*dy*dy*dy/12; Ixy+=dx*dy*x*y; }
+  return {A,xg,yg,Ixx,Iyy,Ixy};
+}
+function endConfined(F,ux,uy,smax){
+  const tol=ST.m.rc+1.5*Math.max(S.dx,S.dy);
+  let mn=Infinity; const ids=[];
+  F.BE.forEach((b,k)=>{ let mx=-1e18, mi=1e18; b.hull.forEach(p=>{ const v=(p[0]-F.rx)*ux+(p[1]-F.ry)*uy; if(v>mx) mx=v; if(v<mi) mi=v; }); if(mx>=smax-tol){ ids.push(k); if(mi<mn) mn=mi; } });
+  return {l:ids.length?smax-mn:0,ids};
+}
+function omegaV(hwcsLw,mud,ratio){
+  if(hwcsLw<=2) return {O:1.25,case:'hwcs/lw ≤ 2'};
+  let v; if(!(ratio>0)||!isFinite(ratio)) return {O:1.25,case:'sin Mu,cs sísmico'};
+  if(mud<=1){ v=1.25; } else if(mud<2){ v=1.25+(mud-1)*(ratio-1.25); } else v=ratio;
+  return {O:Math.max(1.25,v),case:mud<=1?'μδ ≤ 1':mud<2?'1 < μδ < 2, interpolación':'μδ ≥ 2'};
+}
+function wallRun(){
+  const F=ST.F, m=ST.m, W=wallIn(), G=gravP(), fc=m.fc;
+  const a0=num('alphaMC',0)*DEG;
+  const defs=[{k:0,ang:a0,lbl:'α',deg:0},{k:1,ang:a0+Math.PI,lbl:'α + 180°',deg:180}];
+  if(W.perp) defs.push({k:2,ang:a0+Math.PI/2,lbl:'α + 90°',deg:90},{k:3,ang:a0+1.5*Math.PI,lbl:'α + 270°',deg:270});
+  const seis=ST.loads.filter(l=>l.seis), I=sectionInertia();
+  { let Pm=0; const {nx,ny}=S, c=(i,j)=>i>=0&&j>=0&&i<nx&&j<ny&&S.conc[j*nx+i];
+    for(let j=0;j<ny;j++) for(let i=0;i<nx;i++) if(c(i,j)){ if(!c(i-1,j)) Pm+=S.dy; if(!c(i+1,j)) Pm+=S.dy; if(!c(i,j-1)) Pm+=S.dx; if(!c(i,j+1)) Pm+=S.dx; }
+    const h=Pm/2, disc=h*h-4*I.A; ST.teq=disc>0?(h-Math.sqrt(disc))/2:Math.sqrt(I.A); }
+  const out={W,G,I,senses:[],a0};
+  const ringPa=ST.sfPr?ringAt(ST.sfPr,G.Pa,'nom'):null;
+  const ang0=num('alphaMC',0);
+  defs.forEach(d=>{
+    const ux=Math.cos(d.ang), uy=Math.sin(d.ang), [smax,smin]=extent(F,ux,uy), lw=smax-smin, du=W.du[d.k];
+    const s=Object.assign({},d,{ux,uy,smax,smin,lw,du,angDeg:ang0+d.deg});
+    s.phiu=2*du/(W.ht*lw); s.mud=du/(0.004*W.ht);
+    s.hwLw=W.hw/lw; s.htLw=W.ht/lw; s.hwcsLw=W.hwcs/lw;
+    const near=(vx,vy)=>{ if(Math.hypot(vx,vy)<1e-9) return -1; const a=Math.atan2(vy,vx); let bk=-1,bd=1e9; defs.forEach(q=>{ const dd=Math.abs(Math.atan2(Math.sin(a-q.ang),Math.cos(a-q.ang))); if(dd<bd){ bd=dd; bk=q.k; } }); return bk; };
+    const comb=seis.map(l=>({l,M:l.X*ux+l.Y*uy,V:l.Vx*ux+l.Vy*uy,kM:near(l.X,l.Y),kV:near(l.Vx,l.Vy)}));
+    const inS=comb.filter(c=>c.kM===d.k&&c.M>1e-9);
+    s.Mu=inS.length?Math.max(...inS.map(c=>c.M)):0;
+    s.MuName=inS.length?inS.reduce((a,c)=>c.M>a.M?c:a).l.name:'-';
+    const vS=comb.filter(c=>c.kV===d.k&&c.V>1e-9); s.Vu=vS.length?Math.max(...vS.map(c=>c.V)):0;
+    s.Mpr=ringPa?rayR(ringPa,d.ang):NaN;
+    let ratio=s.Mu>0&&isFinite(s.Mpr)?2/3*s.Mpr/s.Mu:NaN; s.ratioRaw=ratio; if(W.cap5&&isFinite(ratio)) ratio=Math.min(ratio,5);
+    s.ratio=ratio; const om=omegaV(s.hwcsLw,s.mud,ratio); s.Om=om.O; s.Ocase=om.case;
+    s.Ve0=s.Om*W.omv*s.Vu; s.Ve=Math.min(s.Ve0,3*s.Vu); s.capped=s.Ve0>3*s.Vu+1e-9;
+    /* curvatura para las deformaciones de 18.10.5.5 */
+    s.lp=Math.min(W.lpIn>0?W.lpIn:0.3*lw,0.3*lw); s.phiy=W.phiyO>0?W.phiyO:2*m.ey/lw;
+    s.phiB=(du-W.dy)/(s.lp*(W.ht-s.lp/2))+s.phiy;
+    s.phi=W.eq==='bd'?s.phiB:s.phiu;
+    const cands=inS.length?inS:comb.filter(c=>c.M>1e-9); s.allComb=!inS.length;
+    s.rows=cands.map(c=>{ const P=c.l.P;
+      const r=W.cm==='nom'?cNominal(F,m,d.ang,P):cAtCurv(F,m,d.ang,s.phi,P);
+      const cc=r?r.c:NaN, ec=s.phi*cc, es=s.phi*(lw-cc);
+      const lN=ec>0.003?cc*(1-0.003/ec):0, lA=Math.max(cc-0.1*lw,cc/2);
+      return {name:c.l.name,P,M:c.M,c:cc,ec,es,lN,lA,beyond:r&&r.beyond,fail:!r||!isFinite(cc)};
+    });
+    const val=s.rows.filter(r=>isFinite(r.c));
+    s.ecMax=val.length?Math.max(...val.map(r=>r.ec)):0; s.esMax=val.length?Math.max(...val.map(r=>r.es)):0;
+    s.cMax=val.length?Math.max(...val.map(r=>r.c)):0;
+    s.gov=val.length?val.reduce((a,r)=>r.ec>a.ec?r:a):null;
+    s.applies5=s.htLw>=3;
+    /* tensiones elásticas 18.10.6.3 en el borde comprimido, flexión en la dirección del sentido con sección bruta */
+    const Iu=I.Iyy*ux*ux+2*I.Ixy*ux*uy+I.Ixx*uy*uy, sg=(I.xg-F.rx)*ux+(I.yg-F.ry)*uy;
+    s.sig=0; s.sigName='-';
+    seis.forEach(l=>{ const Mu=(l.X*ux+l.Y*uy)*1e6; if(Mu<=0) return; const Mg=Mu-sg*l.P*1e3, v=l.P*1e3/I.A+Mg*(smax-sg)/Iu; if(v>s.sig){ s.sig=v; s.sigName=l.name; } });
+    s.meth=W.beM==='auto'?(s.hwLw>=2?'d':'s'):W.beM;
+    s.needD=s.ecMax>=0.003; s.needS=s.sig>=0.2*fc;
+    s.need=s.meth==='d'?s.needD:s.needS;
+    const pr=widthProfile(F,ux,uy,smax,smin), eg=endGeom(pr,lw); s.eg=eg;
+    s.lN=Math.max(0,...val.map(r=>r.lN)); s.lA=val.length?Math.max(...val.map(r=>r.lA)):0;
+    const lRule=(W.lbe==='aci'||s.meth==='s')?s.lA:s.lN;
+    s.lRule=lRule; s.lreq=s.need?Math.min(lw,Math.max(lRule,eg.t,eg.flanged?eg.tf+300:0)):0;
+    const ec=endConfined(F,ux,uy,smax); s.lprov=ec.l; s.beIds=ec.ids;
+    s.bZone=eg.flanged?eg.w0:eg.minW(Math.max(s.lreq,eg.t));
+    s.tBE=eg.flanged?eg.tf:eg.minW(Math.max(s.lreq,eg.t));
+    s.vext=lw;
+    /* 18.10.2.4 cuantía longitudinal en el extremo */
+    out.senses.push(s);
+  });
+  out.senses.forEach(s=>{
+    const opp=out.senses.find(o=>Math.abs(((o.deg-s.deg+540)%360)-180)<1)||s, mud=Math.max(s.mud,opp.mud);
+    const b=s.eg.t;
+    s.lEnd=mud>=2?0.15*s.lw:mud<=1?b:b+(mud-1)*(0.15*s.lw-b);
+    let Ac=0, As=0;
+    for(let i=0;i<F.n;i++){ const v=(F.cx[i]-F.rx)*s.ux+(F.cy[i]-F.ry)*s.uy; if(v>=s.smax-s.lEnd) Ac+=F.fa; }
+    for(let i=0;i<F.nb;i++){ const v=(F.bx[i]-F.rx)*s.ux+(F.by[i]-F.ry)*s.uy; if(v>=s.smax-s.lEnd) As+=F.ba[i]; }
+    s.rhoEnd=Ac>0?As/Ac:0; s.rhoEndReq=0.5*Math.sqrt(m.fc)/m.fy; s.applies24=s.hwLw>=2&&mud>=1;
+  });
+  out.legs=legRun(out);
+  out.be=beDetail(out);
+  out.chk=wallChecks(out);
+  return out;
+}
+/* Pilas: corte por capacidad */
+function legDefaults(name,i){
+  const F=ST.F, [a,b]=extent(F,1,0), [c,d]=extent(F,0,1);
+  return i===0?{lw:Math.round(a-b),bw:300,th:0,dh:10,sh:150,nh:2,dv:10,sv:200}:{lw:Math.round(c-d),bw:300,th:90,dh:10,sh:150,nh:2,dv:10,sv:200};
+}
+function legRun(out){
+  const rows=parseForceRows($('legTxt').value,true), W=out.W, m=ST.m, fc=m.fc, sqf=Math.sqrt(fc);
+  const sgP=$('legSign').checked?-1:1;
+  const names=[...new Set(rows.map(r=>r.pier))];
+  names.forEach((n,i)=>{ if(!ST.legGeo[n]) ST.legGeo[n]=legDefaults(n,i); });
+  ST.legNames=names;
+  const phi=out.senses[0]&&out.senses[0].meth==='s'?0.60:0.75;
+  const legs=names.map(n=>{
+    const g=ST.legGeo[n], lw=Math.max(+g.lw||1,1), bw=Math.max(+g.bw||1,1), th=(+g.th||0)*DEG;
+    const Ab=d=>Math.PI*d*d/4, Acv=lw*bw;
+    const R=rows.filter(r=>r.pier===n).map(r=>Object.assign({},r,{seis:isSeisName(r.name),Pc:sgP*r.P}));
+    const [e1,e2]=extent(ST.F,Math.cos(th),Math.sin(th)), lwWall=e1-e2;
+    const hwSeg=W.hw/lw, hwWall=W.hw/lwWall, hwlw=Math.max(hwSeg,hwWall);
+    const ac=hwlw<=1.5?0.25:hwlw>=2?0.17:0.25-0.16*(hwlw-1.5);
+    const rt=(+g.nh)*Ab(+g.dh)/((+g.sh)*bw), rl=(+g.nh)*Ab(+g.dv)/((+g.sv)*bw);
+    const Vc=ac*W.lam*sqf*Acv/1e3, Vs=rt*W.fyt*Acv/1e3, Vmax=0.83*sqf*Acv/1e3, Vn=Math.min(Vc+Vs,Vmax);
+    const grp={};
+    R.filter(r=>r.seis).forEach(r=>{ const ang=r.V2>=0?th:th+Math.PI;
+      let best=null, bd=1e9; out.senses.forEach(s=>{ const dd=Math.abs(Math.atan2(Math.sin(ang-s.ang),Math.cos(ang-s.ang))); if(dd<bd){ bd=dd; best=s; } });
+      const key=best?best.k:0; if(!grp[key]) grp[key]={s:best,Vu:0,name:'-',dAng:bd}; if(Math.abs(r.V2)>grp[key].Vu){ grp[key].Vu=Math.abs(r.V2); grp[key].name=r.name; } });
+    const sens=Object.values(grp).map(gq=>{ const O=gq.s?gq.s.Om:1.25, Ve0=O*W.omv*gq.Vu, Ve=Math.min(Ve0,3*gq.Vu); return {lbl:gq.s?gq.s.lbl:'-',Om:O,Vu:gq.Vu,name:gq.name,Ve,capped:Ve0>3*gq.Vu+1e-9,far:gq.dAng>Math.PI/4}; });
+    const ns=R.filter(r=>!r.seis), Vns=ns.length?Math.max(...ns.map(r=>Math.abs(r.V2))):0;
+    const VuAll=R.length?Math.max(...R.map(r=>Math.abs(r.V2))):0;
+    const Vdes=Math.max(Vns,...sens.map(q=>q.Ve),0);
+    const rtMin=VuAll<=0.083*W.lam*sqf*Acv/1e3?0.0020:0.0025;
+    const rtReqV=Math.max(0,(Vdes*1e3/(phi*Acv)-ac*W.lam*sqf)/W.fyt), rtReq=Math.max(rtMin,rtReqV);
+    const sReq=(+g.nh)*Ab(+g.dh)/(rtReq*bw), smax=bw>=250?Math.min(bw,450):Math.min(2*bw,450);
+    const Pmax=R.length?Math.max(...R.map(r=>r.Pc)):0;
+    return {name:n,g,lw,bw,th,Acv,hwSeg,hwWall,hwlw,ac,rt,rl,Vc,Vs,Vmax,Vn,phi,sens,Vns,VuAll,Vdes,rtMin,rtReq,sReq,smax,nrows:R.length,Pmax,lwWall};
+  });
+  /* 18.10.4.4: pilas que comparten una fuerza lateral común (paralelas) */
+  const groups=[];
+  legs.forEach(L=>{ const a=((L.th/DEG)%180+180)%180; let g=groups.find(q=>Math.min(Math.abs(q.a-a),180-Math.abs(q.a-a))<20); if(!g){ g={a,legs:[]}; groups.push(g); } g.legs.push(L); });
+  groups.forEach(g=>{ g.Acv=g.legs.reduce((s,L)=>s+L.Acv,0); g.V=g.legs.reduce((s,L)=>s+L.Vdes,0); g.cap=phi*0.66*sqf*g.Acv/1e3; });
+  return {legs,groups,phi,rows:rows.length};
+}
+/* Detallamiento de cada elemento de borde pintado */
+function beDetail(out){
+  const m=ST.m, F=ST.F, fc=m.fc;
+  return F.BE.map(b=>{
+    const c=b.cp, bmin=Math.min(b.Bx,b.By), Ab=c.Ab;
+    const req=out.senses.some(s=>s.need&&s.beIds.includes(b.id));
+    const hx=Math.max(c.hxX,c.hxY), hxLim=Math.min(200,bmin/2);
+    const s0=clamp(100+(350-hx)/3,100,150), sLim=Math.min(bmin/2,isFinite(b.dbMin)?6*b.dbMin:Infinity,s0);
+    const k1=0.3*(b.Ag/b.Ach-1)*fc/m.fyt, k2=0.09*fc/m.fyt, kreq=Math.max(k1,k2);
+    const AshX=c.nly*Ab, AshY=c.nlx*Ab, AreqX=kreq*m.hs*b.bc, AreqY=kreq*m.hs*b.hc;
+    const kdb=m.fy<=420?6:m.fy<=550?5:4, sZT1=Math.min(150,isFinite(b.dbMin)?kdb*b.dbMin:Infinity), sZT2=Math.min(200,isFinite(b.dbMin)?14*b.dbMin:Infinity);
+    return {b,c,bmin,req,hx,hxLim,s0,sLim,k1,k2,kreq,AshX,AshY,AreqX,AreqY,kdb,sZT1,sZT2,dbLim:bmin/9};
+  });
+}
+function wallChecks(out){
+  const W=out.W, m=ST.m, F=ST.F, fc=m.fc, L=[];
+  const Ag=F.Ac, Pmax=ST.loads.length?Math.max(...ST.loads.map(l=>l.P)):0;
+  L.push({n:'18.10.5.4 Pu,máx ≤ 0,35f\'c·Ag',d:fmtk(Pmax)+' kN',c:fmtk(0.35*fc*Ag/1e3)+' kN',r:Pmax/(0.35*fc*Ag/1e3)});
+  const dc=ST.loads.reduce((a,l)=>Math.max(a,l.d),0);
+  if(ST.loads.length) L.push({n:'22.4 Flexocompresión, todas las combinaciones (D/C máx.)',d:fmt(dc,3),c:fmt(1,3),r:dc});
+  out.senses.forEach(s=>{
+    if(s.applies5){
+      L.push({n:`18.10.5.5 εc ≤ 0,008, sentido ${s.lbl}`,d:fmt(s.ecMax,5),c:fmt(0.008,5),r:s.ecMax/0.008});
+      L.push({n:`18.10.5.5 εs ≤ 0,03, sentido ${s.lbl}`,d:fmt(s.esMax,5),c:fmt(0.03,5),r:s.esMax/0.03});
+    }
+    if(s.need) L.push({n:`18.10.6.4(a) Largo confinado pintado, sentido ${s.lbl}`,d:fmtk(s.lreq)+' mm',c:fmtk(s.lprov)+' mm',r:s.lprov>0?s.lreq/s.lprov:Infinity});
+    if(s.need){ L.push({n:`18.10.6.4(b) b ≥ hu/16, sentido ${s.lbl}`,d:fmtk(W.hu/16)+' mm',c:fmtk(s.bZone)+' mm',r:(W.hu/16)/s.bZone});
+      L.push({n:`18.10.6.4(c) Espesor del elemento de borde ≥ 300 mm, sentido ${s.lbl}`,d:'300 mm',c:fmtk(s.tBE)+' mm',r:300/s.tBE}); }
+    if(s.applies24) L.push({n:`18.10.2.4(a) ρ extremo ≥ 0,5√f'c/fy, sentido ${s.lbl}`,d:fmt(s.rhoEndReq*100,3)+' %',c:fmt(s.rhoEnd*100,3)+' %',r:s.rhoEndReq/Math.max(s.rhoEnd,1e-9)});
+  });
+  out.be.forEach(e=>{ const nm=e.b.name;
+    L.push({n:`18.10.6.4(e)(v) hx ≤ mín(200, b/2), ${nm}`,d:fmtk(e.hx)+' mm',c:fmtk(e.hxLim)+' mm',r:e.hx/e.hxLim});
+    L.push({n:`18.10.6.4(e)(vi) s ≤ mín(b/2, 6db, s0), ${nm}`,d:fmtk(m.hs)+' mm',c:fmtk(e.sLim)+' mm',r:m.hs/e.sLim});
+    L.push({n:`18.10.6.4(f) Ash x ≥ máx(a, b)·s·bc, ${nm}`,d:fmtk(e.AreqX)+' mm²',c:fmtk(e.AshX)+' mm²',r:e.AreqX/e.AshX});
+    L.push({n:`18.10.6.4(f) Ash y ≥ máx(a, b)·s·bc, ${nm}`,d:fmtk(e.AreqY)+' mm²',c:fmtk(e.AshY)+' mm²',r:e.AreqY/e.AshY});
+    if(isFinite(e.b.dbMax)) L.push({n:`18.10.6.4(k) db ≤ dimensión menor/9, ${nm}`,d:'Ø'+e.b.dbMax,c:fmt(e.dbLim,1)+' mm',r:e.b.dbMax/e.dbLim});
+    L.push({n:`18.10.6.5(b) s ≤ mín(150, ${e.kdb}db) zona lw, ${nm}`,d:fmtk(m.hs)+' mm',c:fmtk(e.sZT1)+' mm',r:m.hs/e.sZT1});
+  });
+  if(out.be.length) L.push({n:'18.10.6.4(g) f\'c del sistema de piso ≥ 0,7f\'c',d:fmt(0.7*fc,1)+' MPa',c:fmt(W.fcs,1)+' MPa',r:0.7*fc/W.fcs});
+  out.legs.legs.forEach(g=>{
+    L.push({n:`18.10.4 φVn ≥ Ve, pila ${g.name}`,d:fmtk(g.Vdes)+' kN',c:fmtk(g.phi*g.Vn)+' kN',r:g.Vdes/(g.phi*g.Vn)});
+    L.push({n:`18.10.4.4 Ve ≤ φ·0,83√f'c·Acw, pila ${g.name}`,d:fmtk(g.Vdes)+' kN',c:fmtk(g.phi*g.Vmax)+' kN',r:g.Vdes/(g.phi*g.Vmax)});
+    L.push({n:`18.10.2.1 ρt ≥ ${String(g.rtMin).replace('.',',')}, pila ${g.name}`,d:fmt(g.rtMin,5),c:fmt(g.rt,5),r:g.rtMin/g.rt});
+    L.push({n:`18.10.2.1 ρl ≥ 0,0025, pila ${g.name}`,d:fmt(0.0025,5),c:fmt(g.rl,5),r:0.0025/g.rl});
+    L.push({n:`18.10.2.1 Espaciamiento ≤ ${fmtk(g.smax)} mm, pila ${g.name}`,d:fmtk(Math.max(+g.g.sh,+g.g.sv))+' mm',c:fmtk(g.smax)+' mm',r:Math.max(+g.g.sh,+g.g.sv)/g.smax});
+    L.push({n:`18.10.2.2 Dos capas de armadura, pila ${g.name}`,d:'2',c:String(g.g.nh),r:2/Math.max(+g.g.nh,0.01)});
+    if(g.hwlw<=2) L.push({n:`18.10.4.3 ρl ≥ ρt (hw/lw ≤ 2), pila ${g.name}`,d:fmt(g.rt,5),c:fmt(g.rl,5),r:g.rt/g.rl});
+    L.push({n:`18.10.1.3 bw ≥ hu/16 (estabilidad), pila ${g.name}`,d:fmtk(W.hu/16)+' mm',c:fmtk(g.bw)+' mm',r:(W.hu/16)/g.bw});
+  });
+  out.legs.groups.forEach(g=>{ if(g.legs.length>1) L.push({n:`18.10.4.4 ΣVe ≤ φ·0,66√f'c·ΣAcv, pilas ${g.legs.map(q=>q.name).join(', ')}`,d:fmtk(g.V)+' kN',c:fmtk(g.cap)+' kN',r:g.V/g.cap}); });
+  return L;
+}
+function chkHtml(list){
+  return `<thead><tr><th>Verificación</th><th class="num">Demanda</th><th class="num">Capacidad</th><th class="num">Razón</th><th class="num">Estado</th></tr></thead><tbody>${
+    list.map(c=>{ const ok=c.r<=1+1e-9; return `<tr${ok?'':' class="fail"'}><td>${c.n}</td><td class="num">${c.d}</td><td class="num">${c.c}</td><td class="num">${isFinite(c.r)?fmt(c.r,3):'∞'}</td><td class="num">${ok?'Cumple':'No cumple'}</td></tr>`; }).join('')}</tbody>`;
+}
+const f4=x=>fmt(x,5);
+function renderWall(){
+  const R=ST.W; if(!R) return;
+  const fc=ST.m.fc, W=R.W, sen=R.senses;
+  const nf=R.chk.filter(c=>!(c.r<=1+1e-9)).length;
+  const st=[
+    {k:'Pa = PD + '+fmt(R.G.k,2)+'PL',v:fmtk(R.G.Pa)+' kN'},
+    {k:'lw en α / α + 90°',v:fmtk(sen[0].lw)+(sen[2]?' / '+fmtk(sen[2].lw):'')+' mm'},
+    {k:'Ωv α / α + 180°',v:fmt(sen[0].Om,2)+' / '+fmt(sen[1].Om,2)},
+    {k:'Verificaciones',v:nf?nf+' no cumplen':'Todas cumplen',bad:nf>0},
+  ];
+  $('wallStats').innerHTML=st.map(s=>`<div class="stat"><div class="k">${s.k}</div><div class="v"${s.bad?` style="color:${FAIL}"`:''}>${s.v}</div></div>`).join('');
+  $('wallChk').innerHTML=chkHtml(R.chk);
+  const col=(lbl,u,f)=>`<tr><td>${lbl}</td><td>${u}</td>${sen.map(s=>`<td class="num">${f(s)}</td>`).join('')}</tr>`;
+  $('wallSense').innerHTML=`<thead><tr><th>Parámetro</th><th>Unidad</th>${sen.map(s=>`<th class="num">${s.lbl} (${fmtk(((s.angDeg%360)+360)%360)}°)</th>`).join('')}</tr></thead><tbody>`+
+    col('lw, extensión de la sección en la dirección','mm',s=>fmtk(s.lw))+
+    col('hwcs/lw','',s=>fmt(s.hwcsLw,2))+
+    col('δu','mm',s=>fmtk(s.du))+
+    col('μδ = δu/(0,004·ht)','',s=>fmt(s.mud,2))+
+    col('φu = 2δu/(ht·lw)','1/m',s=>fmt(s.phiu*1e3,5))+
+    col('Mu,cs, máximo sísmico en el sentido','kN·m',s=>fmtk(s.Mu))+
+    col('Combinación de Mu,cs','',s=>s.MuName)+
+    col('Mpr,cs con Pa, 1,25fy y φ = 1','kN·m',s=>fmtk(s.Mpr))+
+    col('2/3·Mpr,cs/Mu,cs'+(W.cap5?' (≤ 5)':''),'',s=>fmt(s.ratio,2))+
+    col('Caso Tabla 18.10.3.1.2','',s=>s.Ocase)+
+    col('Ωv','',s=>`<b>${fmt(s.Om,3)}</b>`)+
+    col('Vu,env en el sentido','kN',s=>fmtk(s.Vu))+
+    col('Ve = Ωv·ωv·Vu,env ≤ 3Vu,env','kN',s=>fmtk(s.Ve)+(s.capped?' (límite 3Vu)':''))+'</tbody>';
+  const rows=[];
+  sen.forEach(s=>s.rows.forEach(r=>rows.push({s,r})));
+  $('wallStrain').innerHTML=`<thead><tr><th>Sentido</th><th>Combinación</th><th class="num">Pu [kN]</th><th class="num">M [kN·m]</th><th class="num">φ [1/m]</th><th class="num">c [mm]</th><th class="num">c/lw</th><th class="num">εc</th><th class="num">εs</th><th class="num">Largo ε &gt; 0,003 [mm]</th><th>Nota</th></tr></thead><tbody>${
+    rows.map(({s,r})=>{ const bad=s.applies5&&(r.ec>0.008||r.es>0.03); return `<tr${bad||r.fail?' class="fail"':''}><td>${s.lbl}</td><td>${r.name}</td><td class="num">${fmtk(r.P)}</td><td class="num">${fmtk(r.M)}</td><td class="num">${fmt(s.phi*1e3,5)}</td><td class="num">${fmtk(r.c)}</td><td class="num">${fmt(r.c/s.lw,3)}</td><td class="num">${f4(r.ec)}</td><td class="num">${f4(r.es)}</td><td class="num">${fmtk(r.lN)}</td><td>${r.fail?'Sin equilibrio a esa curvatura':r.beyond?'φ mayor que la capacidad de la sección':s.allComb?'Sin combinación asignada al sentido, se usan las de momento positivo':''}</td></tr>`; }).join('')||'<tr><td colspan="11">Sin combinaciones sísmicas.</td></tr>'}</tbody>`;
+  $('wallBE').innerHTML=`<thead><tr><th>Parámetro</th><th>Unidad</th>${sen.map(s=>`<th class="num">${s.lbl}</th>`).join('')}</tr></thead><tbody>`+
+    col('hw/lw','',s=>fmt(s.hwLw,2))+col('ht/lw (18.10.5.5 aplica si ≥ 3)','',s=>fmt(s.htLw,2)+(s.applies5?'':' no aplica'))+
+    col('Método','',s=>s.meth==='d'?'18.10.6.2':'18.10.6.3')+
+    col('εc máx. (18.10.5.5'+(W.eq==='bd'?'b':'a')+')','',s=>f4(s.ecMax))+col('c máx.','mm',s=>fmtk(s.cMax))+
+    col('σ máx. elástica sísmica / f\'c','',s=>fmt(s.sig/fc,3))+
+    col('Requiere elemento de borde','',s=>s.need?'<b>Sí</b>':'No')+
+    col('Largo ε > 0,003, NCh430 18.10.6.4(a)','mm',s=>fmtk(s.lN))+col('máx(c − 0,1lw, c/2), ACI 318-19','mm',s=>fmtk(s.lA))+
+    col('Extremo con ala','',s=>s.eg.flanged?'Sí, tf = '+fmtk(s.eg.tf)+' mm':'No')+
+    col('Largo confinado requerido','mm',s=>`<b>${fmtk(s.lreq)}</b>`)+
+    col('Largo confinado pintado','mm',s=>fmtk(s.lprov)+(s.beIds.length?' ('+s.beIds.map(k=>ST.F.BE[k].name).join(', ')+')':''))+
+    col('Extensión vertical sobre y bajo la sección crítica ≥ lw','m',s=>s.need?fmt(s.vext/1e3,2):'-')+
+    col('Largo extremo 18.10.2.4(a)','mm',s=>fmtk(s.lEnd))+col('ρ extremo / requerido','%',s=>fmt(s.rhoEnd*100,2)+' / '+fmt(s.rhoEndReq*100,2))+
+    col('18.10.2.3(c) traslapos prohibidos en borde hasta','m',s=>s.mud>=2?fmt(Math.min(0.3*s.lw,3000)/1e3,2):'no aplica')+'</tbody>';
+  $('wallNote').innerHTML=`Pa = PD + ${fmt(R.G.k,2)}PL = ${fmtk(R.G.PD)} + ${fmt(R.G.k,2)}·${fmtk(R.G.PL)} kN${R.G.ok?'':' (PD no encontrado, revise el nombre de la combinación o ingréselo manual)'}. Mpr,cs con fs = 1,25fy, φ = 1 y bloque de Whitney, momento resultante en la dirección del sentido. Cada combinación sísmica se asigna al sentido analizado más cercano a la dirección de su momento (Mu,cs y c) y de su corte (Vu,env). ${W.eq==='bd'?`Curvatura (18.10.5.5b): φ = (δu − δy)/(lp(ht − lp/2)) + φy, lp ≤ 0,3lw, δy = ${fmtk(W.dy)} mm, φy = ${W.phiyO>0?'manual':'2εy/lw (Priestley, Calvi y Kowalsky 2007)'}.`:'Curvatura (18.10.5.5a y c): φu = 2δu/(ht·lw), equivalente a lp = 0,5lw.'} c: ${W.cm==='nom'?'resistencia nominal con εcu = 0,003 y bloque de Whitney, eje neutro perpendicular al sentido':'equilibrio de la sección con las curvas constitutivas a la curvatura de demanda (M-φ), con el mismo control de dirección de la pestaña M-φ'}. Largo requerido = máx(regla seleccionada, espesor del muro 18.10.6.4(c), ala + 300 mm 18.10.6.4(d)). El elemento de borde se extiende verticalmente al menos lw sobre y bajo la sección crítica (18.10.6.2b) y su armadura transversal penetra la fundación ld o 300 mm (18.10.6.4h).`;
+}
+function renderLegs(){
+  const R=ST.W; if(!R) return;
+  const Lg=R.legs, legs=Lg.legs;
+  const g=$('legGeo');
+  const fields=[['lw','lw [mm]',50],['bw','bw [mm]',10],['th','θ [°]',90],['dh','Ø horiz. [mm]',1],['sh','s horiz. [mm]',10],['nh','Capas',1],['dv','Ø vert. [mm]',1],['sv','s vert. [mm]',10]];
+  const sig=JSON.stringify(ST.legNames)+'|'+ST.legNames.map(n=>JSON.stringify(ST.legGeo[n])).join();
+  if(g.dataset.sig!==sig||!g.querySelector('input')){
+    g.innerHTML=`<thead><tr><th>Pila</th>${fields.map(f=>`<th class="num">${f[1]}</th>`).join('')}</tr></thead><tbody>${
+      ST.legNames.map((n,i)=>`<tr><td>${n}</td>${fields.map(f=>`<td class="num"><input type="number" id="leg_${i}_${f[0]}" data-leg="${n}" data-f="${f[0]}" value="${ST.legGeo[n][f[0]]}" step="${f[2]}"></td>`).join('')}</tr>`).join('')||'<tr><td colspan="9">Sin pilas.</td></tr>'}</tbody>`;
+    g.dataset.sig=sig;
+  }
+  $('legTable').innerHTML=`<thead><tr><th>Pila</th><th class="num">Acv [mm²]</th><th class="num">hw/lw usado</th><th class="num">αc</th><th>Sentido de V2</th><th class="num">Ωv</th><th class="num">Vu,env [kN]</th><th class="num">Ve [kN]</th><th class="num">Vu no sísmico [kN]</th><th class="num">Ve diseño [kN]</th><th class="num">Vc [kN]</th><th class="num">Vs [kN]</th><th class="num">φVn [kN]</th><th class="num">ρt req.</th><th class="num">s req. [mm]</th><th class="num">D/C</th></tr></thead><tbody>${
+    legs.map(L=>{ const n=Math.max(1,L.sens.length), dcv=L.Vdes/(L.phi*L.Vn), bad=!(dcv<=1+1e-9);
+      const s0=L.sens.length?L.sens:[{lbl:'-',Om:NaN,Vu:0,Ve:0}];
+      return s0.map((q,i)=>`<tr${bad?' class="fail"':''}>${i===0?`<td rowspan="${n}">${L.name}</td><td class="num" rowspan="${n}">${fmtk(L.Acv)}</td><td class="num" rowspan="${n}">${fmt(L.hwlw,2)}</td><td class="num" rowspan="${n}">${fmt(L.ac,3)}</td>`:''}<td>${q.lbl}${q.far?' (lejano)':''}</td><td class="num">${fmt(q.Om,3)}</td><td class="num">${fmtk(q.Vu)}</td><td class="num">${fmtk(q.Ve)}${q.capped?' *':''}</td>${i===0?`<td class="num" rowspan="${n}">${fmtk(L.Vns)}</td><td class="num" rowspan="${n}"><b>${fmtk(L.Vdes)}</b></td><td class="num" rowspan="${n}">${fmtk(L.Vc)}</td><td class="num" rowspan="${n}">${fmtk(L.Vs)}</td><td class="num" rowspan="${n}">${fmtk(L.phi*L.Vn)}</td><td class="num" rowspan="${n}">${fmt(L.rtReq,5)}</td><td class="num" rowspan="${n}">${fmtk(L.sReq)}</td><td class="num" rowspan="${n}">${fmt(dcv,3)}</td>`:''}</tr>`).join(''); }).join('')||'<tr><td colspan="16">Sin pilas.</td></tr>'}</tbody>`;
+  const ck=R.chk.filter(c=>/pila|pilas/.test(c.n));
+  $('legChk').innerHTML=chkHtml(ck);
+}
+function renderConf(){
+  const R=ST.W, F=ST.F, m=ST.m; if(!R||!F) return;
+  renderConfChart();
+  const be=R.be;
+  const kp=m.conf==='kp';
+  const col=(lbl,u,f)=>`<tr><td>${lbl}</td><td>${u}</td>${be.map(e=>`<td class="num">${f(e)}</td>`).join('')}</tr>`;
+  $('beTable').innerHTML=be.length?`<thead><tr><th>Parámetro</th><th>Unidad</th>${be.map(e=>`<th class="num">${e.b.name}</th>`).join('')}</tr></thead><tbody>`+
+    col('Centro x, y','mm',e=>fmtk(e.b.xc)+', '+fmtk(e.b.yc))+
+    col('Núcleo bc (x) × hc (y)','mm',e=>fmtk(e.b.bc)+' × '+fmtk(e.b.hc))+
+    col('Elemento bruto Bx × By, Ag','mm, mm²',e=>fmtk(e.b.Bx)+' × '+fmtk(e.b.By)+', '+fmtk(e.b.Ag))+
+    col('Ach = bc·hc','mm²',e=>fmtk(e.b.Ach))+
+    col('Ramas paralelas a x / a y','',e=>e.c.nlx+' / '+e.c.nly)+
+    col('hx en x / en y','mm',e=>fmtk(e.c.hxX)+' / '+fmtk(e.c.hxY))+
+    col('ρx = Asx/(s·hc), ρy = Asy/(s·bc)','%',e=>fmt(e.c.rx*100,3)+', '+fmt(e.c.ry*100,3))+
+    col('ρs = ρx + ρy','%',e=>fmt(e.c.rs*100,3))+
+    (kp?col('ε50u = (3 + 0,29f\'c)/(145f\'c − 1000)','',e=>f4(e.c.e50u))+col('ε50h = 0,75ρs√(b"/sh)','',e=>f4(e.c.e50h))+col('ε50c = ε50u + ε50h','',e=>f4(e.c.e50c))+col('ε20c = 1,6ε50c − 0,6ε0','',e=>f4(e.c.e20c))+col('εcu Scott et al. (1982) = 0,004 + 0,9ρs·fyt/300','',e=>f4(e.c.ecuS))
+      :col("f'l = ke·ρs·fyt/2",'MPa',e=>fmt(e.c.fl,3))+col("f'cc",'MPa',e=>fmt(e.c.fcc,2))+col("f'cc/f'c",'',e=>fmt(e.c.fcc/m.fc,3))+col('εcc = 0,002(1 + 5(f\'cc/f\'c − 1))','',e=>f4(e.c.ecc))+col('Esec = f\'cc/εcc, r = Ec/(Ec − Esec)','MPa, ',e=>fmtk(e.c.Esec)+', '+fmt(e.c.r,3))+col('εcu = 0,004 + 0,075ρs·fyt/f\'c','',e=>f4(e.c.ecuM))+col('Referencia: εcu Priestley = 0,004 + 1,4ρs·fyt·εsu/f\'cc','',e=>f4(e.c.ecuP)))+
+    col('εcu usado en M-φ','',e=>`<b>${f4(e.c.ecu)}</b>`)+
+    col('Barras en el elemento, Ø mín. / máx.','',e=>e.b.nbars+', Ø'+(isFinite(e.b.dbMin)?e.b.dbMin:'-')+' / Ø'+(isFinite(e.b.dbMax)?e.b.dbMax:'-'))+'</tbody>':'<tbody><tr><td>No hay celdas confinadas. Use la herramienta Confinado o Pintar EB requeridos.</td></tr></tbody>';
+  const ck=R.chk.filter(c=>/EB-|piso/.test(c.n));
+  $('beChk').innerHTML=chkHtml(ck);
+  $('confNote').innerHTML=kp?`Kent y Park (1971): rama parabólica hasta ε0 = 0,002 con f'c, descenso lineal Z = 0,5/(ε50c − ε0) y residual 0,2f'c después de ε20c, sin aumento de resistencia. ε50u se usa en MPa, (3 + 0,29f'c)/(145f'c − 1000), equivalente a (3 + 0,002f'c)/(f'c − 1000) en psi y a (0,21 + 0,002f'c)/(f'c − 70) en kgf/cm². b" = menor dimensión del núcleo. εcu según Scott, Park y Priestley (1982) salvo valor manual.`
+    :`Mander, Priestley y Park (1988): f(ε) = f'cc·x·r/(r − 1 + x^r), x = ε/εcc, f'cc = f'c(−1,254 + 2,254√(1 + 7,94f'l/f'c) − 2f'l/f'c) con presión lateral efectiva f'l = ke·ρs·fyt/2, ρs = ρx + ρy, ke = ${m.ke} (entrada). εcu = 0,004 + 0,075ρs·fyt/f'c (expresión entregada), el original de Priestley es 0,004 + 1,4ρs·fyt·εsu/f'cc (se muestra como referencia con εsu = ${m.esu}).`;
+  $('confNote').innerHTML+=` Ash (Tabla 18.10.6.4(f)): Ash/(s·bc) ≥ máx(0,3(Ag/Ach − 1)f'c/fyt, 0,09f'c/fyt), Ag del elemento de borde incluye el recubrimiento en caras libres. Ash x usa bc (dimensión en x) y las ramas paralelas a y, Ash y usa hc y las ramas paralelas a x. Recubrimiento: celdas no confinadas a menos de ${m.rc} mm de una celda confinada, se descascaran sobre εsp y no controlan el término de la curva.`;
+}
+/* Pinta las celdas interiores dentro del largo requerido de cada extremo que lo necesita */
+function paintRequired(){
+  const R=ST.W, F=ST.F; if(!R||!F) return;
+  snapshot();
+  const {nx,ny,dx,dy}=S, kcx=Math.max(1,Math.ceil(ST.m.rc/dx-1e-9)), kcy=Math.max(1,Math.ceil(ST.m.rc/dy-1e-9));
+  const conc=(i,j)=>i>=0&&j>=0&&i<nx&&j<ny&&S.conc[j*nx+i];
+  let n=0;
+  R.senses.forEach(s=>{ if(!s.need||!(s.lreq>0)) return;
+    for(let j=0;j<ny;j++) for(let i=0;i<nx;i++){ const k=j*nx+i; if(!S.conc[k]) continue;
+      const x=(i+0.5)*dx, y=(ny-j-0.5)*dy, v=(x-F.rx)*s.ux+(y-F.ry)*s.uy;
+      if(v<s.smax-s.lreq) continue;
+      let inner=true; for(let b=j-kcy;b<=j+kcy&&inner;b++) for(let a=i-kcx;a<=i+kcx;a++) if(!conc(a,b)){ inner=false; break; }
+      if(inner&&!S.conf[k]){ S.conf[k]=1; n++; } } });
+  drawGrid(); changed('geom');
+  $('gridInfo').textContent=n?`Se pintaron ${n} celdas confinadas.`:'No se requieren celdas adicionales.';
+}
+function wallText(){
+  const R=ST.W, L=[]; if(!R) return '';
+  L.push('# Verificacion de muro especial NCh430-2023 18.10');
+  L.push('# sentido\tlw[mm]\tdu[mm]\tmu_d\tphiu[1/m]\tMu[kNm]\tMpr[kNm]\tOmega_v\tVu[kN]\tVe[kN]\tecmax\tesmax\tlreq[mm]\tlconf[mm]');
+  R.senses.forEach(s=>L.push([s.lbl,s.lw.toFixed(0),s.du.toFixed(1),s.mud.toFixed(3),(s.phiu*1e3).toFixed(6),s.Mu.toFixed(1),(s.Mpr||0).toFixed(1),s.Om.toFixed(3),s.Vu.toFixed(1),s.Ve.toFixed(1),s.ecMax.toFixed(5),s.esMax.toFixed(5),s.lreq.toFixed(0),s.lprov.toFixed(0)].join('\t')));
+  L.push('# verificacion\tdemanda\tcapacidad\trazon');
+  R.chk.forEach(c=>L.push(`${c.n}\t${c.d}\t${c.c}\t${isFinite(c.r)?c.r.toFixed(3):'inf'}`));
+  return L.join('\r\n')+'\r\n';
+}
+const DKS={cut:[2.2],vis:[1.3],thin:[0.7],dim:[0.6],hid:[1,'7 4'],ctr:[0.6,'18 4 3 4'],phan:[0.7,'14 3 3 3 3 3']};
+let HLK=null, DKN=0, DKRAF=0;
+const V3S=[];
+(function(){ if(typeof document==='undefined') return; const st=document.createElement('style');
+  st.textContent=`svg.dk text{font-family:"Arial Narrow",Arial,sans-serif;fill:#111}
+svg.dk [data-k].hl line,svg.dk [data-k].hl path,svg.dk [data-k].hl polyline,svg.dk [data-k].hl rect,svg.dk [data-k].hl circle{stroke:#c62828!important}
+svg.dk [data-k].hl polygon{stroke:#c62828!important}
+svg.dk [data-k].hl polygon.ah{fill:#c62828!important}
+svg.dk [data-k].hl text{fill:#c62828!important;font-weight:700}`;
+  document.head.appendChild(st);
+  document.addEventListener('focusin',e=>{ const t=e.target; if(t&&t.id&&/INPUT|SELECT|TEXTAREA/.test(t.tagName)){ HLK=t.id; hlApply(); } });
+  document.addEventListener('focusout',()=>{ HLK=null; hlApply(); });
+})();
+function hlApply(){ document.querySelectorAll('svg.dk [data-k]').forEach(e=>e.classList.toggle('hl',!!HLK&&e.getAttribute('data-k').split(' ').includes(HLK)));
+  V3S.forEach(V=>{ if(V.hl!==HLK){ V.hl=HLK; V.draw(); } }); }
+function DK(svg,W,H,cfg){ const FS=(cfg&&cfg.fs)||1;
+  svg.innerHTML=''; svg.setAttribute('viewBox',`0 0 ${W} ${H}`); svg.classList.add('dk');
+  const id='dk'+(++DKN), NS='http://www.w3.org/2000/svg', K={svg,W,H,id};
+  const mk=(tag,a,par)=>{ const n=document.createElementNS(NS,tag); for(const k in a) if(a[k]!=null) n.setAttribute(k,a[k]); (par||svg).appendChild(n); return n; };
+  K.mk=mk;
+  const defs=mk('defs',{});
+  const pat=(nm,w,h,rot,fn)=>{ const p=mk('pattern',{id:id+nm,width:w,height:h,patternUnits:'userSpaceOnUse',patternTransform:rot?`rotate(${rot})`:null},defs); fn(p); };
+  pat('st',5,5,45,p=>mk('line',{x1:0,y1:0,x2:0,y2:5,stroke:'#111','stroke-width':0.55},p));
+  pat('st2',5,5,-45,p=>mk('line',{x1:0,y1:0,x2:0,y2:5,stroke:'#111','stroke-width':0.55},p));
+  pat('sw',9,9,45,p=>mk('line',{x1:0,y1:0,x2:0,y2:9,stroke:'#111','stroke-width':0.5},p));
+  pat('stx',6,6,45,p=>{ mk('line',{x1:0,y1:0,x2:0,y2:6,stroke:'#111','stroke-width':0.5},p); mk('line',{x1:0,y1:0,x2:6,y2:0,stroke:'#111','stroke-width':0.5},p); });
+  pat('cc',46,46,0,p=>{ [[6,8,3],[30,5,2.4],[18,24,3.2],[40,30,2.6],[8,38,2.2],[27,40,2.8]].forEach(([x,y,r],i)=>mk('polygon',{points:`${x},${y-r} ${x+r*0.95},${y+r*0.7} ${x-r*0.9},${y+r*0.6}`,fill:'none',stroke:'#444','stroke-width':0.5,transform:`rotate(${i*47} ${x} ${y})`},p));
+    [[14,14],[36,16],[22,33],[4,26],[42,42],[33,24],[12,44],[25,12]].forEach(([x,y])=>mk('circle',{cx:x,cy:y,r:0.7,fill:'#444'},p)); });
+  pat('gr',5,5,0,p=>{ mk('circle',{cx:1.2,cy:1.2,r:0.55,fill:'#333'},p); mk('circle',{cx:3.7,cy:3.7,r:0.55,fill:'#333'},p); });
+  pat('so',24,16,0,p=>{ [[2,12],[14,4]].forEach(([x,y])=>{ for(let i=0;i<3;i++) mk('line',{x1:x+i*2.6,y1:y,x2:x+i*2.6+3,y2:y-4,stroke:'#444','stroke-width':0.5},p); }); });
+  pat('wa',20,10,0,p=>{ mk('line',{x1:2,y1:3,x2:10,y2:3,stroke:'#555','stroke-width':0.5},p); mk('line',{x1:12,y1:8,x2:18,y2:8,stroke:'#555','stroke-width':0.5},p); });
+  K.H=nm=>`url(#${id+nm})`;
+  const groups={};
+  K.par=k=>{ if(!k) return svg; if(!groups[k]||svg.lastChild!==groups[k]) groups[k]=mk('g',{'data-k':k}); return groups[k]; };
+  const sty=(s)=>{ const d=DKS[s||'vis']||DKS.vis; return {stroke:'#111','stroke-width':d[0],'stroke-dasharray':d[1]||null,'vector-effect':'non-scaling-stroke','stroke-linecap':'round','stroke-linejoin':'round'}; };
+  K.ln=(x1,y1,x2,y2,s,o)=>mk('line',Object.assign({x1,y1,x2,y2},sty(s)),K.par(o&&o.k));
+  K.pl=(pts,s,fill,o)=>mk(o&&o.open?'polyline':'polygon',Object.assign({points:pts.map(p=>p[0].toFixed(2)+','+p[1].toFixed(2)).join(' '),fill:fill||'none'},s?sty(s):{stroke:'none'}),K.par(o&&o.k));
+  K.rc=(x,y,w,h,s,fill,o)=>{ if(w<0){ x+=w; w=-w; } if(h<0){ y+=h; h=-h; } return mk('rect',Object.assign({x,y,width:w,height:h,fill:fill||'none'},s?sty(s):{stroke:'none'}),K.par(o&&o.k)); };
+  K.ci=(cx,cy,r,s,fill,o)=>mk('circle',Object.assign({cx,cy,r,fill:fill||'none'},s?sty(s):{stroke:'none'}),K.par(o&&o.k));
+  K.pa=(d,s,fill,o)=>mk('path',Object.assign({d,fill:fill||'none'},s?sty(s):{stroke:'none'}),K.par(o&&o.k));
+  K.t=(x,y,t,o)=>{ o=o||{}; const n=mk('text',{x,y,'font-size':(o.s||12)*FS,'text-anchor':o.a||'middle','font-weight':o.b?700:null,transform:o.r?`rotate(${o.r} ${x} ${y})`:null,'paint-order':o.halo===false?null:'stroke',stroke:o.halo===false?null:'#fff','stroke-width':o.halo===false?null:3.2,'stroke-linejoin':'round'},K.par(o.k)); n.textContent=t; return n; };
+  K.ah=(x,y,ang,o,L,Wd)=>{ L=L||9; Wd=Wd||2.6; const c=Math.cos(ang), s=Math.sin(ang); const n=mk('polygon',{points:`${x},${y} ${x-L*c+Wd*s},${y-L*s-Wd*c} ${x-L*c-Wd*s},${y-L*s+Wd*c}`,fill:'#111',stroke:'none',class:'ah'},K.par(o&&o.k)); return n; };
+  K.dim=(p1,p2,off,txt,o)=>{ o=o||{}; const dx=p2[0]-p1[0], dy=p2[1]-p1[1], L=Math.hypot(dx,dy)||1, ux=dx/L, uy=dy/L, nx=uy, ny=-ux;
+    const q1=[p1[0]+nx*off,p1[1]+ny*off], q2=[p2[0]+nx*off,p2[1]+ny*off], sg=Math.sign(off)||1, g=3, ov=4;
+    if(o.ext!==false){ [[p1,q1],[p2,q2]].forEach(([p,q])=>{ if(Math.abs(off)>g+1) K.ln(p[0]+nx*g*sg,p[1]+ny*g*sg,q[0]+nx*ov*sg,q[1]+ny*ov*sg,'dim',o); }); }
+    const inside=L>24, ang=Math.atan2(uy,ux);
+    if(inside){ K.ln(q1[0],q1[1],q2[0],q2[1],'dim',o); K.ah(q1[0],q1[1],ang+Math.PI,o); K.ah(q2[0],q2[1],ang,o); }
+    else { K.ln(q1[0]-ux*16,q1[1]-uy*16,q2[0]+ux*16,q2[1]+uy*16,'dim',o); K.ah(q1[0],q1[1],ang,o); K.ah(q2[0],q2[1],ang+Math.PI,o); }
+    let a=ang*180/Math.PI; if(a>90.01) a-=180; if(a<=-90.01) a+=180; const ar=a*Math.PI/180, tnx=Math.sin(ar), tny=-Math.cos(ar);
+    let mx=(q1[0]+q2[0])/2, my=(q1[1]+q2[1])/2; if(o.tx!=null){ mx+=ux*o.tx; my+=uy*o.tx; }
+    const tw=(String(txt).length*5.6*FS+6);
+    if(!inside&&o.tx==null&&tw>L){ const sd=o.side||1; mx=(sd>0?q2[0]:q1[0])+ux*sd*(18+tw/2); my=(sd>0?q2[1]:q1[1])+uy*sd*(18+tw/2); }
+    K.t(mx+tnx*4,my+tny*4,txt,{r:Math.abs(a)>0.01?a:null,k:o.k,s:o.s||11.5});
+    return K; };
+  K.dh=(x1,x2,yf1,yf2,yd,txt,o)=>{ o=o||{}; const g=3, ov=4, s1=Math.sign(yd-yf1)||1, s2=Math.sign(yd-yf2)||1;
+    if(o.ext!==false){ if(Math.abs(yd-yf1)>g+1) K.ln(x1,yf1+s1*g,x1,yd+s1*ov,'dim',o); if(Math.abs(yd-yf2)>g+1) K.ln(x2,yf2+s2*g,x2,yd+s2*ov,'dim',o); }
+    K.dim([x1,yd],[x2,yd],0,txt,Object.assign({},o,{ext:false})); return K; };
+  K.dv=(y1,y2,xf1,xf2,xd,txt,o)=>{ o=o||{}; const g=3, ov=4, s1=Math.sign(xd-xf1)||1, s2=Math.sign(xd-xf2)||1;
+    if(o.ext!==false){ if(Math.abs(xd-xf1)>g+1) K.ln(xf1+s1*g,y1,xd+s1*ov,y1,'dim',o); if(Math.abs(xd-xf2)>g+1) K.ln(xf2+s2*g,y2,xd+s2*ov,y2,'dim',o); }
+    K.dim([xd,Math.max(y1,y2)],[xd,Math.min(y1,y2)],0,txt,Object.assign({},o,{ext:false})); return K; };
+  K.chainH=(xs,yf,yd,txts,o)=>{ for(let i=0;i<xs.length-1;i++) K.dh(xs[i],xs[i+1],yf,yf,yd,txts[i],Object.assign({},o,{k:(o&&o.ks)?o.ks[i]:(o&&o.k)})); return K; };
+  K.chainV=(ys,xf,xd,txts,o)=>{ for(let i=0;i<ys.length-1;i++) K.dv(ys[i],ys[i+1],xf,xf,xd,txts[i],Object.assign({},o,{k:(o&&o.ks)?o.ks[i]:(o&&o.k)})); return K; };
+  K.lead=(px,py,tx,ty,lines,o)=>{ o=o||{}; lines=[].concat(lines); const sd=o.side||(tx>=px?1:-1), sh=12;
+    K.ln(px,py,tx,ty,'thin',o); K.ln(tx,ty,tx+sd*sh,ty,'thin',o);
+    if(o.dot) K.ci(px,py,2.2,null,'#111',o); else K.ah(px,py,Math.atan2(py-ty,px-tx),o,8,2.4);
+    const n=lines.length; lines.forEach((l,i)=>K.t(tx+sd*(sh+3),ty+4+(i-(n-1)/2)*13,l,{a:sd>0?'start':'end',k:o.k,s:o.s||11.5,b:o.b&&i===0}));
+    return K; };
+  K.cl=(x1,y1,x2,y2,o)=>{ const dx=x2-x1, dy=y2-y1, L=Math.hypot(dx,dy)||1, e=10; return K.ln(x1-dx/L*e,y1-dy/L*e,x2+dx/L*e,y2+dy/L*e,'ctr',o); };
+  K.title=(x,y,t,sub)=>{ K.t(x,y,t.toUpperCase(),{s:13.5,b:true}); const w=t.length*7.4+10; K.ln(x-w/2,y+5,x+w/2,y+5,'cut'); K.ln(x-w/2,y+8.5,x+w/2,y+8.5,'thin'); if(sub) K.t(x,y+22,sub,{s:11}); return K; };
+  K.cut=(x1,y1,x2,y2,lbl,dir,o)=>{ const L=Math.hypot(x2-x1,y2-y1)||1, ux=(x2-x1)/L, uy=(y2-y1)/L, d=dir||[uy,-ux];
+    K.ln(x1,y1,x1+ux*16,y1+uy*16,'cut',o); K.ln(x2,y2,x2-ux*16,y2-uy*16,'cut',o); K.ln(x1,y1,x2,y2,'phan',o);
+    [[x1,y1],[x2,y2]].forEach(([x,y])=>{ K.ln(x,y,x+d[0]*16,y+d[1]*16,'vis',o); K.ah(x+d[0]*18,y+d[1]*18,Math.atan2(d[1],d[0]),o,9,3); K.t(x+d[0]*12-ux*10*(x===x1?1:-1),y+d[1]*12-uy*10*(x===x1?1:-1)+4,lbl,{b:true,s:13,k:o&&o.k}); }); return K; };
+  K.force=(x,y,dx,dy,len,lbl,o)=>{ o=o||{}; const L=Math.hypot(dx,dy)||1, ux=dx/L, uy=dy/L, x0=x-ux*len, y0=y-uy*len;
+    const n=mk('line',{x1:x0,y1:y0,x2:x-ux*8,y2:y-uy*8,stroke:'#111','stroke-width':1.8,'vector-effect':'non-scaling-stroke'},K.par(o.k)); K.ah(x,y,Math.atan2(uy,ux),o,12,4);
+    if(lbl&&o.at==='tip'){ K.t(x+ux*12+(o.lx||0),y+uy*12+(Math.abs(uy)>0.5?(uy>0?12:-2):4)+(o.ly||0),lbl,{a:Math.abs(ux)>0.5?(ux>0?'start':'end'):'middle',b:true,k:o.k}); return n; }
+    if(lbl) K.t(x0+(o.lx||0)+(Math.abs(uy)>0.5&&!o.a?6:0),y0+(o.ly||0)+(Math.abs(uy)>0.5?(uy>0?-6:14):-6),lbl,{a:o.a||(Math.abs(uy)>0.5?'start':'middle'),b:true,k:o.k}); return n; };
+  K.brk=(x1,y1,x2,y2,o)=>{ const L=Math.hypot(x2-x1,y2-y1), ux=(x2-x1)/L, uy=(y2-y1)/L, nx=-uy, ny=ux, m=[(x1+x2)/2,(y1+y2)/2], z=6;
+    return K.pl([[x1-ux*6,y1-uy*6],[m[0]-ux*6,m[1]-uy*6],[m[0]-ux*3+nx*z,m[1]-uy*3+ny*z],[m[0]+ux*3-nx*z,m[1]+uy*3-ny*z],[m[0]+ux*6,m[1]+uy*6],[x2+ux*6,y2+uy*6]],'thin',null,{open:true,k:o&&o.k}); };
+  K.weld=(px,py,tx,ty,o)=>{ o=o||{}; const sd=o.side||(tx>=px?1:-1), Lr=o.len||58, xe=tx+sd*Lr;
+    K.ln(px,py,tx,ty,'thin',o); K.ah(px,py,Math.atan2(py-ty,px-tx),o,8,2.4); K.ln(tx,ty,xe,ty,'thin',o);
+    const xs=tx+sd*16, h=9, tri=(dn)=>K.pl([[xs,ty],[xs,ty+dn*h],[xs+h*sd,ty]],'thin',null,o);
+    if(o.arrow!==false) tri(1); if(o.other||o.both) tri(-1);
+    if(o.all) K.ci(tx,ty,4,'thin',null,o);
+    if(o.field){ K.ln(tx,ty,tx,ty-16,'thin',o); K.pl([[tx,ty-16],[tx+sd*9,ty-12.5],[tx,ty-9]],'thin','#111',o); }
+    if(o.size!=null){ if(o.arrow!==false) K.t(xs-sd*3,ty+10,o.size,{a:sd>0?'end':'start',s:11,k:o.k}); if(o.other||o.both) K.t(xs-sd*3,ty-3,o.size,{a:sd>0?'end':'start',s:11,k:o.k}); }
+    if(o.len2) K.t(xs+sd*(h+4),ty+(o.arrow!==false?10:-3),o.len2,{a:sd>0?'start':'end',s:11,k:o.k});
+    if(o.note){ K.ln(xe,ty,xe+sd*8,ty-6,'thin',o); K.ln(xe,ty,xe+sd*8,ty+6,'thin',o); K.t(xe+sd*16,ty+4,o.note,{a:sd>0?'start':'end',s:11,k:o.k}); }
+    return K; };
+  K.nut=(x,y,w,h,s,o)=>{ K.rc(x-w/2,y-h/2,w,h,'vis','#fff',o); K.ln(x-w/2,y-h/2+h*0.0,x+w/2,y-h/2,'vis',o); K.ln(x-w*0.22,y-h/2,x-w*0.22,y+h/2,'thin',o); K.ln(x+w*0.22,y-h/2,x+w*0.22,y+h/2,'thin',o); return K; };
+  K.boltPlan=(x,y,r,o)=>{ o=o||{}; K.ci(x,y,r,'vis','#fff',o); const e=r+5; K.ln(x-e,y,x+e,y,'thin',o); K.ln(x,y-e,x,y+e,'thin',o); if(o.hex){ const R=o.hex; K.pl(Array.from({length:6},(_,i)=>[x+R*Math.cos(Math.PI/3*i),y+R*Math.sin(Math.PI/3*i)]),'thin',null,o); } return K; };
+  if(!DKRAF){ DKRAF=requestAnimationFrame(()=>{ DKRAF=0; hlApply(); }); }
+  return K;
+}
+/* Lámina técnica del muro: PLANTA, ELEVACIÓN y DETALLE del elemento de borde (kit de dibujo ac/draft.js) */
+function concRuns(i0,i1,j0,j1,test){
+  const R=[]; for(let j=j0;j<=j1;j++){ let i=i0; while(i<=i1){ if(!test(i,j)){ i++; continue; } let k=i; while(k+1<=i1&&test(k+1,j)) k++; R.push([i,k,j]); i=k+1; } } return R;
+}
+/* aristas de borde de la región test, fusionadas en segmentos */
+function regionEdges(i0,i1,j0,j1,test){
+  const E=[];
+  for(let j=j0;j<=j1+1;j++){ let st=null; for(let i=i0;i<=i1+1;i++){ const a=i<=i1&&j<=j1&&test(i,j), b=i<=i1&&j-1>=j0&&test(i,j-1), e=i<=i1&&(a!==b);
+      if(e&&st===null) st=i; if(!e&&st!==null){ E.push([st,j,i,j]); st=null; } } }
+  for(let i=i0;i<=i1+1;i++){ let st=null; for(let j=j0;j<=j1+1;j++){ const a=j<=j1&&i<=i1&&test(i,j), b=j<=j1&&i-1>=i0&&test(i-1,j), e=j<=j1&&(a!==b);
+      if(e&&st===null) st=j; if(!e&&st!==null){ E.push([i,st,i,j]); st=null; } } }
+  return E;
+}
+function legLabelPoints(F){
+  const out={}, used=[];
+  (ST.legNames||[]).forEach(n=>{ const g=ST.legGeo[n]; if(!g) return; const th=(+g.th||0)*DEG, ux=Math.cos(th), uy=Math.sin(th), vx=-uy, vy=ux, h=Math.min(S.dx,S.dy);
+    const bins={};
+    for(let j=0;j<S.ny;j++) for(let i=0;i<S.nx;i++) if(S.conc[j*S.nx+i]){ const x=(i+0.5)*S.dx, y=(S.ny-j-0.5)*S.dy, b=Math.round((x*vx+y*vy)/h), u=x*ux+y*uy;
+      const q=bins[b]||(bins[b]={mn:1e18,mx:-1e18}); if(u<q.mn) q.mn=u; if(u>q.mx) q.mx=u; }
+    const ks=Object.keys(bins).map(Number).sort((a,b)=>(bins[b].mx-bins[b].mn)-(bins[a].mx-bins[a].mn));
+    const k=ks.find(k=>!used.some(u=>u.th===Math.round(th*100)&&Math.abs(u.b-k)*h<Math.max(+g.bw||300,300)))??ks[0];
+    if(k===undefined) return; used.push({th:Math.round(th*100),b:k});
+    const q=bins[k], um=(q.mn+q.mx)/2, vm=k*h; out[n]=[um*ux+vm*vx,um*uy+vm*vy]; });
+  return out;
+}
+function drawSheet(svgArg){
+  const svg=svgArg||$('sheetSvg'); if(!svg||!ST.F||!ST.W) return;
+  if(!svgArg&&svg.closest('.tabpane')&&svg.closest('.tabpane').hidden) return;
+  const W=1300,H=780, K=DK(svg,W,H,{fs:1.05}), F=ST.F, R=ST.W, m=ST.m, fc=m.fc, Wi=R.W;
+  const {nx,ny,dx,dy}=S, isC=(i,j)=>i>=0&&j>=0&&i<nx&&j<ny&&!!S.conc[j*nx+i], isQ=(i,j)=>isC(i,j)&&!!S.conf[j*nx+i];
+  let i0=nx,i1=-1,j0=ny,j1=-1; for(let j=0;j<ny;j++) for(let i=0;i<nx;i++) if(isC(i,j)){ i0=Math.min(i0,i); i1=Math.max(i1,i); j0=Math.min(j0,j); j1=Math.max(j1,j); }
+  if(i1<0) return;
+  const fl=v=>fmtk(v);
+  /* ---------- PLANTA ---------- */
+  const xa=i0*dx, xb=(i1+1)*dx, ya=(ny-1-j1)*dy, yb=(ny-j0)*dy, wS=xb-xa, hS=yb-ya;
+  const box={x:150,y:96,w:460,h:290}, sc=Math.min(box.w/wS,box.h/hS), ox=box.x+(box.w-wS*sc)/2, oy=box.y+(box.h+hS*sc)/2;
+  const X=x=>ox+(x-xa)*sc, Y=y=>oy-(y-ya)*sc, XI=i=>X(i*dx), YJ=j=>Y((ny-j)*dy);
+  concRuns(i0,i1,j0,j1,isC).forEach(([a,b,j])=>K.rc(XI(a),YJ(j),(b-a+1)*dx*sc+0.4,dy*sc+0.4,null,K.H('cc')));
+  concRuns(i0,i1,j0,j1,isQ).forEach(([a,b,j])=>{ K.rc(XI(a),YJ(j),(b-a+1)*dx*sc+0.4,dy*sc+0.4,null,'#fff'); K.rc(XI(a),YJ(j),(b-a+1)*dx*sc+0.4,dy*sc+0.4,null,K.H('st')); });
+  regionEdges(i0,i1,j0,j1,isQ).forEach(e=>K.ln(XI(e[0]),YJ(e[1]),XI(e[2]),YJ(e[3]),'vis',{k:'hDb hS hRc'}));
+  regionEdges(i0,i1,j0,j1,isC).forEach(e=>K.ln(XI(e[0]),YJ(e[1]),XI(e[2]),YJ(e[3]),'cut',{k:'dx dy nx ny'}));
+  for(let n=0;n<F.nb;n++) K.ci(X(F.bx[n]),Y(F.by[n]),Math.max(F.bd[n]/2*sc,1.7),null,'#111',{k:'diam'});
+  /* punto de referencia y dirección α */
+  const rx=X(F.rx), ry=Y(F.ry), s0=R.senses[0];
+  K.ln(rx-7,ry,rx+7,ry,'thin'); K.ln(rx,ry-7,rx,ry+7,'thin'); K.ci(rx,ry,3.5,'thin');
+  /* ejes de referencia */
+  K.ln(40,box.y+box.h+40,72,box.y+box.h+40,'vis'); K.ah(74,box.y+box.h+40,0,null,8,2.4); K.t(80,box.y+box.h+44,'x',{a:'start',s:11});
+  K.ln(40,box.y+box.h+40,40,box.y+box.h+8,'vis'); K.ah(40,box.y+box.h+6,-Math.PI/2,null,8,2.4); K.t(40,box.y+box.h-2,'y',{s:11});
+  /* cotas generales por quiebres del contorno */
+  const xsB=[...new Set(regionEdges(i0,i1,j0,j1,isC).filter(e=>e[0]===e[2]).map(e=>e[0]))].sort((a,b)=>a-b);
+  const ysB=[...new Set(regionEdges(i0,i1,j0,j1,isC).filter(e=>e[1]===e[3]).map(e=>e[1]))].sort((a,b)=>a-b);
+  const yD=Y(ya)+26;
+  if(xsB.length>2&&xsB.length<=7) K.chainH(xsB.map(XI),Y(ya),yD,xsB.slice(1).map((v,i)=>fl((v-xsB[i])*dx)),{k:'dx nx'});
+  K.dh(X(xa),X(xb),Y(ya),Y(ya),yD+(xsB.length>2&&xsB.length<=7?24:0),fl(wS),{k:'dx nx'});
+  const xD=X(xa)-26;
+  if(ysB.length>2&&ysB.length<=7) K.chainV(ysB.map(YJ),X(xa),xD,ysB.slice(1).map((v,i)=>fl((v-ysB[i])*dy)),{k:'dy ny'});
+  K.dv(Y(yb),Y(ya),X(xa),X(xa),xD-(ysB.length>2&&ysB.length<=7?24:0),fl(hS),{k:'dy ny'});
+  /* lw en α, largo requerido y pintado en cada extremo comprimido, eje neutro */
+  const vproj=(s,x,y)=>(x-F.rx)*(-s.uy)+(y-F.ry)*s.ux, uproj=(s,x,y)=>(x-F.rx)*s.ux+(y-F.ry)*s.uy;
+  const scr=(x,y)=>[X(x),Y(y)];
+  const dimOut=(p1,p2,w,off,txt,o)=>{ const ddx=p2[0]-p1[0], ddy=p2[1]-p1[1], L=Math.hypot(ddx,ddy)||1, n=[ddy/L,-ddx/L], sg=(n[0]*w[0]+n[1]*w[1])>=0?1:-1; K.dim(p1,p2,sg*off,txt,o); };
+  { const s=s0; let pv=-1e18; for(let i=0;i<F.kx.length;i++){ const v=vproj(s,F.kx[i],F.ky[i]); if(v>pv) pv=v; }
+    const A=[F.rx+s.ux*s.smin-s.uy*pv,F.ry+s.uy*s.smin+s.ux*pv], B=[F.rx+s.ux*s.smax-s.uy*pv,F.ry+s.uy*s.smax+s.ux*pv];
+    const pA=scr(...A), pB=scr(...B), ok=[pA,pB].every(p=>p[0]>20&&p[0]<box.x+box.w+30&&p[1]>40&&p[1]<box.y+box.h+60);
+    if(ok) dimOut(pA,pB,[-s.uy,-s.ux],78,`lw (α = ${fl(s.angDeg)}°) = ${fl(s.lw)}`,{k:'alphaMC alphaW'});
+    else K.t(box.x,box.y-40,`lw (α = ${fl(s.angDeg)}°) = ${fl(s.lw)}, medido en la dirección α`,{a:'start',s:11,b:true,k:'alphaMC alphaW'}); }
+  const drawnConf=[];
+  R.senses.forEach(s=>{ if(!(s.need||s.lprov>0)) return;
+    const horiz=Math.abs(s.ux)>=Math.abs(s.uy), tol=Math.max(dx,dy)*0.51;
+    /* horizontales: sobre la cara superior del extremo; verticales: a la izquierda, fuera de las cadenas de cotas */
+    let best=null; for(let i=0;i<F.kx.length;i++){ if(uproj(s,F.kx[i],F.ky[i])<s.smax-tol) continue; const sc2=horiz?F.ky[i]:-F.kx[i]; if(!best||sc2>best[2]) best=[F.kx[i],F.ky[i],sc2]; }
+    if(!best) return;
+    const base=[best[0]+s.ux*(s.smax-uproj(s,best[0],best[1])),best[1]+s.uy*(s.smax-uproj(s,best[0],best[1]))];
+    const into=L=>scr(base[0]-s.ux*L,base[1]-s.uy*L), w=horiz?[0,-1]:[-1,0];
+    const o0=horiz?24:(X(base[0])-X(xa))+((ysB.length>2&&ysB.length<=7)?74:50);
+    if(s.lreq>0) dimOut(scr(...base),into(s.lreq),w,o0,`req. ${fl(s.lreq)}`,{k:'du'+(s.k+1)+' wHt wLbe hRc'});
+    const dk2=s.beIds.slice().sort().join(',')+'|'+Math.round(s.lprov); if(s.lprov>0.9*s.lw&&drawnConf.includes(dk2)) return; drawnConf.push(dk2);
+    if(s.lprov>0) dimOut(scr(...base),into(s.lprov),w,s.lreq>0?o0+24:o0,`conf. ${fl(s.lprov)}`,{k:'hRc hBc hHc'}); });
+  if(s0.gov&&isFinite(s0.gov.c)){
+    const sN=s0.smax-s0.gov.c, vx=-s0.uy, vy=s0.ux; let mn=1e18,mx=-1e18; for(let i=0;i<F.kx.length;i++){ const v=(F.kx[i]-F.rx)*vx+(F.ky[i]-F.ry)*vy; if(v<mn) mn=v; if(v>mx) mx=v; }
+    const p=v=>[X(F.rx+s0.ux*sN+vx*v),Y(F.ry+s0.uy*sN+vy*v)], a=p(mn), b=p(mx);
+    K.ln(a[0],a[1],b[0],b[1],'phan',{k:'du1 wHt wCm'});
+    K.t((a[0]+b[0])/2+6,(a[1]+b[1])/2-8,`E.N. ${s0.gov.name}`,{a:'start',s:10.5,k:'du1 wHt wCm'});
+    K.t((a[0]+b[0])/2+6,(a[1]+b[1])/2+6,`c = ${fl(s0.gov.c)}`,{a:'start',s:10.5,b:true,k:'du1 wHt wCm'});
+  }
+  /* rótulos: marcas en la planta y cuadro a la derecha */
+  const cxS=X((xa+xb)/2), cyS=Y((ya+yb)/2);
+  F.BE.forEach(b=>K.t(X(b.xc),Y(b.yc)+4,b.name,{s:10,b:true,k:'hBc hHc hDb hS'}));
+  const LP=legLabelPoints(F);
+  Object.entries(LP).forEach(([n,p])=>{ const q=[X(p[0]),Y(p[1])], i=ST.legNames.indexOf(n), g=ST.legGeo[n], th=(+g.th||0)*DEG;
+    const o=[Math.cos(th)*0,0]; const ox3=q[0]+(Math.abs(Math.cos(th))>0.7?0:-30), oy3=q[1]+(Math.abs(Math.cos(th))>0.7?-30:0);
+    K.ln(q[0],q[1],ox3,oy3,'thin',{k:`leg_${i}_lw`}); K.ci(ox3,oy3,13,'vis','#fff',{k:`leg_${i}_lw leg_${i}_bw leg_${i}_th`}); K.t(ox3,oy3+4,n,{s:11,b:true,halo:false,k:`leg_${i}_lw`}); });
+  const lx=box.x+box.w+60; let ly=box.y+4;
+  K.t(lx,ly,'CUADRO DE ELEMENTOS DE BORDE',{a:'start',s:11,b:true}); ly+=18;
+  F.BE.slice(0,7).forEach(b=>{ K.t(lx,ly,`${b.name}  NÚCLEO ${fl(b.bc)}×${fl(b.hc)}`,{a:'start',s:11,k:'hBc hHc'}); K.t(lx+8,ly+14,`E Ø${m.dh} @ ${fl(m.hs)}, ${b.cp.nlx}+${b.cp.nly} RAMAS`,{a:'start',s:10.5,k:'hDb hS hHx'}); ly+=32; });
+  if(!F.BE.length){ K.t(lx,ly,'SIN ELEMENTOS PINTADOS',{a:'start',s:11}); ly+=18; }
+  ly+=6; K.t(lx,ly,'PILAS',{a:'start',s:11,b:true}); ly+=18;
+  (ST.legNames||[]).forEach((n,i)=>{ const g=ST.legGeo[n]; K.t(lx,ly,`${n}  ${fl(g.lw)}×${fl(g.bw)}, θ = ${fl(g.th)}°`,{a:'start',s:11,k:`leg_${i}_lw leg_${i}_bw leg_${i}_th`}); K.t(lx+8,ly+14,`H Ø${g.dh} @ ${fl(g.sh)}, V Ø${g.dv} @ ${fl(g.sv)}, ${g.nh} capas`.toUpperCase(),{a:'start',s:10.5,k:`leg_${i}_dh leg_${i}_sh`}); ly+=32; });
+  const nBar={}; F.bd.forEach(d=>nBar[d]=(nBar[d]||0)+1);
+  ly+=6; K.t(lx,ly,'ARMADURA LONGITUDINAL',{a:'start',s:11,b:true}); ly+=16;
+  K.t(lx,ly,Object.keys(nBar).sort((a,b)=>a-b).map(d=>`${nBar[d]}Ø${d}`).join(' + '),{a:'start',s:11,k:'diam'}); ly+=14;
+  K.t(lx,ly,`A630-420H, fy ${m.fy} MPa`,{a:'start',s:11,k:'fy'}); ly+=14;
+  K.t(lx,ly,`H.A. f'c ${fc} MPa, RECUBR. ${fl(m.rc)}`,{a:'start',s:11,k:'fc hRc'});
+  K.title(box.x+box.w/2,box.y+box.h+90,'Planta del muro','S/E');
+  /* ---------- DETALLE DEL ELEMENTO DE BORDE ---------- */
+  const eb=(s0.beIds.length?F.BE[s0.beIds[0]]:null)||F.BE[0];
+  const dbx={x:70,y:525,w:520,h:185};
+  if(eb){
+    const pad=Math.max(eb.b?0:0,3);
+    let I0=eb.box.I0, I1=eb.box.I1, J0=eb.box.J0, J1=eb.box.J1;
+    const ext=Math.round(Math.max(eb.bc,eb.hc)*0.35/Math.max(dx,dy))+2;
+    I0=Math.max(i0,I0-ext); I1=Math.min(i1,I1+ext); J0=Math.max(j0,J0-ext); J1=Math.min(j1,J1+ext);
+    const wx=(I1-I0+1)*dx, wy=(J1-J0+1)*dy, s2=Math.min(dbx.w/wx,dbx.h/wy), ox2=dbx.x+(dbx.w-wx*s2)/2, oy2=dbx.y+(dbx.h-wy*s2)/2;
+    const U=i=>ox2+(i-I0)*dx*s2, V=j=>oy2+(j-J0)*dy*s2, Ux=x=>ox2+(x-I0*dx)*s2, Vy=y=>oy2+((ny-y/dy)-J0)*dy*s2;
+    const inW=(i,j)=>i>=I0&&i<=I1&&j>=J0&&j<=J1&&isC(i,j);
+    concRuns(I0,I1,J0,J1,inW).forEach(([a,b,j])=>K.rc(U(a),V(j),(b-a+1)*dx*s2+0.4,dy*s2+0.4,null,K.H('cc')));
+    regionEdges(I0,I1,J0,J1,inW).forEach(e=>{ const cutEdge=(e[0]===e[2]&&(e[0]===I0&&isC(I0-1,e[1])||e[0]===I1+1&&isC(I1+1,e[1])))||(e[1]===e[3]&&(e[1]===J0&&isC(e[0],J0-1)||e[1]===J1+1&&isC(e[0],J1+1)));
+      if(cutEdge) K.brk(U(e[0]),V(e[1]),U(e[2]),V(e[3])); else K.ln(U(e[0]),V(e[1]),U(e[2]),V(e[3]),'cut'); });
+    const hx0=U(eb.i0), hx1=U(eb.i1+1), hy0=V(eb.j0), hy1=V(eb.j1+1), hd=Math.max(m.dh*s2,1.6), rr=Math.min(8,hd*2+3);
+    K.pa(`M${hx0+rr},${hy0} H${hx1-rr} Q${hx1},${hy0} ${hx1},${hy0+rr} V${hy1-rr} Q${hx1},${hy1} ${hx1-rr},${hy1} H${hx0+rr} Q${hx0},${hy1} ${hx0},${hy1-rr} V${hy0+rr} Q${hx0},${hy0} ${hx0+rr},${hy0} Z`,'cut',null,{k:'hDb hS'});
+    K.ln(hx0+rr*0.6,hy0+rr*0.6,hx0+rr*0.6+14,hy0+rr*0.6+14,'vis',{k:'hDb'}); K.ln(hx0+rr*1.3,hy0+1,hx0+rr*1.3+14,hy0+15,'vis',{k:'hDb'});
+    const c=eb.cp;
+    for(let q=1;q<c.nly-1;q++){ const x=hx0+(hx1-hx0)*q/(c.nly-1); K.ln(x,hy0,x,hy1,'vis',{k:'hHx hNy'}); K.ln(x,hy0,x+7,hy0+7,'thin',{k:'hHx'}); }
+    for(let q=1;q<c.nlx-1;q++){ const y=hy0+(hy1-hy0)*q/(c.nlx-1); K.ln(hx0,y,hx1,y,'vis',{k:'hHx hNx'}); }
+    for(let n=0;n<F.nb;n++){ const i=Math.floor(F.bx[n]/dx), j=ny-1-Math.floor(F.by[n]/dy); if(i<I0||i>I1||j<J0||j>J1) continue; K.ci(Ux(F.bx[n]),Vy(F.by[n]),Math.max(F.bd[n]/2*s2,2),'thin','#111',{k:'diam'}); }
+    /* cotas del núcleo y del elemento */
+    const yb2=V(eb.box.J1+1)+22, xl2=U(eb.box.I0)-22;
+    K.dh(hx0,hx1,hy1,hy1,yb2,`bc = ${fl(eb.bc)}`,{k:'hBc'});
+    K.dh(U(eb.box.I0),U(eb.box.I1+1),V(eb.box.J1+1),V(eb.box.J1+1),yb2+24,fl(eb.Bx),{k:'hRc'});
+    K.dv(hy0,hy1,hx0,hx0,xl2,`hc = ${fl(eb.hc)}`,{k:'hHc'});
+    K.dv(V(eb.box.J0),V(eb.box.J1+1),U(eb.box.I0),U(eb.box.I0),xl2-24,fl(eb.By),{k:'hRc'});
+    if(c.nly>2&&c.nly<=8){ const xs=Array.from({length:c.nly},(_,q)=>hx0+(hx1-hx0)*q/(c.nly-1)); K.chainH(xs,hy0,hy0-16,xs.slice(1).map(()=>fl(c.hxX)),{k:'hHx'}); }
+    const e=R.be.find(q=>q.b===eb), tx2=dbx.x+dbx.w+20;
+    K.lead((hx0+hx1)/2,hy0,tx2,dbx.y+6,[`E Ø${m.dh} @ ${fl(m.hs)} CERRADO`,`${c.nlx} RAMAS ∥ x, ${c.nly} RAMAS ∥ y`],{k:'hDb hS hHx'});
+    if(e) K.lead(hx1,(hy0+hy1)/2,tx2,dbx.y+50,[`Ash x = ${fl(e.AshX)}, REQ. ${fl(e.AreqX)} mm²`,`Ash y = ${fl(e.AshY)}, REQ. ${fl(e.AreqY)} mm²`],{k:'hDb hS hFy fc'});
+    K.lead(hx1-4,hy1-4,tx2,dbx.y+94,[`ρs = ${fmt(c.rs*100,2)} %, f'cc = ${fmt(c.fpk,1)} MPa`,`εcu = ${fmt(c.ecu,4)}`],{k:'confModel hKe hFy',dot:true});
+    K.lead(hx0+3,hy1-2,tx2,dbx.y+138,[`RECUBRIMIENTO ${fl(m.rc)}`],{k:'hRc'});
+    K.title(dbx.x+dbx.w/2,H-34,`Detalle ${eb.name}`,'S/E');
+  } else { K.t(dbx.x+dbx.w/2,dbx.y+dbx.h/2,'SIN ELEMENTOS DE BORDE PINTADOS',{s:13,b:true}); K.title(dbx.x+dbx.w/2,H-34,'Detalle elemento de borde','S/E'); }
+  /* ---------- ELEVACIÓN ---------- */
+  const s1=R.senses[1]||s0, lw=s0.lw, ht=Wi.ht, hw=Math.max(Wi.hw,ht), hf=1000, Hd=hw+hf;
+  const ev={x:935,y:96,w:180,h:600}, sv=ev.h/Hd, shz=Math.min(ev.w/(lw*1.35),sv*2.2), xw0=ev.x+(ev.w-lw*shz)/2, xw1=xw0+lw*shz;
+  const Zb=ev.y+hw*sv, Zh=z=>Zb-z*sv, Xe=x=>xw0+x*shz;
+  K.rc(xw0-500*shz,Zb,lw*shz+1000*shz,hf*sv,'cut',K.H('cc'),{k:'wHt'});
+  K.pl([[xw0-500*shz-30,Zb],[xw0-500*shz,Zb]],'vis',null,{open:true}); K.pl([[xw1+500*shz,Zb],[xw1+500*shz+30,Zb]],'vis',null,{open:true});
+  K.rc(xw0-500*shz-30,Zb+2,28,hf*sv-2,null,K.H('so')); K.rc(xw1+500*shz+2,Zb+2,28,hf*sv-2,null,K.H('so'));
+  K.rc(xw0,Zh(hw),lw*shz,hw*sv,'cut','#fff',{k:'wHw'});
+  /* zonas de borde por extremo: izquierda = extremo de α + 180°, derecha = extremo de α */
+  const zoneSide=(s,right)=>{ if(!s) return;
+    const kdb=m.fy<=420?6:m.fy<=550?5:4, dbm=R.be.length&&isFinite(R.be[0].b.dbMin)?R.be[0].b.dbMin:16;
+    const Lb=s.need?Math.max(s.lreq,s.lprov):Math.max(s.eg.t,s.lprov,300), wpx=Math.max(Lb*shz,10), x0=right?xw1-wpx:xw0;
+    let z0=0;
+    if(s.need){ K.rc(x0,Zh(s.lw),wpx,(s.lw+300)*sv,'vis',K.H('stx'),{k:'du'+(s.k+1)+' wHt'}); z0=s.lw; }
+    const zt1=Math.min(z0+s.lw,hw), zt2=Math.max(zt1,Math.min(hw/3+z0*0,hw));
+    K.rc(x0,Zh(zt1),wpx,(zt1-z0)*sv,'vis',K.H('st'),{k:'hS'});
+    if(zt2>zt1) K.rc(x0,Zh(zt2),wpx,(zt2-zt1)*sv,'vis',K.H('sw'),{k:'hS'});
+    return {x0,wpx,z0,zt1,zt2,kdb,dbm};
+  };
+  const zr=zoneSide(s0,true), zl=zoneSide(s1,false);
+  for(let z=Wi.hu;z<hw-1;z+=Wi.hu){ K.ln(xw0-14,Zh(z),xw0,Zh(z),'vis',{k:'wHu'}); K.ln(xw1,Zh(z),xw1+14,Zh(z),'vis',{k:'wHu'}); }
+  K.ln(xw0-14,Zh(hw),xw1+14,Zh(hw),'vis');
+  if(ht<hw-1) K.ln(xw0-10,Zh(ht),xw1+10,Zh(ht),'hid',{k:'wHt'});
+  K.cl(Xe(lw/2),Zh(hw)-6,Xe(lw/2),Zb+hf*sv-6);
+  K.ln(xw0-40,Zb,xw1+40,Zb,'phan',{k:'wHt'});
+  K.lead(xw0-40,Zb,ev.x-24,Zb+16,['SECCIÓN CRÍTICA'],{dot:true,side:-1});
+  /* δu en el techo */
+  const zt=Zh(ht);
+  K.force(xw1+46,zt,1,0,40,'',{k:'du1'}); K.t(xw1+18,zt-8,`δu = ${fl(s0.du)}`,{a:'start',b:true,k:'du1'});
+  if(s1!==s0){ K.force(xw0-46,zt,-1,0,40,'',{k:'du2'}); K.t(xw0-18,zt-8,`δu = ${fl(s1.du)}`,{a:'end',b:true,k:'du2'}); }
+  /* cotas verticales */
+  const xR=xw1+14;
+  K.dv(Zh(ht),Zb,xw1,xw1,xR+50,`ht = ${fmt(ht/1e3,1)} m`,{k:'wHt'});
+  if(zr){ const ys=[Zb,Zh(zr.z0),Zh(zr.zt1),Zh(zr.zt2)].filter((v,i,a)=>i===0||Math.abs(v-a[i-1])>2); const tt=[]; if(zr.z0>0) tt.push(fmt(zr.z0/1e3,2)); tt.push(fmt((zr.zt1-zr.z0)/1e3,2)); if(zr.zt2>zr.zt1) tt.push(fmt((zr.zt2-zr.zt1)/1e3,2));
+    K.chainV(ys,xw1,xR+10,tt,{k:'du1 hS'}); }
+  const lpU=Wi.eq==='bd'?s0.lp:0.5*s0.lw;
+  K.dv(Zh(lpU),Zb,xw0,xw0,xw0-30,`lp = ${fl(lpU)}`,{k:'wLp wEq'});
+  K.dh(xw0,xw1,Zh(hw),Zh(hw),Zh(hw)-22,`lw = ${fl(lw)}`,{k:'alphaMC'});
+  if(zr&&s0.need) K.dh(zr.x0,zr.x0+zr.wpx,Zb+(300)*sv,Zb+300*sv,Zb+300*sv+18,fl(Math.max(s0.lreq,s0.lprov)),{k:'du1 wLbe'});
+  /* notas de zonas */
+  const nx2=xR+100; let nyy=Zh(Math.min(hw,s0.lw*3.2))-40;
+  const zt1s=Math.min(150,(zr?zr.kdb:6)*(zr?zr.dbm:16)), zt2s=Math.min(200,14*(zr?zr.dbm:16));
+  if(zr&&s0.need) K.lead(zr.x0+zr.wpx/2,Zh(s0.lw*0.5),nx2-50,Zh(s0.lw*0.5),['EB, ε > 0,003',`s ≤ ${fl(R.be[0]?R.be[0].sLim:100)}`],{k:'hS hHx',side:1});
+  if(zr) K.lead(zr.x0+zr.wpx/2,Zh((zr.z0+zr.zt1)/2),nx2-50,Zh((zr.z0+zr.zt1)/2)-6,['ZT1',`s ≤ ${fl(zt1s)}`],{k:'hS',side:1});
+  if(zr&&zr.zt2>zr.zt1) K.lead(zr.x0+zr.wpx/2,Zh((zr.zt1+zr.zt2)/2),nx2-50,Zh((zr.zt1+zr.zt2)/2),['ZT2, hasta hw/3',`s ≤ ${fl(zt2s)}`],{k:'hS',side:1});
+  K.lead(xw0+lw*shz*0.5,Zb+hf*sv*0.6,ev.x-10,Zb+Math.max(hf*sv*0.85,34)+18,['FUNDACIÓN','EB penetra 300 mín.'],{dot:true,side:-1});
+  if(hw>Wi.hu*3.5) K.dv(Zh(hw-Wi.hu),Zh(hw-2*Wi.hu),xw0-14,xw0-14,xw0-30,`hu = ${fmt(Wi.hu/1e3,2)}`,{k:'wHu'});
+  K.title(ev.x+ev.w/2,H-34,'Elevación del muro','S/E');
+}
+function sectionSVG(){
+  const F=ST.F, W=S.nx*S.dx, H=S.ny*S.dy;
+  let i0=S.nx,i1=-1,j0=S.ny,j1=-1;
+  for(let j=0;j<S.ny;j++) for(let i=0;i<S.nx;i++) if(S.conc[j*S.nx+i]||S.bars[j*S.nx+i]>0){ i0=Math.min(i0,i); i1=Math.max(i1,i); j0=Math.min(j0,j); j1=Math.max(j1,j); }
+  if(i1<0){ i0=0;i1=S.nx-1;j0=0;j1=S.ny-1; }
+  const x0=i0*S.dx, x1=(i1+1)*S.dx, yT=(S.ny-j0)*S.dy, yB=(S.ny-1-j1)*S.dy;
+  const w=x1-x0, h=yT-yB, pad=Math.max(w,h)*0.08;
+  const svg=el('svg',{viewBox:`${x0-pad} ${-yT-pad} ${w+2*pad} ${h+2*pad}`,width:'100%',style:'max-width:640px;max-height:90mm;height:auto;display:block;margin:0 auto;'});
+  for(let j=j0;j<=j1;j++){ let i=i0; while(i<=i1){ if(!S.conc[j*S.nx+i]){ i++; continue; } let k=i; while(k+1<=i1&&S.conc[j*S.nx+k+1]) k++;
+    svg.appendChild(el('rect',{x:i*S.dx,y:-(S.ny-j)*S.dy,width:(k-i+1)*S.dx+0.5,height:S.dy+0.5,fill:'#c0c0c0'})); i=k+1; } }
+  for(let j=j0;j<=j1;j++) for(let i=i0;i<=i1;i++) if(S.conc[j*S.nx+i]&&S.conf[j*S.nx+i]) svg.appendChild(el('rect',{x:i*S.dx,y:-(S.ny-j)*S.dy,width:S.dx+0.5,height:S.dy+0.5,fill:'#8a8a3c','fill-opacity':0.6}));
+  for(let n=0;n<F.nb;n++) svg.appendChild(el('circle',{cx:F.bx[n],cy:-F.by[n],r:F.bd[n]/2,fill:'#000'}));
+  const s=Math.max(w,h)/40;
+  svg.appendChild(el('path',{d:`M${F.rx-s},${-F.ry} L${F.rx+s},${-F.ry} M${F.rx},${-F.ry-s} L${F.rx},${-F.ry+s}`,stroke:'#000','stroke-width':s/6,fill:'none'}));
+  const fs=Math.max(w,h)/30;
+  const t1=el('text',{x:(x0+x1)/2,y:-yB+pad*0.8,'font-size':fs,'text-anchor':'middle'}); t1.textContent=`${fmtk(w)} mm`; svg.appendChild(t1);
+  const t2=el('text',{x:x0-pad*0.3,y:-(yB+yT)/2,'font-size':fs,'text-anchor':'middle',transform:`rotate(-90 ${x0-pad*0.3} ${-(yB+yT)/2})`}); t2.textContent=`${fmtk(h)} mm`; svg.appendChild(t2);
+  return svg;
+}
+function barSummary(){
+  const F=ST.F, c={};
+  F.bd.forEach(d=>{ c[d]=(c[d]||0)+1; });
+  return Object.keys(c).sort((a,b)=>a-b).map(d=>`${c[d]}Ø${d}`).join(' + ')||'-';
+}
+function wallReport(ct,addSec){
+  const R=ST.W, m=ST.m; if(!R) return;
+  const W=R.W, h=document.createElement('h2'); h.textContent='Muros especiales, NCh430-2023 18.10'; h.style.cssText='font-size:16px;margin:18px 0 8px;break-before:page;page-break-before:always;'; ct.appendChild(h);
+  const sel=id=>$(id).options[$(id).selectedIndex].text;
+  const pt=document.createElement('table'); pt.className='rpt-params';
+  pt.innerHTML=`<tr><td class="k">ht / hw / hwcs / hu</td><td>${fmt(W.ht/1e3,2)} / ${fmt(W.hw/1e3,2)} / ${fmt(W.hwcs/1e3,2)} / ${fmt(W.hu/1e3,2)} m</td><td class="k">δu α / α+180° / α+90° / α+270°</td><td>${W.du.map(v=>fmtk(v)).join(' / ')} mm</td></tr>
+    <tr><td class="k">Deformaciones 18.10.5.5</td><td>${sel('wEq')}</td><td class="k">Profundidad c</td><td>${sel('wCm')}</td></tr>
+    <tr><td class="k">Pa</td><td>PD + ${fmt(R.G.k,2)}PL = ${fmtk(R.G.Pa)} kN</td><td class="k">ωv / λ / fyt corte</td><td>${fmt(W.omv,2)} / ${fmt(W.lam,2)} / ${fmtk(W.fyt)} MPa</td></tr>
+    <tr><td class="k">Hormigón confinado</td><td>${sel('confModel')}, E Ø${m.dh} @ ${fmtk(m.hs)}, fyt ${fmtk(m.fyt)} MPa, hx ≤ ${fmtk(m.hx)}, ke ${m.ke}</td><td class="k">Elementos de borde</td><td>${sel('wBeM')}, ${sel('wLbe')}</td></tr>`;
+  ct.appendChild(pt);
+  const cp=(id,cls)=>{ const t=document.createElement('table'); t.className=cls||'rpt-small'; t.innerHTML=$(id).innerHTML; t.querySelectorAll('input').forEach(i=>{ const sp=document.createElement('span'); sp.textContent=i.type==='checkbox'?(i.checked?'Sí':'No'):i.value; i.replaceWith(sp); }); return t; };
+  addSec('Resumen de verificaciones',cp('wallChk'),true);
+  addSec('Sobrerresistencia Ωv y corte de diseño por sentido, 18.10.3',cp('wallSense'));
+  addSec('Deformaciones unitarias, 18.10.5.5',cp('wallStrain'),true);
+  addSec('Elementos de borde por extremo, 18.10.6',cp('wallBE'));
+  const sc=el('svg',{width:'100%',style:'max-width:640px;height:auto;display:block;margin:0 auto;'}); renderConfChart(sc);
+  const sC=addSec('Hormigón confinado',sc); sC.appendChild(cp('beTable'));
+  addSec('Detallamiento de elementos de borde, 18.10.6.4 y 18.10.6.5',cp('beChk'),true);
+  const sg=addSec('Geometría de pilas',cp('legGeo'));
+  addSec('Diseño al corte por capacidad de pilas, 18.10.3 y 18.10.4',cp('legTable'),true);
+  const sv=el('svg',{width:'100%',style:'max-width:100%;height:auto;display:block;margin:0 auto;'}); drawSheet(sv);
+  addSec('Lámina',sv);
+}
+function buildReport(){
+  const m=ST.m, F=ST.F, ct=$('printReport'); ct.innerHTML='';
+  const hd=document.createElement('div'); hd.className='rpt-header';
+  hd.innerHTML=`<h1>Muros de hormigón armado</h1><div class="rpt-sub">${$('proj').value.trim()?$('proj').value.trim()+', ':''}${new Date().toLocaleDateString('es-CL')}</div>`;
+  ct.appendChild(hd);
+  const pt=document.createElement('table'); pt.className='rpt-params';
+  pt.innerHTML=`
+    <tr><td class="k">f'c / Ec</td><td>${m.fc} MPa / ${fmtk(m.Ec)} MPa</td><td class="k">fy / Es</td><td>${m.fy} MPa / ${fmtk(m.Es)} MPa</td></tr>
+    <tr><td class="k">Curva hormigón M-φ</td><td>${$('ccurve').options[$('ccurve').selectedIndex].text}</td><td class="k">Modelo acero M-φ</td><td>${$('smodel').options[$('smodel').selectedIndex].text}${m.smodel==='park'?`, fsu = ${m.fsu} MPa, εsh = ${m.esh}, εsu = ${m.esu}`:''}</td></tr>
+    <tr><td class="k">Interacción</td><td>${$('pmConc').options[$('pmConc').selectedIndex].text}${m.mpr?', fs = 1,25fy, φ = 1':''}</td><td class="k">Grilla</td><td>${S.nx} × ${S.ny} celdas de ${S.dx} × ${S.dy} mm, fibra ≤ ${m.fib} mm</td></tr>
+    <tr><td class="k">Armadura</td><td>${barSummary()}</td><td class="k">Ag / As / ρ</td><td>${fmtk(F.Ac)} mm² / ${fmtk(F.As)} mm² / ${fmt(F.rho*100,3)} %</td></tr>`;
+  ct.appendChild(pt);
+  const addSec=(title,node,brk)=>{ const s=document.createElement('div'); s.className='rpt-section'+(brk?' allow-break':''); s.innerHTML=`<h2>${title}</h2>`; if(node) s.appendChild(node); ct.appendChild(s); return s; };
+  addSec('Sección',sectionSVG());
+  const tp=document.createElement('table'); tp.innerHTML=$('propTable').innerHTML; addSec('Propiedades',tp);
+  const mk=(h)=>{ const s=el('svg',{width:'100%',style:'max-width:640px;height:auto;display:block;margin:0 auto;'}); return s; };
+  const sMC=mk(), tMC=document.createElement('table'), dummy=document.createElement('div');
+  renderMC(sMC,tMC,dummy);
+  const secMC=addSec(`Momento-curvatura, α = ${num('alphaMC',0)}°, P+ = ${m.Pp} kN, P− = ${m.Pn} kN`,sMC); secMC.appendChild(tMC);
+  const sPM=mk(), sR=mk(), d2=document.createElement('div');
+  renderPM(sPM,sR,d2);
+  addSec(`Diagrama de interacción, α = ${num('alphaPM',0)}°`,sPM);
+  addSec(`Contorno Mx-My, P = ${num('Pring',0)} kN`,sR);
+  const img=GL.image();
+  if(img){ const im=document.createElement('img'); im.src=img; im.style.cssText='width:100%;max-width:600px;display:block;margin:0 auto;'; addSec('Superficie de interacción',im); }
+  if(ST.loads.length){ const tl=document.createElement('table'); tl.className='rpt-small'; renderLoads(tl); addSec('Verificación de cargas',tl,true); }
+  wallReport(ct,addSec);
+  const ft=document.createElement('div'); ft.className='rpt-foot'; ft.innerHTML=$('notes').innerHTML+'<br>'+$('wallNote').innerHTML+'<br>'+$('confNote').innerHTML; ct.appendChild(ft);
+}
+$('pdfBtn').addEventListener('click',()=>{ const wasHidden=document.querySelector('[data-pane="s3d"]').hidden; if(wasHidden){ document.querySelector('[data-pane="s3d"]').hidden=false; GL.resize(); } buildReport(); if(wasHidden){ document.querySelector('[data-pane="s3d"]').hidden=true; } window.print(); });
+
+$('txtBtn').addEventListener('click',()=>{
+  const k=$('txtSel').value, L=[];
+  if(k==='grid'){ download(baseName()+'_grilla.txt',gridText()); return; }
+  if(k==='wall'){ download(baseName()+'_muro_18_10.txt',wallText()); return; }
+  if(k==='mc'){
+    L.push(`# Momento-curvatura, alfa = ${num('alphaMC',0)} grados`);
+    L.push('# rama\tphi[1/m]\tM[kNm]');
+    ST.mc.pos.pts.forEach(p=>L.push(`+\t${(p[0]*1e3).toFixed(6)}\t${p[1].toFixed(2)}`));
+    ST.mc.neg.pts.forEach(p=>L.push(`-\t${(-p[0]*1e3).toFixed(6)}\t${(-p[1]).toFixed(2)}`));
+  }
+  if(k==='pm'){
+    const a=num('alphaPM',0)*DEG, cN=pmCurve(ST.sf,a,'nom'), cD=pmCurve(ST.sf,a,'des');
+    L.push(`# Interaccion P-M, alfa = ${num('alphaPM',0)} grados, P compresion positiva`);
+    L.push('# curva\tM[kNm]\tP[kN]');
+    cN.L.slice().reverse().concat(cN.R).forEach(p=>L.push(`nominal\t${p[0].toFixed(2)}\t${p[1].toFixed(2)}`));
+    cD.L.slice().reverse().concat(cD.R).forEach(p=>L.push(`diseno\t${p[0].toFixed(2)}\t${p[1].toFixed(2)}`));
+  }
+  if(k==='surf'){
+    L.push('# Superficie de interaccion, P compresion positiva, Mx comprime +y, My comprime +x');
+    L.push('# tipo\tP[kN]\tMx[kNm]\tMy[kNm]');
+    ST.sf.levN.forEach((P,i)=>{ const r=ST.sf.ringsN[i]; if(r) r.forEach(q=>L.push(`nominal\t${P.toFixed(2)}\t${q[1].toFixed(2)}\t${q[0].toFixed(2)}`)); });
+    ST.sf.levD.forEach((P,i)=>{ const r=ST.sf.ringsD[i]; if(r) r.forEach(q=>L.push(`diseno\t${P.toFixed(2)}\t${q[1].toFixed(2)}\t${q[0].toFixed(2)}`)); });
+  }
+  download(baseName()+'_'+k+'.txt',L.join('\r\n')+'\r\n');
+});
+
+const DEF_LOADS=`PP	-6500	0	0	0	0	150
+SC	-1300	0	0	0	0	40
+1.4PP	-9100	0	0	0	0	210
+1.2PP+1.6SC	-9880	0	0	0	0	244
+1.2PP+SC+1.4SX	-10800	950	60	30	-300	12500
+1.2PP+SC-1.4SX	-8600	-950	-60	-30	300	-12000
+0.9PP+1.4SX	-7600	950	60	30	-300	12200
+0.9PP-1.4SX	-5400	-950	-60	-30	300	-12200
+1.2PP+SC+1.4SY	-9400	80	600	40	-4200	700
+1.2PP+SC-1.4SY	-8800	-80	-600	-40	4200	-500
+0.9PP+1.4SY	-6100	80	600	40	-4100	600
+0.9PP-1.4SY	-5700	-80	-600	-40	4100	-400`;
+const DEF_LEGS=`P1	PP	-4800	0	0	0	0	100
+P1	SC	-950	0	0	0	0	30
+P1	1.2PP+SC+1.4SX	-7000	900	20	10	-50	9800
+P1	1.2PP+SC-1.4SX	-6300	-900	-20	-10	50	-9500
+P1	0.9PP+1.4SX	-4700	900	20	10	-50	9600
+P1	0.9PP-1.4SX	-4000	-900	-20	-10	50	-9600
+P1	1.2PP+SC+1.4SY	-6900	40	110	5	-700	600
+P1	1.2PP+SC-1.4SY	-6400	-40	-110	-5	700	-500
+P2	PP	-1700	0	0	0	0	50
+P2	SC	-350	0	0	0	0	10
+P2	1.2PP+SC+1.4SX	-2600	50	-30	5	100	400
+P2	1.2PP+SC-1.4SX	-2300	-50	30	-5	-100	-380
+P2	1.2PP+SC+1.4SY	-2500	560	40	10	-150	3600
+P2	1.2PP+SC-1.4SY	-2200	-560	-40	-10	150	-3500
+P2	0.9PP+1.4SY	-1600	560	40	10	-150	3500
+P2	0.9PP-1.4SY	-1300	-560	-40	-10	150	-3400`;
+function defaultProject(){
+  S.dx=Math.max(num('dx',50),1); S.dy=Math.max(num('dy',50),1);
+  $('tLw').value=4000; $('tLf').value=2000; $('tT').value=300; $('tDm').value=10; $('tDb').value=22; $('tS').value=4;
+  genTemplate('T',true);
+  $('loadsTxt').value=DEF_LOADS; $('legTxt').value=DEF_LEGS;
+  ST.legGeo={P1:{lw:4000,bw:300,th:0,dh:10,sh:150,nh:2,dv:10,sv:200},P2:{lw:2000,bw:300,th:90,dh:10,sh:150,nh:2,dv:10,sv:200}};
+  ST.seisOv={};
+  layoutGrid();
+  computeAll(new Set(['all']));
+  paintRequired();
+}
+
+(function init(){
+  let loaded=false;
+  try{ const d=JSON.parse(localStorage.getItem('fdd_muros_v1')||'null'); if(d) loaded=loadProject(d); }catch(e){}
+  $('parkBox').hidden=$('smodel').value!=='park';
+  $('alphaW').value=$('alphaMC').value;
+  layoutGrid();
+  if(!loaded){ defaultProject(); } else changed('all');
+  ED.undo=[];
+  try{ const t=localStorage.getItem('fdd_muros_tab'); if(t){ const b=document.querySelector(`#tabs button[data-tab="${t}"]`); if(b) b.click(); } }catch(e){}
+})();
+</script>
+</body></html>
