@@ -184,12 +184,13 @@ svg text{font-family:var(--sans);}
     </div>
     <div class="chartwrap" style="margin-top:12px">
       <div class="toolbar" style="margin-bottom:6px;">
-        <label style="font-size:13px;">Corte A-A</label>
-        <select id="cutDir"><option value="x" selected>Horizontal, en y =</option><option value="y">Vertical, en x =</option></select>
+        <label style="font-size:13px;">Corte A-A horizontal en y =</label>
         <input type="number" id="cutPos" value="2.5" step="0.1" style="width:80px">
+        <label style="font-size:13px;margin-left:10px;">Corte B-B vertical en x =</label>
+        <input type="number" id="cutPosB" value="2" step="0.1" style="width:80px">
         <span class="note">m, se ajusta a la línea de malla más cercana</span>
       </div>
-      <svg id="lSvg" viewBox="0 0 1300 1500" width="100%" style="display:block;height:auto"></svg>
+      <svg id="lSvg" viewBox="0 0 1300 1970" width="100%" style="display:block;height:auto"></svg>
     </div>
     <div class="chartwrap"><div class="toolbar" id="v3bar"></div><div class="toolbar"><label class="chk"><input type="checkbox" id="v3d" checked> Deformada exagerada</label><label class="chk"><input type="checkbox" id="v3w" checked> Muros y vigas</label></div><canvas id="v3" style="width:100%;height:440px;display:block"></canvas></div>
     <div class="panel"><div class="section-title">Verificaciones</div><div class="tablewrap"><table id="tbChk"></table></div></div>
@@ -1043,7 +1044,7 @@ function plan(K,o,B){
   /* muros como obstáculo */
   o.ps.forEach(z=>{ if(!supType(z.type)) return; const r=z.hz?{x0:X(z.a),y0:Y(z.c+e/2),x1:X(z.b),y1:Y(z.c-e/2)}:{x0:X(z.c-e/2),y0:Y(z.b),x1:X(z.c+e/2),y1:Y(z.a)}; r.w=1.2; OC.push(r); });
   /* corte A-A como obstáculo */
-  if(o.cut){ const cv=o.cut.v, E2=o.cut.dir==='x'?[[left-128,Y(cv)],[right+34,Y(cv)]]:[[X(cv),top-62],[X(cv),bot+34]]; E2.forEach(([x,y])=>OC.push({x0:x-26,y0:y-26,x1:x+26,y1:y+26})); if(o.cut.dir==='x') SG.push({a:[left,Y(cv)],b:[right,Y(cv)],id:-1}); else SG.push({a:[X(cv),top],b:[X(cv),bot],id:-1}); }
+  (o.cuts||[]).forEach(ct=>{ const cv=ct.v, E2=ct.dir==='x'?[[left-128,Y(cv)],[right+34,Y(cv)]]:[[X(cv),top-62],[X(cv),bot+34]]; E2.forEach(([x,y])=>OC.push({x0:x-26,y0:y-26,x1:x+26,y1:y+26})); if(ct.dir==='x') SG.push({a:[left,Y(cv)],b:[right,Y(cv)],id:-1}); else SG.push({a:[X(cv),top],b:[X(cv),bot],id:-1}); });
   /* cotas parciales L1, L3, L5, L10 */
   items.forEach(it=>{ const b=it.b, k=it.k;
     if(!it.sup){ const sz=10, pt=(txt,cs,r)=>{ const q=place(cs.map(([x,y])=>({x,y,r:tRect(x,y,txt,sz,r)})),it.id); K.t(q.x,q.y,txt,{s:sz,k,r:r?-90:null}); };
@@ -1085,7 +1086,7 @@ function plan(K,o,B){
   /* orientación */
   const ox=B.x-100, oy=bot+60; K.ln(ox,oy,ox+30,oy,'vis'); K.ah(ox+34,oy,0,null,8,2.6); K.ln(ox,oy,ox,oy-30,'vis'); K.ah(ox,oy-34,-Math.PI/2,null,8,2.6); K.t(ox+40,oy+4,'x',{a:'start',s:12}); K.t(ox,oy-40,'y',{s:12});
   /* corte A-A */
-  const ct=o.cut; if(ct){ if(ct.dir==='x') K.cut(left-128,Y(ct.v),right+34,Y(ct.v),'A',[0,1],{k:'cutPos cutDir'}); else K.cut(X(ct.v),top-62,X(ct.v),bot+34,'A',[-1,0],{k:'cutPos cutDir'}); }
+  (o.cuts||[]).forEach(ct=>{ if(ct.dir==='x') K.cut(left-128,Y(ct.v),right+34,Y(ct.v),ct.lbl,[0,1],{k:'cutPos'}); else K.cut(X(ct.v),top-62,X(ct.v),bot+34,ct.lbl,[-1,0],{k:'cutPosB'}); });
   /* zonas de clic */
   o.P.forEach(p=>{ const r=K.rc(X(p.x0),Y(p.y1),p.Lx*sc,p.Ly*sc,null,'transparent'); r.setAttribute('data-pan',p.i); r.setAttribute('pointer-events','none'); });
   return {X,Y,sc,bb};
@@ -1129,11 +1130,11 @@ function deflPlan(K,o,B){ const C=contourPlan(K,o,B,'w',1000), {X,Y}=C.F;
   return C; }
 
 /* ---------- CORTE A-A ---------- */
-function cutLine(o){ const G=o.G, dir=G.cutDir, M=o.M, grid=dir==='x'?M.Y:M.X, bnd=new Set(o.P.flatMap(p=>dir==='x'?[p.y0,p.y1]:[p.x0,p.x1]).map(v=>v.toFixed(5)));
+function cutLine(o,dir,pos){ const G={cutPos:pos}, M=o.M, grid=dir==='x'?M.Y:M.X, bnd=new Set(o.P.flatMap(p=>dir==='x'?[p.y0,p.y1]:[p.x0,p.x1]).map(v=>v.toFixed(5)));
   let best=null; grid.forEach(v=>{ if(bnd.has(v.toFixed(5))) return; const inside=o.P.some(p=>dir==='x'?v>p.y0&&v<p.y1:v>p.x0&&v<p.x1); if(!inside) return; if(!best||Math.abs(v-G.cutPos)<Math.abs(best-G.cutPos)) best=v; });
   if(best==null) return null; return {dir,v:best}; }
-function section(K,o,B){
-  const ct=o.cut; if(!ct) return; const dir=ct.dir, e=o.e, M=o.M;
+function section(K,o,B,ct){
+  if(!ct) return; const dir=ct.dir, e=o.e, M=o.M;
   const ps=o.P.filter(p=>dir==='x'?ct.v>p.y0&&ct.v<p.y1:ct.v>p.x0&&ct.v<p.x1).sort((a,b)=>dir==='x'?a.x0-b.x0:a.y0-b.y0);
   const lo=p=>dir==='x'?p.x0:p.y0, hi=p=>dir==='x'?p.x1:p.y1, sA=dir==='x'?'l':'b', sB=dir==='x'?'r':'t';
   const portion=(p,s)=>p['ps_'+s].find(z=>ct.v>=z.a-1e-6&&ct.v<=z.b+1e-6);
@@ -1230,8 +1231,8 @@ function detail(K,o,B){
 function sheetSVG(svg,o){
   const W=1300, bb=bbox(o), spanX=bb.x1-bb.x0, spanY=bb.y1-bb.y0;
   const sc=Math.min((W-150-70)/spanX,760/spanY), ph=spanY*sc, top=128;
-  o.cut=cutLine(o);
-  const H1=top+ph+110, H2=360, H3=470, H=H1+H2+H3;
+  o.cuts=[Object.assign(cutLine(o,'x',o.G.cutPos)||{},{lbl:'A'}),Object.assign(cutLine(o,'y',o.G.cutPosB)||{},{lbl:'B'})].filter(c=>c.dir); o.cut=o.cuts[0]||null;
+  const H1=top+ph+110, H2=360, H3=470, H4=o.cuts.length>1?470:0, H=H1+H2+H3+H4;
   const K=DK(svg,W,H,{fs:1.05});
   const pl=plan(K,o,{x:150+((W-150-70)-spanX*sc)/2,y:top,sc});
   K.title(W/2,H1-30,'Planta de losas','S/E');
@@ -1244,9 +1245,12 @@ function sheetSVG(svg,o){
   const c3=deflPlan(K,o,{cx:Bx[3],cy,w:bw-30,h:250}); K.title(Bx[3],H1+H2-40,'Deformación',`D + L, mm, curvas cada ${f1(c3.st,2).replace('.',',')}`);
   K.t(W/2,H1+H2-6,'CURVAS: 1,2D + 1,6L EN TODOS LOS PAÑOS, LLENA POSITIVA, SEGMENTADA NEGATIVA. VALORES: ENVOLVENTE DE DISEÑO, Δ TOTAL A LARGO PLAZO.',{s:10.5});
   K.ln(20,H1+H2+8,W-20,H1+H2+8,'thin');
-  if(o.cut){ section(K,o,{x:70,y:H1+H2+110,w:820,mo:232}); K.title(480,H-30,'Corte A-A',o.cut.dir==='x'?`y = ${fc2(o.cut.v)} m, S/E`:`x = ${fc2(o.cut.v)} m, S/E`); }
+  const tit=c=>c.dir==='x'?`y = ${fc2(c.v)} m, S/E`:`x = ${fc2(c.v)} m, S/E`;
+  if(o.cuts[0]){ section(K,o,{x:70,y:H1+H2+110,w:820,mo:232},o.cuts[0]); K.title(480,H1+H2+H3-30,`Corte ${o.cuts[0].lbl}-${o.cuts[0].lbl}`,tit(o.cuts[0])); }
   detail(K,o,{x:935,y:H1+H2+150,w:225,zs:0.75});
-  K.title(1110,H-30,`Detalle corte losa ${o.P[Math.min(SEL,o.P.length-1)].name}`,'S/E');
+  K.title(1110,H1+H2+H3-30,`Detalle corte losa ${o.P[Math.min(SEL,o.P.length-1)].name}`,'S/E');
+  if(o.cuts[1]){ K.ln(20,H1+H2+H3+8,W-20,H1+H2+H3+8,'thin'); section(K,o,{x:70,y:H1+H2+H3+110,w:1160,mo:232},o.cuts[1]); K.title(W/2,H-30,`Corte ${o.cuts[1].lbl}-${o.cuts[1].lbl}`,tit(o.cuts[1])); }
+  K.split=H1+H2+8;
   /* selección por clic */
   svg.querySelectorAll('[data-pan]').forEach(r=>{ r.setAttribute('pointer-events','all'); r.addEventListener('click',()=>{ if(typeof selectPanel==='function') selectPanel(+r.getAttribute('data-pan')); }); });
   return K;
@@ -1262,7 +1266,7 @@ const CONDS=[['S','Simple'],['E','Empotrado'],['L','Libre']];
 
 function readG(){
   const G={fc:num('fc',25),fy:num('fy',420),lam:num('lam',1),gc:num('gc',25),nu:num('nu',0.2),ew:Math.max(0,num('ew',200)),rp:num('rp',20),rs:num('rs',30),
-    alt:$('alt').checked,extEnd:$('extEnd').value,hkS:$('hkS').checked,xi:num('xi',2),psi:Math.min(1,Math.max(0,num('psi',0.25))),dlim:$('dlim').value,N:num('fine',12),thk:$('thk').value,proj:$('proj').value.trim(),cutDir:$('cutDir').value,cutPos:num('cutPos',2.5)};
+    alt:$('alt').checked,extEnd:$('extEnd').value,hkS:$('hkS').checked,xi:num('xi',2),psi:Math.min(1,Math.max(0,num('psi',0.25))),dlim:$('dlim').value,N:num('fine',12),thk:$('thk').value,proj:$('proj').value.trim(),cutPos:num('cutPos',2.5),cutPosB:num('cutPosB',2)};
   G.nu=Math.min(0.45,Math.max(0,G.nu)); return G; }
 
 /* ---------- editor ---------- */
@@ -1394,7 +1398,7 @@ $('valBtn').addEventListener('click',runValidation);
 /* ---------- ejecución ---------- */
 function run(){
   const G=readG(); $('EcTxt').textContent=f1(4700*Math.sqrt(G.fc),0);
-  const GK=Object.assign({},G); delete GK.cutDir; delete GK.cutPos; delete GK.proj; const key=JSON.stringify([GK,PANELS]);
+  const GK=Object.assign({},G); delete GK.cutPos; delete GK.cutPosB; delete GK.proj; const key=JSON.stringify([GK,PANELS]);
   if(R) R.G=G;
   if(key!==RKEY||!R){ try{ R=analyze(G,PANELS); RKEY=key; }catch(err){ R=null; RKEY=''; $('stats').innerHTML=''; $('lSvg').innerHTML=''; $('tbChk').innerHTML=''; throw err; } }
   R.G=G;
@@ -1413,7 +1417,9 @@ function report(){
     ['Hormigón',`f'c = ${G.fc} MPa, Ec = ${f1(4700*Math.sqrt(G.fc),0)} MPa, ν = ${G.nu}, γc = ${G.gc} kN/m³`,'Acero',`fy = ${G.fy} MPa`],
     ['Recubrimientos',`rp = ${G.rp} mm, rs = ${G.rs} mm, muros e = ${G.ew} mm`,'Deformaciones',`ξ = ${G.xi}, ψ sostenida = ${G.psi}, ${$('dlim').selectedOptions[0].textContent}`],
     ['Paños',o.P.map(p=>`${esc(p.name)} ${p.Lx}×${p.Ly} m, h ${p.h}, D ${p.D}, L ${p.L} kPa`).join('<br>'),'Bordes',o.P.map(p=>`${esc(p.name)}: ${SIDES.map(s=>p['ps_'+s].map(z=>COND_TXT[z.type][0]).join('/')).join(' ')}`).join('<br>')+'<br>(inferior, derecho, superior, izquierdo)']]);
-  const sv=rp.svg(); sv.style.maxWidth='100%'; sheetSVG(sv,o); rp.sec('Lámina',null,sv);
+  const sv=rp.svg(); sv.style.maxWidth='100%'; const KS=sheetSVG(sv,o); const vb=sv.getAttribute('viewBox').split(' ').map(Number), Ht=vb[3], cut=KS.split;
+  const sv2=sv.cloneNode(true); sv.setAttribute('viewBox',`0 0 ${vb[2]} ${cut}`); sv2.setAttribute('viewBox',`0 ${cut} ${vb[2]} ${Ht-cut}`);
+  rp.sec('Planta de losas y armaduras en ambas direcciones',null,sv); rp.sec('Cortes A-A y B-B',null,sv2);
   if(V3) rp.sec('Vista 3D, deformada exagerada',null,snap3D(V3,760,420));
   const s1=rp.sec('Verificaciones',chkTableG(o)); s1.classList.add('allow-break');
   rp.sec('Momentos por paño',htmlMo(o)); const s2=rp.sec('Momentos en apoyos',htmlMs(o)); s2.classList.add('allow-break');
