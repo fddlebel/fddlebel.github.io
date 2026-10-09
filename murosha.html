@@ -436,7 +436,7 @@ td input[type=number],td input[type=text]{padding:3px 4px;font-size:12px;min-wid
       <div class="tablewrap"><table id="legGeo"></table></div>
       <div class="note" style="margin:6px 0 12px;">θ: dirección del eje local 2 de la pila en la sección (0° = +x, 90° = +y). Un V2 positivo actúa en el sentido θ y toma el Ωv de ese sentido, un V2 negativo el de θ + 180°. Las pilas nuevas se crean al aparecer su nombre en la tabla.</div>
       <div class="ctrls"><div class="section-title" style="margin:0">Diseño al corte por capacidad por piso, 18.10.3 y 18.10.4</div><button class="btn" id="designH">Diseñar armadura horizontal</button>
-        <div class="note" style="max-width:520px;">Elige por piso el menor Ø (8, 10, 12, 16) y el mayor s múltiplo de 25 mm, entre 100 mm y el límite de 18.10.2.1, que cumple φVn ≥ Ve y ρt mínimo. Las celdas se pueden editar después.</div></div>
+        <div class="note" style="max-width:520px;">Elige por piso el menor Ø (8, 10, 12, 16) y el mayor s múltiplo de 25 mm, entre 100 mm y el límite de 18.10.2.1, que cumple φVn ≥ Ve y ρt mínimo. Las celdas se pueden editar después.</div><div class="note" id="designMsg" style="max-width:560px;"></div></div>
       <div id="legStory"></div>
       <div class="section-title" style="margin-top:14px">Gráficos radiales por pila</div>
       <div id="legRadar" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px;"></div>
@@ -1161,7 +1161,13 @@ function projectData(){
   const bars=[]; for(let k=0;k<S.nx*S.ny;k++) if(S.bars[k]>0) bars.push([k,S.bars[k]]);
   const conc=[]; for(let k=0;k<S.nx*S.ny;k++) if(S.conc[k]) conc.push(k);
   const conf=[]; for(let k=0;k<S.nx*S.ny;k++) if(S.conf[k]&&S.conc[k]) conf.push(k);
-  return {app:'fddlebel-murosha',v:1,grid:{nx:S.nx,ny:S.ny,dx:S.dx,dy:S.dy,conc,bars,conf},inputs:inp,extra:{seisOv:ST.seisOv,legGeo:ST.legGeo,legReinf:ST.legReinf,storyGeo:ST.storyGeo,beOv:ST.beOv}};
+  return {app:'fddlebel-murosha',v:1,grid:{nx:S.nx,ny:S.ny,dx:S.dx,dy:S.dy,conc,bars,conf},inputs:inp,extra:pruneExtra()};
+}
+function pruneExtra(){
+  const piers=ST.legNames||[], sts=ST.stories||[], pick=(o,keys)=>Object.fromEntries(Object.entries(o||{}).filter(([k])=>keys.includes(k)));
+  const lr={}; piers.forEach(p=>{ if(ST.legReinf&&ST.legReinf[p]) lr[p]=pick(ST.legReinf[p],sts); });
+  const be=(ST.F&&ST.F.BE||[]).map(b=>b.name);
+  return {seisOv:ST.seisOv,legGeo:pick(ST.legGeo,piers),legReinf:lr,storyGeo:pick(ST.storyGeo,sts),beOv:pick(ST.beOv,be)};
 }
 function loadProject(d){
   if(!d||!d.grid) return false;
@@ -1821,7 +1827,8 @@ function renderWall(){
     col('Extensión vertical sobre y bajo la sección crítica ≥ lw','m',s=>s.need?fmt(s.vext/1e3,2):'-')+
     col('Largo extremo 18.10.2.4(a)','mm',s=>fmtk(s.lEnd))+col('ρ extremo / requerido','%',s=>fmt(s.rhoEnd*100,2)+' / '+fmt(s.rhoEndReq*100,2))+
     col('18.10.2.3(c) traslapos prohibidos en borde hasta','m',s=>s.mud>=2?fmt(Math.min(0.3*s.lw,3000)/1e3,2):'no aplica')+'</tbody>';
-  $('wallNote').innerHTML=`Pa = PD + ${fmt(R.G.k,2)}PL = ${fmtk(R.G.PD)} + ${fmt(R.G.k,2)}·${fmtk(R.G.PL)} kN${R.G.ok?'':' (PD no encontrado, revise el nombre de la combinación o ingréselo manual)'}. Mpr,cs con fs = 1,25fy, φ = 1 y bloque de Whitney, momento resultante en la dirección del sentido. Cada combinación sísmica se asigna al sentido analizado más cercano a la dirección de su momento (Mu,cs y c) y de su corte (Vu,env). ${W.eq==='bd'?`Curvatura (18.10.5.5b): φ = (δu − δy)/(lp(ht − lp/2)) + φy, lp ≤ 0,3lw, δy = ${fmtk(W.dy)} mm, φy = ${W.phiyO>0?'manual':'2εy/lw (Priestley, Calvi y Kowalsky 2007)'}.`:'Curvatura (18.10.5.5a y c): φu = 2δu/(ht·lw), equivalente a lp = 0,5lw.'} c: ${W.cm==='nom'?'resistencia nominal con εcu = 0,003 y bloque de Whitney, eje neutro perpendicular al sentido':'equilibrio de la sección con las curvas constitutivas a la curvatura de demanda (M-φ), con el mismo control de dirección de la pestaña M-φ'}. Largo requerido = máx(regla seleccionada, espesor del muro 18.10.6.4(c), ala + 300 mm 18.10.6.4(d)). El elemento de borde se extiende verticalmente al menos lw sobre y bajo la sección crítica (18.10.6.2b) y su armadura transversal penetra la fundación ld o 300 mm (18.10.6.4h).`;
+  const wv=typeof vmaxWarnings==='function'?vmaxWarnings():[];
+  $('wallNote').innerHTML=wv.map(t=>`<div class="warn" style="color:${FAIL}">${t}</div>`).join('')+`Pa = PD + ${fmt(R.G.k,2)}PL = ${fmtk(R.G.PD)} + ${fmt(R.G.k,2)}·${fmtk(R.G.PL)} kN${R.G.ok?'':' (PD no encontrado, revise el nombre de la combinación o ingréselo manual)'}. Mpr,cs con fs = 1,25fy, φ = 1 y bloque de Whitney, momento resultante en la dirección del sentido. Cada combinación sísmica se asigna al sentido analizado más cercano a la dirección de su momento (Mu,cs y c) y de su corte (Vu,env). ${W.eq==='bd'?`Curvatura (18.10.5.5b): φ = (δu − δy)/(lp(ht − lp/2)) + φy, lp ≤ 0,3lw, δy = ${fmtk(W.dy)} mm, φy = ${W.phiyO>0?'manual':'2εy/lw (Priestley, Calvi y Kowalsky 2007)'}.`:'Curvatura (18.10.5.5a y c): φu = 2δu/(ht·lw), equivalente a lp = 0,5lw.'} c: ${W.cm==='nom'?'resistencia nominal con εcu = 0,003 y bloque de Whitney, eje neutro perpendicular al sentido':'equilibrio de la sección con las curvas constitutivas a la curvatura de demanda (M-φ), con el mismo control de dirección de la pestaña M-φ'}. Largo requerido = máx(regla seleccionada, espesor del muro 18.10.6.4(c), ala + 300 mm 18.10.6.4(d)). El elemento de borde se extiende verticalmente al menos lw sobre y bajo la sección crítica (18.10.6.2b) y su armadura transversal penetra la fundación ld o 300 mm (18.10.6.4h).`;
 }
 function renderConf(){
   const R=ST.W, F=ST.F, m=ST.m; if(!R||!F) return;
@@ -2027,14 +2034,28 @@ function legChecks(out,L){
   out.legs.groups.forEach(g=>{ if(g.worst) L.push({n:`18.10.4.4 ΣVe ≤ φ·0,66√f'c·ΣAcv, pilas ${g.legs.map(q=>q.name).join(', ')}, piso ${g.worst.story}`,d:fmtk(g.worst.V)+' kN',c:fmtk(g.worst.cap)+' kN',r:g.worst.r}); });
 }
 /* Diseño automático de la armadura horizontal: menor Ø y mayor s múltiplo de 25 mm que cumplen */
+function storyRanges(names){
+  const idx=names.map(n=>ST.stories.indexOf(n)).sort((a,b)=>a-b), out=[]; let a=null,b=null;
+  idx.forEach(k=>{ if(a===null){ a=b=k; } else if(k===b+1) b=k; else { out.push([a,b]); a=b=k; } }); if(a!==null) out.push([a,b]);
+  return out.map(([x,y])=>x===y?ST.stories[x]:(y===x+1?ST.stories[x]+', '+ST.stories[y]:ST.stories[x]+' a '+ST.stories[y])).join(', ');
+}
+function vmaxWarnings(){
+  const R=ST.W; if(!R) return [];
+  return R.legs.legs.map(L=>{ const bad=L.st.filter(q=>!q.okVmax).map(q=>q.story); return bad.length?`${L.name}: ${storyRanges(bad)} con Ve > φ·0,83√f'c·Acv (18.10.4.4), aumentar bw, lw o f'c.`:null; }).filter(Boolean);
+}
+/* Diseño automático de la armadura horizontal: menor Ø y mayor s múltiplo de 25 mm que cumplen.
+   Donde Ve > φVn,máx se diseña para Vs req. limitado a Vn,máx (ninguna armadura resuelve el límite) */
 function designHorizontal(){
   const R=ST.W; if(!R) return;
-  R.legs.legs.forEach(L=>L.st.forEach(q=>{
-    const r=q.r, n=Math.max(2,+r.n||2), need=Math.max(q.AvsReqV,q.rtMin*q.bw*10)/10; /* mm²/mm */
+  let np=0, ns=0;
+  R.legs.legs.forEach(L=>{ if(L.st.length) np++; L.st.forEach(q=>{ ns++;
+    const r=q.r, n=Math.max(2,+r.n||2), VsReq=Math.max(0,Math.min(q.Vdes/L.phi,q.Vmax)-q.Vc), AvsV=VsReq*1e3/(R.W.fyt*q.lw);
+    const need=Math.max(AvsV,q.rtMin*q.bw); /* mm²/mm */
     let pick=null;
-    for(const d of [8,10,12,16]){ const Ab=Math.PI*d*d/4, sMax=Math.min(n*Ab/Math.max(need,1e-9),q.smax), s=Math.floor(sMax/25+1e-9)*25; if(s>=100){ pick={d,s}; break; } }
+    for(const d of [8,10,12,16]){ const Ab=Math.PI*d*d/4, sMax=Math.min(n*Ab/Math.max(need,1e-9),q.smax), sp=Math.floor(sMax/25+1e-9)*25; if(sp>=100){ pick={d,s:sp}; break; } }
     if(!pick){ const Ab=Math.PI*16*16/4; pick={d:16,s:Math.max(50,Math.floor(Math.min(n*Ab/Math.max(need,1e-9),q.smax)/25)*25)}; }
-    r.n=n; r.d=pick.d; r.s=pick.s; }));
+    r.n=n; r.d=pick.d; r.s=pick.s; }); });
+  ST.designMsg=`Armadura diseñada en ${np} pila${np===1?'':'s'}, ${ns} piso${ns===1?'':'s'}.`;
   changed('wall');
 }
 function storyTableHtml(){
@@ -2047,8 +2068,8 @@ function renderStories(){
 }
 function legStoryTable(L,print){
   const inp=(q,f,step,w)=>print?(f==='bw'?(q.r.bw||'-'):q.r[f]):`<input type="number" id="lr_${L.name}_${q.story}_${f}" data-pier="${L.name}" data-st="${q.story}" data-f="${f}" value="${q.r[f]}" step="${step}" style="width:${w}px"${f==='bw'?` placeholder="${L.g.bw}"`:''}>`;
-  return `<thead><tr><th>Piso</th><th class="num">Vu [kN]</th><th class="num">bw [mm]</th><th class="num">Acv [mm²]</th><th class="num">Vc [kN]</th><th class="num">Ωv</th><th class="num">Ve [kN]</th><th class="num">Vs req. [kN]</th><th class="num">Av/s req. [cm²/m]</th><th class="num">Capas</th><th class="num">Ø [mm]</th><th class="num">s [mm]</th><th class="num">Av/s [cm²/m]</th><th class="num">ρt</th><th class="num">Vs [kN]</th><th class="num">φVn [kN]</th><th class="num">Vn,máx [kN]</th><th class="num">Uso</th></tr></thead><tbody>${
-    L.st.slice().reverse().map(q=>`<tr${q.ok?'':' class="fail"'}><td>${q.story}</td><td class="num">${fmt(q.Vu,1)}</td><td class="num">${inp(q,'bw',10,58)}</td><td class="num">${fmtk(q.Acv)}</td><td class="num">${fmt(q.Vc,1)}</td><td class="num">${fmt(q.Om,2)}</td><td class="num">${fmt(q.Vdes,1)}${q.capped?' *':''}</td><td class="num">${fmt(q.VsReq,1)}</td><td class="num">${fmt(q.AvsReq,3)}</td><td class="num">${inp(q,'n',1,44)}</td><td class="num">${inp(q,'d',1,48)}</td><td class="num">${inp(q,'s',25,58)}</td><td class="num">${fmt(q.Avs,3)}</td><td class="num">${fmt(q.rt,5)}</td><td class="num">${fmt(q.Vs,1)}</td><td class="num">${fmt(q.phiVn,1)}</td><td class="num">${fmt(q.Vmax,1)}</td><td class="num">${fmt(q.util,3)}</td></tr>`).join('')}</tbody>`;
+  return `<thead><tr><th>Piso</th><th class="num">Vu [kN]</th><th class="num">bw [mm]</th><th class="num">Acv [mm²]</th><th class="num">Vc [kN]</th><th class="num">Ωv</th><th class="num">Ve [kN]</th><th class="num">Vs req. [kN]</th><th class="num">Av/s req. [cm²/m]</th><th class="num">Capas</th><th class="num">Ø [mm]</th><th class="num">s [mm]</th><th class="num">Av/s [cm²/m]</th><th class="num">ρt</th><th class="num">Vs [kN]</th><th class="num">φVn [kN]</th><th class="num">Vn,máx [kN]</th><th class="num">Uso</th><th>Nota</th></tr></thead><tbody>${
+    L.st.slice().reverse().map(q=>`<tr${q.ok?'':' class="fail"'}><td>${q.story}</td><td class="num">${fmt(q.Vu,1)}</td><td class="num">${inp(q,'bw',10,58)}</td><td class="num">${fmtk(q.Acv)}</td><td class="num">${fmt(q.Vc,1)}</td><td class="num">${fmt(q.Om,2)}</td><td class="num">${fmt(q.Vdes,1)}${q.capped?' *':''}</td><td class="num">${fmt(q.VsReq,1)}</td><td class="num">${fmt(q.AvsReq,3)}</td><td class="num">${inp(q,'n',1,44)}</td><td class="num">${inp(q,'d',1,48)}</td><td class="num">${inp(q,'s',25,58)}</td><td class="num">${fmt(q.Avs,3)}</td><td class="num">${fmt(q.rt,5)}</td><td class="num">${fmt(q.Vs,1)}</td><td class="num">${fmt(q.phiVn,1)}</td><td class="num">${fmt(q.Vmax,1)}</td><td class="num">${fmt(q.util,3)}</td><td style="white-space:nowrap">${q.okVmax?'':'Ve &gt; φVn,máx'}</td></tr>`).join('')}</tbody>`;
 }
 function legHeadHtml(L,W){
   return `<b>${L.name}</b>: lw = ${fmtk(L.lw)} mm, bw = ${fmtk(L.g.bw)} mm, θ = ${fmtk(L.g.th)}°, hw/lw = máx(${fmt(L.hwSeg,2)}, ${fmt(L.hwWall,2)}) = ${fmt(L.hwlw,2)}, αc = ${fmt(L.ac,3)}, ωv = ${fmt(W.omv,2)}, φ = ${fmt(L.phi,2)}. Ωv de la sección crítica: V2 &gt; 0 sentido ${L.lblP} (${fmt(L.Op,3)}), V2 &lt; 0 sentido ${L.lblN} (${fmt(L.On,3)}). Vu = envolvente sísmica de V2 por sentido, Ve = máx por sentido de mín(Ωv·ωv·Vu, 3Vu), y no menor que el corte no sísmico.`;
@@ -2083,6 +2104,8 @@ function renderLegs(){
   }
   $('legStory').innerHTML=legs.map(L=>`<div class="note" style="margin:10px 0 4px;">${legHeadHtml(L,R.W)}</div><div class="tablewrap"><table class="legst">${legStoryTable(L)}</table></div>`).join('')||'<div class="note">Sin pilas.</div>';
   if(foc&&foc.startsWith('lr_')&&$(foc)) $(foc).focus();
+  const wv=vmaxWarnings();
+  $('designMsg').innerHTML=(ST.designMsg?`<div>${ST.designMsg}</div>`:'')+wv.map(t=>`<div style="color:${FAIL};font-weight:700">${t}</div>`).join('');
   const rd=$('legRadar'); rd.innerHTML='';
   legs.forEach(L=>{ const d=document.createElement('div'); d.appendChild(radarSVG(L)); rd.appendChild(d); });
   const ck=R.chk.filter(c=>/pila|pilas/.test(c.n));
@@ -2183,6 +2206,8 @@ function DK(svg,W,H,cfg){ const FS=(cfg&&cfg.fs)||1;
   return K;
 }
 /* Lámina técnica del muro: PLANTA, ELEVACIÓN y DETALLE del elemento de borde (kit de dibujo ac/draft.js) */
+/* un solo path por región (más liviano al imprimir que un rectángulo por fila) */
+function runsPath(runs,Ux,Vy,w,h){ return runs.map(([a,b,j])=>{ const x=Ux(a), y=Vy(j); return `M${x.toFixed(1)},${y.toFixed(1)}h${((b-a+1)*w+0.4).toFixed(1)}v${(h+0.4).toFixed(1)}h${(-(b-a+1)*w-0.4).toFixed(1)}z`; }).join(''); }
 function concRuns(i0,i1,j0,j1,test){
   const R=[]; for(let j=j0;j<=j1;j++){ let i=i0; while(i<=i1){ if(!test(i,j)){ i++; continue; } let k=i; while(k+1<=i1&&test(k+1,j)) k++; R.push([i,k,j]); i=k+1; } } return R;
 }
@@ -2213,8 +2238,9 @@ function drawSheet(svgArg){
   const F=ST.F, R=ST.W, m=ST.m, fc=m.fc, Wi=R.W;
   const nBE=F.BE.length, nRowsD=Math.max(1,Math.ceil(nBE/3)), stories=ST.stories||[];
   const legsH=(R.legs&&R.legs.legs)||[];
-  const blkH=Math.max(60+nBE*30+40+legsH.length*30+70,40+(stories.length+1)*15);
-  const yBlk=530, yDet=Math.max(yBlk+blkH+40,840), W=1300,H=yDet+nRowsD*290+20;
+  const tabH=legsH.length&&stories.length?40+(stories.length+1)*15:0, txtH=60+nBE*30+40+legsH.length*30+70;
+  const yTab=84, yBlk=yTab+tabH+(tabH?24:0), yEl=Math.max(520,yBlk+txtH+20), nEl=Math.max(1,legsH.length), nRowsE=Math.ceil(nEl/2);
+  const yDet=yEl+nRowsE*720+20, W=1300,H=yDet+nRowsD*290+20;
   const K=DK(svg,W,H,{fs:1.05});
   const {nx,ny,dx,dy}=S, isC=(i,j)=>i>=0&&j>=0&&i<nx&&j<ny&&!!S.conc[j*nx+i], isQ=(i,j)=>isC(i,j)&&!!S.conf[j*nx+i];
   let i0=nx,i1=-1,j0=ny,j1=-1; for(let j=0;j<ny;j++) for(let i=0;i<nx;i++) if(isC(i,j)){ i0=Math.min(i0,i); i1=Math.max(i1,i); j0=Math.min(j0,j); j1=Math.max(j1,j); }
@@ -2224,8 +2250,8 @@ function drawSheet(svgArg){
   const xa=i0*dx, xb=(i1+1)*dx, ya=(ny-1-j1)*dy, yb=(ny-j0)*dy, wS=xb-xa, hS=yb-ya;
   const box={x:150,y:84,w:560,h:330}, sc=Math.min(box.w/wS,box.h/hS), ox=box.x+(box.w-wS*sc)/2, oy=box.y+(box.h+hS*sc)/2;
   const X=x=>ox+(x-xa)*sc, Y=y=>oy-(y-ya)*sc, XI=i=>X(i*dx), YJ=j=>Y((ny-j)*dy);
-  concRuns(i0,i1,j0,j1,isC).forEach(([a,b,j])=>K.rc(XI(a),YJ(j),(b-a+1)*dx*sc+0.4,dy*sc+0.4,null,K.H('cc')));
-  concRuns(i0,i1,j0,j1,isQ).forEach(([a,b,j])=>{ K.rc(XI(a),YJ(j),(b-a+1)*dx*sc+0.4,dy*sc+0.4,null,'#fff'); K.rc(XI(a),YJ(j),(b-a+1)*dx*sc+0.4,dy*sc+0.4,null,K.H('st')); });
+  { const dC=runsPath(concRuns(i0,i1,j0,j1,isC),XI,YJ,dx*sc,dy*sc), dQ=runsPath(concRuns(i0,i1,j0,j1,isQ),XI,YJ,dx*sc,dy*sc);
+    if(dC) K.pa(dC,null,K.H('cc')); if(dQ){ K.pa(dQ,null,'#fff'); K.pa(dQ,null,K.H('st')); } }
   regionEdges(i0,i1,j0,j1,isQ).forEach(e=>K.ln(XI(e[0]),YJ(e[1]),XI(e[2]),YJ(e[3]),'vis',{k:'hDb hS hRc'}));
   regionEdges(i0,i1,j0,j1,isC).forEach(e=>K.ln(XI(e[0]),YJ(e[1]),XI(e[2]),YJ(e[3]),'cut',{k:'dx dy nx ny'}));
   for(let n=0;n<F.nb;n++) K.ci(X(F.bx[n]),Y(F.by[n]),Math.max(F.bd[n]/2*sc,1.7),null,'#111',{k:'diam'});
@@ -2302,7 +2328,7 @@ function drawSheet(svgArg){
     if(!done) K.t(P[0],P[1]+4,b.name,{s:10,b:true,k:kk}); });
   K.title(box.x+box.w/2,box.y+box.h+66,'Planta del muro','S/E');
   /* ---------- CUADROS ---------- */
-  let lx=40, ly=yBlk;
+  let lx=780, ly=yBlk;
   K.t(lx,ly,'CUADRO DE ELEMENTOS DE BORDE',{a:'start',s:11,b:true}); ly+=18;
   F.BE.forEach(b=>{ const c=b.cp; K.t(lx,ly,`${b.name}  NÚCLEO ${fl(b.bc)}×${fl(b.hc)}`,{a:'start',s:11,k:'hBc hHc'}); K.t(lx+8,ly+13,`E Ø${c.dh} @ ${fl(c.s)}, ${c.nlx} + ${c.nly} RAMAS${c.ov?' (PROPIO)':''}`,{a:'start',s:10.5,k:`hDb hS hHx beov_${b.name}_dh beov_${b.name}_s`}); ly+=30; });
   if(!nBE){ K.t(lx,ly,'SIN ELEMENTOS PINTADOS',{a:'start',s:11}); ly+=18; }
@@ -2315,8 +2341,8 @@ function drawSheet(svgArg){
   K.t(lx,ly,`H.A. f'c ${fc} MPa, RECUBR. ${fl(m.rc)}`,{a:'start',s:11,k:'fc hRc'});
   /* cuadro de armadura horizontal: filas = pisos (techo arriba), columnas = pilas */
   if(legsH.length&&stories.length){
-    const tx0=350, cw0=46, np=legsH.length, cwP=Math.min(150,(720-tx0-cw0)/np), rh=15, showU=cwP>=118;
-    let ty=yBlk; K.t(tx0,ty,'CUADRO DE ARMADURA HORIZONTAL',{a:'start',s:11,b:true}); ty+=10;
+    const tx0=780, cw0=46, np=legsH.length, cwP=Math.min(150,(1290-tx0-cw0)/np), rh=15, showU=cwP>=118;
+    let ty=yTab; K.t(tx0,ty,'CUADRO DE ARMADURA HORIZONTAL',{a:'start',s:11,b:true}); ty+=10;
     const tw=cw0+np*cwP, rows=stories.slice().reverse();
     K.rc(tx0,ty,tw,(rows.length+1)*rh,'vis');
     K.t(tx0+cw0/2,ty+11,'PISO',{s:10,b:true});
@@ -2331,7 +2357,8 @@ function drawSheet(svgArg){
   F.BE.forEach((eb,k)=>{ const col=k%3, row=Math.floor(k/3); drawBEDetail(K,eb,{x:20+col*430,y:yDet+row*290,w:200,h:200},isC,i0,i1,j0,j1); });
   if(!nBE){ K.t(W/2,yDet+80,'SIN ELEMENTOS DE BORDE PINTADOS',{s:13,b:true}); }
   /* ---------- ELEVACIÓN ---------- */
-  drawElevation(K,{x:752,y:80,w:510,h:640},R,Wi,m);
+  if(legsH.length) legsH.forEach((L,k)=>drawElevation(K,{x:10+(k%2)*645,y:yEl+Math.floor(k/2)*720,w:600,h:620},R,Wi,m,L));
+  else drawElevation(K,{x:10,y:yEl,w:600,h:620},R,Wi,m,null);
 }
 function drawBEDetail(K,eb,cell,isC,i0,i1,j0,j1){
   const F=ST.F, R=ST.W, m=ST.m, {nx,ny,dx,dy}=S, fl=v=>fmtk(v), c=eb.cp;
@@ -2343,7 +2370,7 @@ function drawBEDetail(K,eb,cell,isC,i0,i1,j0,j1){
   const U=i=>ox2+(i-I0)*dx*s2, V=j=>oy2+(j-J0)*dy*s2, Ux=x=>ox2+(x-I0*dx)*s2, Vy=y=>oy2+((ny-y/dy)-J0)*dy*s2;
   const inW=(i,j)=>i>=I0&&i<=I1&&j>=J0&&j<=J1&&isC(i,j);
   const kE=`hDb hS beov_${eb.name}_dh beov_${eb.name}_s`, kL=`hHx beov_${eb.name}_nx beov_${eb.name}_ny`;
-  concRuns(I0,I1,J0,J1,inW).forEach(([a,b,j])=>K.rc(U(a),V(j),(b-a+1)*dx*s2+0.4,dy*s2+0.4,null,K.H('cc')));
+  { const d=runsPath(concRuns(I0,I1,J0,J1,inW),U,V,dx*s2,dy*s2); if(d) K.pa(d,null,K.H('cc')); }
   regionEdges(I0,I1,J0,J1,inW).forEach(e=>{ const cutEdge=(e[0]===e[2]&&(e[0]===I0&&isC(I0-1,e[1])||e[0]===I1+1&&isC(I1+1,e[1])))||(e[1]===e[3]&&(e[1]===J0&&isC(e[0],J0-1)||e[1]===J1+1&&isC(e[0],J1+1)));
     if(cutEdge) K.brk(U(e[0]),V(e[1]),U(e[2]),V(e[3])); else K.ln(U(e[0]),V(e[1]),U(e[2]),V(e[3]),'cut'); });
   const hx0=U(eb.i0), hx1=U(eb.i1+1), hy0=V(eb.j0), hy1=V(eb.j1+1), rr=Math.min(7,Math.max(c.dh*s2,1.6)*2+3);
@@ -2364,8 +2391,10 @@ function drawBEDetail(K,eb,cell,isC,i0,i1,j0,j1){
   if(e) K.t(tx2+15,cell.y+150,`s ≤ ${fl(e.sLim)}, hx ≤ ${fl(e.hxLim)} mm`,{a:'start',s:11,k:kE});
   K.title(cell.x+cell.w/2+60,cell.y+cell.h+36,`Detalle ${eb.name}`,'S/E');
 }
-function drawElevation(K,ev,R,Wi,m){
-  const fl=v=>fmtk(v), s0=R.senses[0], s1=R.senses[1]||s0, lw=s0.lw, stories=ST.stories||[], zb=ST.zb||{};
+function drawElevation(K,ev,R,Wi,m,Lg){
+  const fl=v=>fmtk(v), stories=ST.stories||[], zb=ST.zb||{};
+  const th=Lg?Lg.th:R.senses[0].ang, near=a=>{ let b=null,bd=1e9; R.senses.forEach(q=>{ const d=Math.abs(Math.atan2(Math.sin(a-q.ang),Math.cos(a-q.ang))); if(d<bd){ bd=d; b=q; } }); return bd<0.2?b:null; };
+  const s0=near(th), s1=near(th+Math.PI), lw=Lg?Lg.lw:R.senses[0].lw;
   const zTop=Math.max(ST.zTop||Wi.hw,1), zc=Wi.zc||0, hf=1000;
   const sv=(ev.h-40)/(zTop+hf), shz=Math.min(sv*2.2,150/lw);
   const xw0=ev.x+150, xw1=xw0+lw*shz, Zh=z=>ev.y+20+(zTop-z)*sv, Z0=Zh(0), Zc=Zh(zc);
@@ -2384,7 +2413,7 @@ function drawElevation(K,ev,R,Wi,m){
     if(zt1>zB) K.rc(x0,Zh(zt1),wpx,(zt1-zB)*sv,'vis',K.H('st'),{k:'hS'});
     if(zt2>zt1) K.rc(x0,Zh(zt2),wpx,(zt2-zt1)*sv,'vis',K.H('sw'),{k:'hS'});
     return {x0,wpx,zA,zB,zt1,zt2}; };
-  const zr=zone(s0,true); zone(s1,false);
+  const zr=s0?zone(s0,true):null; if(s1) zone(s1,false);
   /* pisos: losas, nombres y cotas desde la sección crítica */
   stories.forEach((st,i)=>{ const z=zb[st]; if(z>0){ K.ln(xw0-12,Zh(z),xw0,Zh(z),'vis',{k:`sto_${st}_hu`}); K.ln(xw1,Zh(z),xw1+12,Zh(z),'vis',{k:`sto_${st}_hu`}); }
     const hu=ST.storyGeo[st].hu*1e3; K.t((xw0+xw1)/2,Zh(z+hu/2)+4,st,{s:9.5,b:st===Wi.crit,k:`sto_${st}_hu`});
@@ -2394,35 +2423,38 @@ function drawElevation(K,ev,R,Wi,m){
   K.ln(xw0-62,Zc,xw1+40,Zc,'phan',{k:'wCrit'});
   K.lead(xw1+30,Zc,xw1+80,Zc+22,['SECCIÓN CRÍTICA',`BASE DE ${Wi.crit}`],{dot:true,k:'wCrit'});
   /* armadura horizontal de la pila en el plano de α, agrupada por pisos iguales */
-  const legs=(R.legs&&R.legs.legs)||[];
-  let Lp=null, bd=1e9; legs.forEach(L=>{ const d=Math.abs(Math.sin(L.th-s0.ang)); if(d<bd){ bd=d; Lp=L; } });
+  const Lp=Lg;
   if(Lp&&Lp.st.length){
     const grp=[]; Lp.st.forEach(q=>{ const key=`${q.d}|${q.s}|${q.n}`, last=grp[grp.length-1]; if(last&&last.key===key) last.sts.push(q); else grp.push({key,q,sts:[q]}); });
     const xb=xw0-62;
     grp.forEach(g=>{ const zA=zb[g.sts[0].story], zB=zb[g.sts[g.sts.length-1].story]+ST.storyGeo[g.sts[g.sts.length-1].story].hu*1e3, yA=Zh(zA)-2, yB=Zh(zB)+2;
       K.ln(xb,yB,xb,yA,'thin'); K.ln(xb,yB,xb+5,yB,'thin'); K.ln(xb,yA,xb+5,yA,'thin');
       K.t(xb-5,(yA+yB)/2+4,`H Ø${g.q.d}@${fl(g.q.s)} ${g.q.n}C`,{a:'end',s:10,k:g.sts.map(q=>`lr_${Lp.name}_${q.story}_d lr_${Lp.name}_${q.story}_s`).join(' ')}); });
-    K.t(xb-5,Zh(zTop)-22,`PILA ${Lp.name}`,{a:'end',s:10.5,b:true});
   }
   /* δu en el techo */
   const zt=Zh(zTop);
-  K.force(xw1+46,zt,1,0,40,'',{k:'du1'}); K.t(xw1+18,zt-8,`δu = ${fl(s0.du)}`,{a:'start',b:true,k:'du1'});
-  if(s1!==s0){ K.force(xw0-46,zt,-1,0,40,'',{k:'du2'}); K.t(xw0-18,zt-8,`δu = ${fl(s1.du)}`,{a:'end',b:true,k:'du2'}); }
-  K.dh(xw0,xw1,Zh(zTop),Zh(zTop),Zh(zTop)-30,`lw = ${fl(lw)}`,{k:'alphaMC'});
+  if(s0){ K.force(xw1+46,zt,1,0,40,'',{k:'du'+(s0.k+1)}); K.t(xw1+18,zt-8,`δu = ${fl(s0.du)}`,{a:'start',b:true,k:'du'+(s0.k+1)}); }
+  if(s1){ K.force(xw0-46,zt,-1,0,40,'',{k:'du'+(s1.k+1)}); K.t(xw0-18,zt-8,`δu = ${fl(s1.du)}`,{a:'end',b:true,k:'du'+(s1.k+1)}); }
+  const li=Lg?ST.legNames.indexOf(Lg.name):-1;
+  K.dh(xw0,xw1,Zh(zTop),Zh(zTop),Zh(zTop)-30,`lw = ${fl(lw)}`,{k:li>=0?`leg_${li}_lw`:'alphaMC'});
   /* cotas verticales a la derecha */
   const xR=xw1+16;
   K.dv(Zh(zTop),Zc,xw1,xw1,xR+50,`ht = ${fmt(Wi.ht/1e3,2)} m`,{k:'wHt wCrit'});
-  if(zr){ const zs=[zr.zA,zc,zr.zB,zr.zt1,zr.zt2].filter((v,i,a)=>i===0||v-a[i-1]>1); const ys=zs.map(Zh), tt=zs.slice(1).map((v,i)=>fmt((v-zs[i])/1e3,2));
+  if(zr){ const zs=[zr.zA,zc,zr.zB,zr.zt1,zr.zt2].filter((v,i,a)=>i===0||v-a[i-1]>1); const ys=zs.map(Zh), tt=zs.slice(1).map((v,i)=>(v-zs[i])*sv<30?'':fmt((v-zs[i])/1e3,2));
     if(ys.length>1) K.chainV(ys,xw1,xR+12,tt,{k:'du1 hS'}); }
-  const lpU=Wi.eq==='bd'?s0.lp:0.5*s0.lw, xl=xw0+lw*shz*0.3;
-  K.dv(Zh(zc+lpU),Zc,xl,xl,xl,`lp = ${fl(lpU)}`,{k:'wLp wEq'});
+  if(s0){ const lpU=Wi.eq==='bd'?s0.lp:0.5*s0.lw, xl=xw0+lw*shz*0.3;
+    K.dv(Zh(zc+lpU),Zc,xl,xl,xl,`lp = ${fl(lpU)}`,{k:'wLp wEq'}); }
   const nx2=xR+70, be0=R.be[0];
   const zt1s=Math.min(150,kdb*dbm), zt2s=Math.min(200,14*dbm);
-  if(zr&&s0.need) K.lead(zr.x0+zr.wpx/2,Zh((zc+zr.zB)/2),nx2,Zh((zc+zr.zB)/2),['EB',`s ≤ ${fl(be0?be0.sLim:100)}`],{k:'hS hHx',side:1});
-  if(zr&&zr.zt1>zr.zB) K.lead(zr.x0+zr.wpx/2,Zh((zr.zB+zr.zt1)/2),nx2,Zh((zr.zB+zr.zt1)/2),['ZT1',`s ≤ ${fl(zt1s)}`],{k:'hS',side:1});
-  if(zr&&zr.zt2>zr.zt1) K.lead(zr.x0+zr.wpx/2,Zh((zr.zt1+zr.zt2)/2),nx2,Zh((zr.zt1+zr.zt2)/2),['ZT2',`s ≤ ${fl(zt2s)}`],{k:'hS',side:1});
+  const notes=[];
+  if(zr&&s0.need) notes.push([Zh((zc+zr.zB)/2),['EB',`s ≤ ${fl(be0?be0.sLim:100)}`],'hS hHx']);
+  if(zr&&zr.zt1>zr.zB) notes.push([Zh((zr.zB+zr.zt1)/2),['ZT1',`s ≤ ${fl(zt1s)}`],'hS']);
+  if(zr&&zr.zt2>zr.zt1) notes.push([Zh((zr.zt1+zr.zt2)/2),['ZT2',`s ≤ ${fl(zt2s)}`],'hS']);
+  let lastY=Zc+40; notes.forEach(n=>{ const ty=Math.min(n[0],lastY-34); lastY=ty; K.lead(zr.x0+zr.wpx/2,n[0],nx2,ty,n[1],{k:n[2],side:1}); });
   K.lead((xw0+xw1)/2+20,Z0+hf*sv*0.6,nx2,Z0+hf*sv*0.6+20,['FUNDACIÓN','EB PENETRA 300 MÍN.'],{dot:true,side:1});
-  K.title(ev.x+ev.w/2,ev.y+ev.h+50,'Elevación del muro','S/E');
+  { const tx=ev.x+ev.w/2-40, ty=ev.y+ev.h+50, t='ELEVACIÓN '+(Lg?'PILA '+Lg.name:'DEL MURO'), w=t.length*7.4+10;
+    K.t(tx,ty,t,{s:13.5,b:true}); K.ln(tx-w/2,ty+5,tx+w/2,ty+5,'cut'); K.ln(tx-w/2,ty+8.5,tx+w/2,ty+8.5,'thin');
+    K.t(tx,ty+22,s0||s1?`S/E, PLANO DE ${s0?s0.lbl:''}${s0&&s1?' Y ':''}${s1?s1.lbl:''}`:'S/E, FUERA DE LOS SENTIDOS ANALIZADOS',{s:11}); }
 }
 function sectionSVG(){
   const F=ST.F, W=S.nx*S.dx, H=S.ny*S.dy;
