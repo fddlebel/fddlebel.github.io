@@ -92,10 +92,13 @@ svg text{font-family:var(--sans);}
 <body>
 
 <style>
-.ltab{width:100%;border-collapse:collapse;font-size:12px;}
+.ltab{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed;}
+.ltab th:nth-child(5){width:62px;}
+.ltab th:last-child{width:24px;}
 .ltab td,.ltab th{padding:2px 3px;}
-.ltab input[type=number]{padding:4px 3px;font-size:12px;width:54px;}
-.ltab .xb{border:1px solid var(--line-strong);background:#fff;border-radius:4px;cursor:pointer;padding:2px 7px;font-size:12px;}
+.ltab input[type=number]{padding:4px 3px;font-size:12px;width:100%;min-width:0;box-sizing:border-box;}
+.ltab select{padding:4px 1px;font-size:12px;width:100%;min-width:0;box-sizing:border-box;}
+.ltab .xb{border:1px solid var(--line-strong);background:#fff;border-radius:4px;cursor:pointer;padding:2px 5px;font-size:12px;}
 </style>
 <div class="app-header">
   <h1><a href="index.html" style="color:inherit;text-decoration:none;font-weight:400;">fddlebel</a> / Conexiones</h1>
@@ -573,27 +576,26 @@ function cxWeldSheet(svg,o){
   const m=24/sc; K.rc(X(x0-m),Y(y1+m),(bw+2*m)*sc,(bh+2*m)*sc,'thin','#fff');
   o.segs.forEach(s=>{ const L=s.L||Math.hypot(s.x2-s.x1,s.y2-s.y1), ux=(s.x2-s.x1)/L, uy=(s.y2-s.y1)/L, n=Math.max(2,Math.round(L*sc/5));
     K.ln(X(s.x1),Y(s.y1),X(s.x2),Y(s.y2),'cut',{k:'ww'});
-    const mx=(s.x1+s.x2)/2-o.xc, my=(s.y1+s.y2)/2-o.yc, sgn=(-uy*mx+ux*my)>=0?1:-1;
-    for(let i=0;i<=n;i++){ const px=X(s.x1+ux*L*i/n), py=Y(s.y1+uy*L*i/n); K.ln(px,py,px+(-uy)*sgn*5,py-(ux)*sgn*5,'thin',{k:'ww'}); } });
+    for(let i=0;i<=n;i++){ const px=X(s.x1+ux*L*i/n), py=Y(s.y1+uy*L*i/n); s.sg.forEach(g=>K.ln(px,py,px+(-uy)*g*5,py-(ux)*g*5,'thin',{k:'ww'})); } });
   const gx=X(o.xc), gy=Y(o.yc); K.ci(gx,gy,6,'vis','#fff'); K.pa(`M${gx},${gy} L${gx+6},${gy} A6,6 0 0,0 ${gx},${gy-6} Z M${gx},${gy} L${gx-6},${gy} A6,6 0 0,0 ${gx},${gy+6} Z`,null,'#111'); K.t(gx+10,gy-10,'G',{a:'start',b:true});
   const ux=[...new Set(xs.map(v=>+v.toFixed(3)))].sort((a,b)=>a-b), uy=[...new Set(ysv.map(v=>+v.toFixed(3)))].sort((a,b)=>a-b);
   if(ux.length>1) K.chainH(ux.map(X),Y(y0),Y(y0-m)+30,ux.slice(1).map((v,i)=>fl(v-ux[i])),{k:'pb'});
   if(uy.length>1) K.chainV(uy.map(Y),X(x0),X(x0-m)-30,uy.slice(1).map((v,i)=>fl(v-uy[i])),{k:'ph'});
   K.dh(X(o.xc),X(x1),gy,gy,Y(y1+m)-14,'x̄ = '+f1(x1-o.xc,1),{});
-  o.nodes.forEach(nd=>{ const r=nd.fr/o.cap, crit=nd===o.crit; K.ci(X(nd.x),Y(nd.y),3,'vis',crit?'#111':'#fff'); K.t(X(nd.x)+(nd.x>=o.xc?8:-8),Y(nd.y)+(nd.y>=o.yc?-8:16),`${f1(nd.fr,1)} MPa`,{a:nd.x>=o.xc?'start':'end',b:crit}); });
+  o.nodes.filter(nd=>nd.lab||nd===o.crit).forEach(nd=>{ const r=nd.fr/o.cap, crit=nd===o.crit; K.ci(X(nd.x),Y(nd.y),3,'vis',crit?'#111':'#fff'); K.t(X(nd.x)+(nd.x>=o.xc?8:-8),Y(nd.y)+(nd.y>=o.yc?-8:16),`${f1(nd.fr,1)} MPa`,{a:nd.x>=o.xc?'start':'end',b:crit}); });
   const Fx=num('Fx',0), Fy=num('Fyl',0), Fz=num('Fz',0), Mz=num('wMz',0)+Fy*num('wex',0)/1e3-Fx*num('wey',0)/1e3, Lr=60;
   if(Fx) K.force(gx+Math.sign(Fx)*(Lr+8),gy,Math.sign(Fx),0,Lr,`Fx = ${Fx} kN`,{k:'Fx',at:'tip'});
   if(Fy) K.force(gx,gy-Math.sign(Fy)*(Lr+8),0,-Math.sign(Fy),Lr,`Fy = ${Fy} kN`,{k:'Fyl',at:'tip'});
   if(Fz){ const zx=gx-34, zy=gy+30; K.ci(zx,zy,7,'vis','#fff',{k:'Fz'}); if(Fz>0) K.ci(zx,zy,2,null,'#111',{k:'Fz'}); else { K.ln(zx-5,zy-5,zx+5,zy+5,'vis',{k:'Fz'}); K.ln(zx-5,zy+5,zx+5,zy-5,'vis',{k:'Fz'}); } K.t(zx-11,zy+4,`Fz = ${Fz} kN`,{a:'end',b:true,k:'Fz'}); }
   if(Mz){ const r=42, a0=Math.sign(Mz); K.pa(`M${gx+r},${gy} A${r},${r} 0 1,${a0>0?0:1} ${gx},${gy+(a0>0?r:-r)}`,null,null,{k:'wMz'}).setAttribute('style','stroke:#111;stroke-width:1.5;fill:none'); K.ah(gx,gy+(a0>0?r:-r),a0>0?Math.PI:Math.PI,{k:'wMz'},10,3.4); K.t(gx+r*0.75,gy+r+16,`Mz = ${f1(Mz,3)} kN·m`,{a:'start',b:true,k:'wMz'}); }
   const closed=o.segs.length>2&&Math.hypot(o.segs[0].x1-o.segs[o.segs.length-1].x2,o.segs[0].y1-o.segs[o.segs.length-1].y2)<1e-6;
-  const s0=o.segs.reduce((a,b)=>(b.x1+b.x2)>(a.x1+a.x2)?b:a); K.weld(X((s0.x1+s0.x2)/2)+3,Y((s0.y1+s0.y2)/2)-3,X(x1+m)+50,Y((s0.y1+s0.y2)/2)-60,{size:w,all:closed,note:'E'+{414:60,483:70,552:80}[$('fexx').value]+'XX',side:1,k:'ww fexx'});
+  const s0=o.segs.reduce((a,b)=>(b.x1+b.x2)>(a.x1+a.x2)?b:a); K.weld(X((s0.x1+s0.x2)/2)+3,Y((s0.y1+s0.y2)/2)-3,X(x1+m)+50,Y((s0.y1+s0.y2)/2)-60,{size:w,both:s0.ns===2,all:closed&&o.segs.every(q=>q.sd===s0.sd),note:'E'+{414:60,483:70,552:80}[$('fexx').value]+'XX',side:1,k:'ww fexx'});
   K.title(360,H-24,'Elevación grupo de soldadura','S/E');
   const ex=1010, ez=330, sd=Math.min(14,200/(Math.max(w,tm)*3+tm)), D=v=>v*sd, base=Math.max(2*tm,3*w+tm);
   const bx0=ex-D(base*1.6), bx1=ex+D(base*1.6);
   K.rc(bx0,ez,bx1-bx0,D(tm),'cut',K.H('st2'),{k:'wtm'}); K.brk(bx0,ez-4,bx0,ez+D(tm)+4); K.brk(bx1,ez-4,bx1,ez+D(tm)+4);
   K.rc(ex-D(tm/2),ez-D(base*1.4),D(tm),D(base*1.4),'cut',K.H('st'),{k:'wtm'}); K.brk(ex-D(tm/2)-4,ez-D(base*1.4),ex+D(tm/2)+4,ez-D(base*1.4));
-  [[1,ex+D(tm/2)],[-1,ex-D(tm/2)]].forEach(([s,xw])=>K.pl([[xw,ez],[xw+s*D(w),ez],[xw,ez-D(w)]],'vis','#111',{k:'ww'}));
+  [[1,ex+D(tm/2)],[-1,ex-D(tm/2)]].slice(0,o.ns===2?2:1).forEach(([s,xw])=>K.pl([[xw,ez],[xw+s*D(w),ez],[xw,ez-D(w)]],'vis','#111',{k:'ww'}));
   K.dh(ex+D(tm/2),ex+D(tm/2+w),ez,ez,ez-D(w)-18,`w = ${w}`,{k:'ww',side:1});
   K.dv(ez,ez-D(w),ex+D(tm/2),ex+D(tm/2),ex+D(tm/2+w)+30,`${w}`,{k:'ww'});
   const xm=ex+D(tm/2+w/2), ym=ez-D(w/2), te=w/Math.SQRT2; K.dim([ex+D(tm/2),ez],[xm,ym],0,'',{ext:false}); K.lead(xm-D(te*0.35),ym+D(te*0.35)-2,ex+D(tm/2+w)+70,ez-D(w)-60,[`te = 0,707w = ${f1(te,2)}`],{});
@@ -615,8 +617,8 @@ const FNT={A307:[310,190,190],G120:[620,370,470],G144:[750,450,560],G150:[780,47
 let SEGS=[];
 function fillBolts(){ $('bd').innerHTML=Object.keys(BOLTS).map(k=>`<option${k==='M20'?' selected':''}>${k}</option>`).join(''); }
 function segUI(){
-  $('segTab').innerHTML='<tr><th>x1</th><th>y1</th><th>x2</th><th>y2</th><th></th></tr>'+SEGS.map((s,i)=>`<tr>${['x1','y1','x2','y2'].map(k=>`<td><input type="number" data-i="${i}" data-k="${k}" value="${s[k]}" step="5"></td>`).join('')}<td><button class="xb" data-del="${i}">×</button></td></tr>`).join('');
-  $('segTab').querySelectorAll('input').forEach(inp=>inp.addEventListener('input',()=>{ SEGS[+inp.dataset.i][inp.dataset.k]=parseFloat(inp.value)||0; rerun(); }));
+  $('segTab').innerHTML='<tr><th>x1</th><th>y1</th><th>x2</th><th>y2</th><th>Lados</th><th></th></tr>'+SEGS.map((s,i)=>`<tr>${['x1','y1','x2','y2'].map(k=>`<td><input type="number" data-i="${i}" data-k="${k}" value="${s[k]}" step="5"></td>`).join('')}<td><select data-i="${i}" data-k="sd">${[['a','Ambos'],['o','Fuera'],['i','Dentro']].map(([v,t])=>`<option value="${v}"${(s.sd||(s.ns===1?'o':'a'))===v?' selected':''}>${t}</option>`).join('')}</select></td><td><button class="xb" data-del="${i}">×</button></td></tr>`).join('');
+  $('segTab').querySelectorAll('input,select').forEach(inp=>inp.addEventListener(inp.tagName==='SELECT'?'change':'input',()=>{ SEGS[+inp.dataset.i][inp.dataset.k]=inp.tagName==='SELECT'?inp.value:(parseFloat(inp.value)||0); rerun(); }));
   $('segTab').querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>{ SEGS.splice(+b.dataset.del,1); segUI(); rerun(); }));
 }
 function preset(k){ const b=num('pb',100), h=num('ph',100);
@@ -719,31 +721,38 @@ function weldAnalysis(){
   const w=num('ww',6), te=w/Math.SQRT2, FEXX=+$('fexx').value, tmin=num('wtm',10), Fy=num('wFy',250), Fu=num('wFu',400);
   const segs=SEGS.map(s=>({...s,L:Math.hypot(s.x2-s.x1,s.y2-s.y1)})).filter(s=>s.L>0);
   if(!segs.length){ o.warn.push('Sin tramos de soldadura.'); return o; }
-  let A=0,Sx=0,Sy=0; segs.forEach(s=>{ A+=s.L*te; Sx+=s.L*te*(s.x1+s.x2)/2; Sy+=s.L*te*(s.y1+s.y2)/2; });
+  const tp=num('wtm',10), dw=tp/2+w/3, L0=segs.reduce((a,s)=>a+s.L,0), gx0=segs.reduce((a,s)=>a+s.L*(s.x1+s.x2)/2,0)/L0, gy0=segs.reduce((a,s)=>a+s.L*(s.y1+s.y2)/2,0)/L0;
+  const lines=[]; segs.forEach((s,i)=>{ s.sd=s.sd||(s.ns===1?'o':'a'); const ux=(s.x2-s.x1)/s.L, uy=(s.y2-s.y1)/s.L, nx=-uy, ny=ux, dp=nx*((s.x1+s.x2)/2-gx0)+ny*((s.y1+s.y2)/2-gy0);
+    s.so=dp<0?-1:1; s.sg=s.sd==='a'?[s.so,-s.so]:[s.sd==='o'?s.so:-s.so]; s.ns=s.sg.length;
+    s.sg.forEach(g=>lines.push({i,g,x1:s.x1+nx*g*dw,y1:s.y1+ny*g*dw,x2:s.x2+nx*g*dw,y2:s.y2+ny*g*dw,L:s.L})); });
+  let A=0,Sx=0,Sy=0; lines.forEach(l=>{ const a=l.L*te; A+=a; Sx+=a*(l.x1+l.x2)/2; Sy+=a*(l.y1+l.y2)/2; });
   const xc=Sx/A, yc=Sy/A; let Ixx=0,Iyy=0,Ixy=0;
-  segs.forEach(s=>{ const a=s.L*te, mx=(s.x1+s.x2)/2-xc, my=(s.y1+s.y2)/2-yc, dx=s.x2-s.x1, dy=s.y2-s.y1; Ixx+=a*(my*my+dy*dy/12); Iyy+=a*(mx*mx+dx*dx/12); Ixy+=a*(mx*my+dx*dy/12); });
-  const J=Ixx+Iyy, Ltot=segs.reduce((a,s)=>a+s.L,0);
+  lines.forEach(l=>{ const a=l.L*te, mx=(l.x1+l.x2)/2-xc, my=(l.y1+l.y2)/2-yc, dx=l.x2-l.x1, dy=l.y2-l.y1; Ixx+=a*(my*my+dy*dy/12); Iyy+=a*(mx*mx+dx*dx/12); Ixy+=a*(mx*my+dx*dy/12); });
+  const J=Ixx+Iyy, Ltot=lines.reduce((a,l)=>a+l.L,0);
   const Fx=num('Fx',0)*1e3, Fyl=num('Fyl',0)*1e3, Fz=num('Fz',0)*1e3, ex=num('wex',0), ey=num('wey',0);
   const Mx=num('wMx',0)*1e6+Fz*ey, My=num('wMy',0)*1e6+Fz*ex, Mz=num('wMz',0)*1e6+Fyl*ex-Fx*ey;
   const den=Ixx*Iyy-Ixy*Ixy;
   const st=(x,y)=>{ const X=x-xc, Y=y-yc; const fx=Fx/A-Mz*Y/J, fy=Fyl/A+Mz*X/J, fz=Fz/A+((Mx*Iyy-My*Ixy)*Y+(My*Ixx-Mx*Ixy)*X)/den; return {fx,fy,fz,fr:Math.hypot(fx,fy,fz)}; };
-  const nodes=[]; segs.forEach(s=>{ [[s.x1,s.y1],[s.x2,s.y2]].forEach(([x,y])=>{ if(!nodes.some(n=>Math.abs(n.x-x)<1e-6&&Math.abs(n.y-y)<1e-6)) nodes.push({x,y,...st(x,y)}); }); });
+  const nodes=[]; lines.forEach(l=>[[l.x1,l.y1,0],[l.x2,l.y2,1]].forEach(([x,y,e])=>nodes.push({x,y,i:l.i,e,g:l.g,...st(x,y)})));
+  const kk=n=>{ const s0=segs[n.i]; return (n.e?[s0.x2,s0.y2]:[s0.x1,s0.y1]).map(v=>v.toFixed(3)).join(','); };
+  const best={}; nodes.forEach(n=>{ const k=kk(n); if(!best[k]||n.fr>best[k].fr) best[k]=n; }); Object.values(best).forEach(n=>n.lab=true);
   const crit=nodes.reduce((a,b)=>b.fr>a.fr?b:a);
-  const ph=phiOm(lrfd,0.75,2.00), Fnw=0.60*FEXX, cap=ph*Fnw;
-  D.push([null,'Grupo de soldadura, método elástico'],['te = 0,707w',f1(te,2)+' mm','J2.2a'],['A, xc, yc',`${f1(A,0)} mm², ${f1(xc,1)}, ${f1(yc,1)} mm`,'garganta efectiva'],['Ixx, Iyy, Ixy',`${f1(Ixx/1e6,3)}, ${f1(Iyy/1e6,3)}, ${f1(Ixy/1e6,3)}·10⁶ mm⁴`,''],['Mx, My, Mz en centroide',`${f1(Mx/1e6,3)}, ${f1(My/1e6,3)}, ${f1(Mz/1e6,3)} kN·m`,'incluye excentricidades'],
-    ['Nodo crítico',`(${f1(crit.x,1)}, ${f1(crit.y,1)})`,''],['fx, fy, fz',`${f1(crit.fx,1)}, ${f1(crit.fy,1)}, ${f1(crit.fz,1)} MPa`,'por área de garganta'],['Fnw',f1(Fnw,1)+' MPa','Tabla J2.5, 0,60FEXX, kds = 1,0']);
+  const ph=phiOm(lrfd,0.75,2.00), Fnw=0.60*FEXX, cap=ph*Fnw, SDN={a:'ambos',o:'fuera',i:'dentro'};
+  D.push([null,'Grupo de soldadura, método elástico'],['te = 0,707w',f1(te,2)+' mm','J2.2a'],['Lados por tramo',segs.map(s=>SDN[s.sd]).join(', '),'respecto al centro geométrico de los tramos'],['Desfase de garganta',f1(dw,2)+' mm','t/2 + w/3 desde el eje de la placa'],['A, xc, yc',`${f1(A,0)} mm², ${f1(xc,1)}, ${f1(yc,1)} mm`,'garganta efectiva'],['Ixx, Iyy, Ixy',`${f1(Ixx/1e6,3)}, ${f1(Iyy/1e6,3)}, ${f1(Ixy/1e6,3)}·10⁶ mm⁴`,''],['Mx, My, Mz en centroide',`${f1(Mx/1e6,3)}, ${f1(My/1e6,3)}, ${f1(Mz/1e6,3)} kN·m`,'incluye excentricidades'],
+    ['Nodo crítico',`(${f1(crit.x,1)}, ${f1(crit.y,1)}), tramo ${crit.i+1}`,''],['fx, fy, fz',`${f1(crit.fx,1)}, ${f1(crit.fy,1)}, ${f1(crit.fz,1)} MPa`,'por área de garganta'],['Fnw',f1(Fnw,1)+' MPa','Tabla J2.5, 0,60FEXX, kds = 1,0']);
   o.chk.push({n:'Metal de soldadura, J2-4',d:f1(crit.fr,1)+' MPa',c:f1(cap,1)+' MPa',r:crit.fr/cap});
-  const q=crit.fr*te;
+  const qn=nodes.filter(n=>n.i===crit.i&&n.e===crit.e), q=qn.reduce((a,n)=>a+n.fr*te,0);
+  D.push(['Fuerza por unidad de largo',f1(q,1)+' N/mm',qn.length>1?'Σ fr·te ambos lados':'fr·te']);
   const bmY=phiOm(lrfd,1.00,1.50)*0.6*Fy*tmin, bmR=phiOm(lrfd,0.75,2.00)*0.6*Fu*tmin;
-  D.push(['Fuerza por unidad de largo',f1(q,1)+' N/mm','fr·te'],['Metal base, fluencia / ruptura en corte',`${f1(bmY,1)} / ${f1(bmR,1)} N/mm`,'J4.2 con t mín. unido']);
+  D.push(['Metal base, fluencia / ruptura en corte',`${f1(bmY,1)} / ${f1(bmR,1)} N/mm`,'J4.2 con t mín. unido']);
   o.chk.push({n:'Metal base, J4-3 y J4-4',d:f1(q,1)+' N/mm',c:f1(Math.min(bmY,bmR),1)+' N/mm',r:q/Math.min(bmY,bmR)});
   const wmin=tmin<=6?3:tmin<=13?5:tmin<=19?6:8, wmax=tmin<6?tmin:tmin-2;
   D.push([null,'Limitaciones J2.2b'],['Tamaño mínimo / máximo',`${wmin} / ${f1(wmax,0)} mm`,'Tabla J2.4, J2.2b(b)']);
   if(w<wmin) o.warn.push(`Pierna ${w} mm menor que el mínimo ${wmin} mm de Tabla J2.4.`);
   if(w>wmax) o.warn.push(`Pierna ${w} mm mayor que el máximo ${f1(wmax,0)} mm de J2.2b(b).`);
   segs.forEach((s,i)=>{ if(s.L<4*w) o.warn.push(`Tramo ${i+1}: largo menor que 4w, J2.2b(c).`); if(s.L>100*w) o.warn.push(`Tramo ${i+1}: largo > 100w, aplicar β de Ec. J2-1 si está cargado en el extremo.`); });
-  o.segs=segs; o.nodes=nodes; o.crit=crit; o.xc=xc; o.yc=yc; o.cap=cap; o.Ltot=Ltot;
-  o.name=`Filete ${w} mm E${Math.round(FEXX/6.895)}, L = ${f1(Ltot,0)} mm`;
+  o.segs=segs; o.lines=lines; o.nodes=nodes; o.crit=crit; o.xc=xc; o.yc=yc; o.cap=cap; o.Ltot=Ltot;
+  const sdU=[...new Set(segs.map(s=>s.sd))]; o.ns=Math.max(...segs.map(s=>s.ns)); o.name=`Filete ${w} mm E${Math.round(FEXX/6.895)} ${sdU.length>1?'mixto':{a:'ambos lados',o:'un lado fuera',i:'un lado dentro'}[sdU[0]]}, L = ${f1(Ltot,0)} mm`;
   return o;
 }
 function run(){
@@ -758,7 +767,7 @@ function run(){
   $('stats').innerHTML=statsHtml([['Conexión',mode==='b'?'Pernos':'Soldadura'],['Verificaciones',String(R.chk.length)],['Razón máx.',f1(mx,3),mx<=1],['Estado',mx<=1?'Cumple':'No cumple',mx<=1]]);
   $('notes').innerHTML=notesHtml();
 }
-function notesHtml(){ return 'Unidades N, mm, MPa. Pernos según J3: resistencia por perno igual al menor entre corte J3.7 y aplastamiento o desgarro J3.11 con lc en la dirección de la carga. Grupo excéntrico por centro instantáneo del Manual AISC parte 7 con la resistencia mínima por perno. Placa en tracción con Ae ≤ 0,85Ag de J4.1(b). Soldadura por método elástico con garganta 0,707w, kds = 1,0 y base según J4.2. Perforación más 2 mm en área neta, B4.3b.'; }
+function notesHtml(){ return 'Unidades N, mm, MPa. Pernos según J3: resistencia por perno igual al menor entre corte J3.7 y aplastamiento o desgarro J3.11 con lc en la dirección de la carga. Grupo excéntrico por centro instantáneo del Manual AISC parte 7 con la resistencia mínima por perno. Placa en tracción con Ae ≤ 0,85Ag de J4.1(b). Soldadura por método elástico con garganta 0,707w por lado, kds = 1,0 y base según J4.2. Perforación más 2 mm en área neta, B4.3b.'; }
 function report(){
   const rp=reportStart(R.mode==='b'?'Conexión apernada':'Conexión soldada',`${$('proj').value?$('proj').value+', ':''}AISC 360-22 ${$('meth').value==='lrfd'?'LRFD':'ASD'}`,[['Conexión',R.name||'','Método',$('meth').value.toUpperCase()]]);
   rp.sec('Vista 3D',null,snap3D(V3,760,440)); const sv=rp.svg(); sv.style.maxWidth='100%'; if(R.mode==='b') cxBoltSheet(sv,R); else cxWeldSheet(sv,R);
@@ -793,12 +802,11 @@ function sceneWeld(o){
   const w=Math.max(num('ww',6),3), tm=Math.max(num('wtm',10),4), xs=o.segs.flatMap(s=>[s.x1,s.x2]), zs=o.segs.flatMap(s=>[s.y1,s.y2]);
   const x0=Math.min(...xs),x1=Math.max(...xs),z0=Math.min(...zs),z1=Math.max(...zs), m=Math.max(60,0.3*Math.max(x1-x0,z1-z0)), Hm=Math.max(120,0.8*Math.max(x1-x0,z1-z0));
   ms.push(M3.box(x0-m,-16,z0-m,x1+m,0,z1+m,COL.steel2));
-  const cr=s=>{ const n=o.nodes.filter(q=>(Math.abs(q.x-s.x1)<1e-6&&Math.abs(q.y-s.y1)<1e-6)||(Math.abs(q.x-s.x2)<1e-6&&Math.abs(q.y-s.y2)<1e-6)); return Math.max(...n.map(q=>q.fr))/o.cap; };
-  o.segs.forEach(s=>{ const L=s.L, U=[(s.x2-s.x1)/L,0,(s.y2-s.y1)/L], A=[-U[2],0,U[0]], B=[0,1,0], O=[s.x1,0,s.y1];
+  const cr=(i,g)=>Math.max(...o.nodes.filter(q=>q.i===i&&q.g===g).map(q=>q.fr))/o.cap;
+  o.segs.forEach((s,i)=>{ const L=s.L, U=[(s.x2-s.x1)/L,0,(s.y2-s.y1)/L], A=[-U[2],0,U[0]], B=[0,1,0], O=[s.x1,0,s.y1];
     ms.push(M3.ext([[-tm/2,0],[tm/2,0],[tm/2,Hm],[-tm/2,Hm]],O,U,A,B,L,COL.steel));
-    const c=cr(s)>1?COL.red:COL.weld;
-    ms.push(M3.ext([[tm/2,0],[tm/2+w,0],[tm/2,w]],O,U,A,B,L,c),M3.ext([[-tm/2,0],[-tm/2,w],[-tm/2-w,0]],O,U,A,B,L,c)); });
-  o.nodes.forEach(n=>lb.push({p:[n.x,w,n.y],t:`${f1(n.fr,1)} MPa`}));
+    s.sg.forEach(g=>{ const c=cr(i,g)>1?COL.red:COL.weld; ms.push(M3.ext(g>0?[[tm/2,0],[tm/2+w,0],[tm/2,w]]:[[-tm/2,0],[-tm/2,w],[-tm/2-w,0]],O,U,A,B,L,c)); }); });
+  o.nodes.filter(n=>n.lab).forEach(n=>lb.push({p:[n.x,w,n.y],t:`${f1(n.fr,1)} MPa`}));
   const C=[o.xc,Hm+20,o.yc], F=[['Fx',num('Fx',0),[1,0,0]],['Fy',num('Fyl',0),[0,0,1]],['Fz',num('Fz',0),[0,1,0]]], Lr=Math.max(100,0.5*Math.max(x1-x0,z1-z0));
   F.forEach(([k,v,dv])=>{ if(!v) return; const dd=dv.map(q=>q*Math.sign(v)), tip=C.map((q,i)=>q+dd[i]*Lr); ms.push(...M3.arrow(tip,dd,Lr,COL.red,4)); lb.push({p:tip,t:`${k} = ${v} kN`}); });
   lb.push({p:[x1+m,0,z1+m],t:`Filete ${num('ww',6)} mm E${{414:60,483:70,552:80}[$('fexx').value]}`});
